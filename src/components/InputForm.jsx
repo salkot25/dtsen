@@ -49,7 +49,7 @@ export default function InputForm({ onSubmit, lastCumulative }) {
     : null;
 
   return (
-    <div className="bg-white rounded-xl p-6 border border-slate-100 enterprise-shadow h-full">
+    <div className="bg-white rounded-xl p-6 border border-slate-100 enterprise-shadow">
       <div className="mb-6">
         <h3 className="text-base font-bold text-slate-900">Input Capaian Kumulatif</h3>
         <p className="text-xs text-slate-400 mt-0.5">Masukkan total realisasi terbaru untuk hari ini.</p>

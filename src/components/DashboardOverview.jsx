@@ -92,66 +92,55 @@ export default function DashboardOverview({ history, totalTarget }) {
     <div className="space-y-6">
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
-          title="Total Capaian"
-          value={formatNumber(currentTotal)}
-          icon={<Activity size={20} />}
-          iconBg="bg-blue-50"
-          iconColor="text-blue-600"
-          delay="75"
-        >
-          <div className="w-full bg-slate-100 rounded-full h-2 mb-1.5 overflow-hidden">
-            <div 
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-700 ease-out" 
-              style={{ width: `${percentage}%` }}
-            ></div>
+        {/* Card 1: Total Capaian */}
+        <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-75">
+          <div className="flex justify-between items-start mb-2">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Capaian</p>
+            <div className="p-2 rounded-xl bg-blue-50 text-blue-600"><Activity size={18} /></div>
           </div>
-          <p className="text-xs text-slate-500">
-            <span className="font-semibold text-blue-600">{percentage}%</span> dari {formatNumber(totalTarget)}
-          </p>
-        </KPICard>
+          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{formatNumber(currentTotal)}</h3>
+          <div className="w-full bg-slate-100 rounded-full h-1.5 mb-1 overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 rounded-full transition-all duration-700" style={{ width: `${percentage}%` }}></div>
+          </div>
+          <p className="text-[11px] text-slate-400"><span className="font-semibold text-blue-600">{percentage}%</span> dari {formatNumber(totalTarget)}</p>
+        </div>
 
-        <KPICard
-          title="Kinerja Terakhir"
-          value={`+${formatNumber(lastRealization)}`}
-          icon={isUp ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
-          iconBg={isUp ? 'bg-emerald-50' : 'bg-rose-50'}
-          iconColor={isUp ? 'text-emerald-600' : 'text-rose-600'}
-          delay="150"
-        >
-          <div className="flex items-center gap-1.5 mt-3">
-            <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${isUp ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+        {/* Card 2: Kinerja Terakhir */}
+        <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-150">
+          <div className="flex justify-between items-start mb-2">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Kinerja Terakhir</p>
+            <div className={`p-2 rounded-xl ${isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+              {isUp ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">+{formatNumber(lastRealization)}</h3>
+          <div className="flex items-center gap-1.5">
+            <div className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-medium ${isUp ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
               {isUp ? '↑' : '↓'} {formatNumber(Math.abs(lastRealization - previousRealization))}
             </div>
-            <span className="text-xs text-slate-400">vs kemarin</span>
+            <span className="text-[11px] text-slate-400">vs kemarin</span>
           </div>
-        </KPICard>
+        </div>
 
-        <KPICard
-          title="Rata-rata Harian"
-          value={formatNumber(averageDaily)}
-          subtitle={<>Target ideal: <span className="font-semibold text-slate-700">1.873</span>/hari</>}
-          icon={<Target size={20} />}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-600"
-          delay="225"
-        />
-
-        <KPICard
-          title="Sisa Waktu"
-          value={<>{remainingDays} <span className="text-base font-normal text-slate-400">hari</span></>}
-          icon={<Clock size={20} />}
-          iconBg="bg-violet-50"
-          iconColor="text-violet-600"
-          delay="300"
-        >
-          <div className="mt-2.5 pt-2.5 border-t border-slate-100">
-            <p className="text-[11px] text-slate-400 uppercase tracking-wider mb-1">Target Harian Baru</p>
-            <p className="text-sm font-bold text-blue-600 flex items-center gap-1.5">
-              <CalendarDays size={14} /> {formatNumber(dailyTarget)}<span className="text-xs font-normal text-slate-400">/hari</span>
-            </p>
+        {/* Card 3: Rata-rata Harian */}
+        <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-225">
+          <div className="flex justify-between items-start mb-2">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Rata-rata Harian</p>
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-600"><Target size={18} /></div>
           </div>
-        </KPICard>
+          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{formatNumber(averageDaily)}</h3>
+          <p className="text-[11px] text-slate-400">Target ideal: <span className="font-semibold text-slate-600">1.873</span>/hari</p>
+        </div>
+
+        {/* Card 4: Sisa Waktu & Target */}
+        <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-300">
+          <div className="flex justify-between items-start mb-2">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Sisa Waktu</p>
+            <div className="p-2 rounded-xl bg-violet-50 text-violet-600"><Clock size={18} /></div>
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{remainingDays} <span className="text-sm font-normal text-slate-400">hari</span></h3>
+          <p className="text-[11px] text-slate-400">Target baru: <span className="font-bold text-blue-600">{formatNumber(dailyTarget)}</span>/hari</p>
+        </div>
       </div>
 
       {/* Chart Section */}

@@ -12,6 +12,7 @@ const TOTAL_TARGET = 206533;
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentTab, setCurrentTab] = useState('overview');
+  const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   
   // Real history fetched from GAS
   const [history, setHistory] = useState([]);
@@ -82,13 +83,21 @@ function App() {
 
       {currentTab === 'input' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
              <div className="lg:col-span-1 flex flex-col gap-6">
                 <InputForm onSubmit={handleSubmitRealisasi} lastCumulative={lastCumulative} />
-                <HistoryTable history={history} />
+                <HistoryTable 
+                  history={history} 
+                  selectedId={selectedHistoryId} 
+                  onSelectItem={(id) => setSelectedHistoryId(id === selectedHistoryId ? null : id)} 
+                />
              </div>
              <div className="lg:col-span-2">
-                <WhatsAppGenerator history={history} totalTarget={TOTAL_TARGET} />
+                <WhatsAppGenerator 
+                  history={history} 
+                  totalTarget={TOTAL_TARGET} 
+                  selectedItem={history.find(h => h.id === selectedHistoryId)} 
+                />
              </div>
           </div>
         </div>

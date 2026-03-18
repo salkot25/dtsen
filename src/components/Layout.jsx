@@ -94,7 +94,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen relative pb-16 md:pb-0">
+      <div className="flex-1 flex flex-col relative pb-20 md:pb-0 overflow-y-auto">
         {/* Desktop Topbar */}
         <header className="hidden md:flex bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-4 items-center justify-between sticky top-0 z-10">
           <h2 className="text-lg font-semibold text-slate-800 tracking-tight">

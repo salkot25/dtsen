@@ -2,38 +2,52 @@ import React, { useState } from 'react';
 import { Copy, MessageCircle, Check } from 'lucide-react';
 import { formatNumber, calculateDailyTarget, getRemainingWorkingDays } from '../utils/dateUtils';
 
-export default function WhatsAppGenerator({ history, totalTarget }) {
+const JML_PETUGAS = 60;
+
+export default function WhatsAppGenerator({ history, totalTarget, selectedItem }) {
   const [copied, setCopied] = useState(false);
   
-  const currentTotal = history.length > 0 ? history[0].value : 0;
-  const previousTotal = history.length > 1 ? history[1].value : 0;
+  // Gunakan data yang dipilih user, atau data terbaru jika tidak ada yang dipilih
+  const selectedIndex = selectedItem ? history.findIndex(h => h.id === selectedItem.id) : 0;
+  const currentTotal = selectedItem ? selectedItem.value : (history.length > 0 ? history[0].value : 0);
+  const previousTotal = history[selectedIndex + 1] ? history[selectedIndex + 1].value : 0;
   
-  const realisasiHariIni = currentTotal - previousTotal;
-  const percentage = ((currentTotal / totalTarget) * 100).toFixed(2);
-  const remainingDays = getRemainingWorkingDays();
+  const realisasiHariIni = selectedItem?.dailyAchieved !== undefined 
+    ? selectedItem.dailyAchieved 
+    : (currentTotal - previousTotal);
   const dailyTarget = calculateDailyTarget(currentTotal);
+  const remainingDays = getRemainingWorkingDays();
   
-  const todayStr = new Intl.DateTimeFormat('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  }).format(new Date());
+  // Persentase harian: realisasi hari ini vs target harian
+  const pctHarian = dailyTarget > 0 ? ((realisasiHariIni / dailyTarget) * 100).toFixed(2) : '0';
+  
+  // Target kumulatif s/d hari ini (Total Target)
+  const targetKumulatif = totalTarget;
+  const pctKumulatif = targetKumulatif > 0 ? ((currentTotal / targetKumulatif) * 100).toFixed(2) : '0';
 
-  const messageText = `*UPDATE PROGRES PENDATAAN DTSEN ULP SALATIGA KOTA*
-Hari/Tanggal: ${todayStr}
+  // Format tanggal dari selected item atau hari ini
+  const reportDate = selectedItem ? new Date(selectedItem.date) : new Date();
+  const dd = String(reportDate.getDate()).padStart(2, '0');
+  const mm = String(reportDate.getMonth() + 1).padStart(2, '0');
+  const yyyy = reportDate.getFullYear();
+  const dateFormatted = `${dd}/${mm}/${yyyy}`;
 
-*A. Realisasi:*
-1. Realisasi Hari Ini: +${formatNumber(realisasiHariIni)} pelanggan
-2. Total Kumulatif: ${formatNumber(currentTotal)} pelanggan
-3. Persentase Capaian: ${percentage}% dari total target (${formatNumber(totalTarget)})
+  const messageText = `*Laporan harian hasil Pendataan DTSEN ULP SALATIGA KOTA, tgl ${dateFormatted}, sbb :*
 
-*B. Evaluasi & Target:*
-1. Sisa Target: ${formatNumber(totalTarget - currentTotal)} pelanggan
-2. Sisa Hari Kerja: ${remainingDays} hari (s.d 31 Agt 2026)
-3. Target Harian Berikutnya: ${formatNumber(dailyTarget)} pelanggan/hari
+*HARIAN*
+Jml Petugas : ${JML_PETUGAS}
+Target : ${formatNumber(dailyTarget)}
+Realisasi : ${formatNumber(realisasiHariIni)}
+% : ${pctHarian}%
 
-Tetap semangat dan jaga kesehatan! ⚡️🙏`;
+*KUMULATIF*
+Target : ${formatNumber(targetKumulatif)}
+Realisasi : ${formatNumber(currentTotal)}
+% : ${pctKumulatif}%.
+
+Demikian disampaikan, mohon dukungan agar laporan dapat disampaikan secara rutin dan tepat waktu sebagai bahan monitoring bersama.
+
+Terima kasih atas kerjasamanya 🙏`;
 
   const handleCopy = async () => {
     try {
@@ -64,7 +78,7 @@ Tetap semangat dan jaga kesehatan! ⚡️🙏`;
             </div>
             WhatsApp Report
           </h3>
-          <p className="text-xs text-slate-400 mt-1">Generator otomatis laporan evaluasi harian</p>
+          <p className="text-xs text-slate-400 mt-1">Format resmi laporan harian manajemen</p>
         </div>
       </div>
       
