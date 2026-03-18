@@ -51,33 +51,38 @@ Tetap semangat dan jaga kesehatan! ⚡️🙏`;
   };
 
   return (
-    <div className="bg-slate-900 rounded-xl p-5 shadow-lg border border-slate-800 text-white md:col-span-2 relative overflow-hidden h-full flex flex-col">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500 rounded-bl-full z-0 opacity-10"></div>
+    <div className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl p-6 shadow-xl border border-slate-800/50 text-white relative overflow-hidden h-full flex flex-col animate-slide-in-right">
+      {/* Decorative Accent */}
+      <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500 rounded-bl-full opacity-[0.07]"></div>
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500 rounded-tr-full opacity-[0.05]"></div>
       
-      <div className="relative z-10 mb-4 flex justify-between items-center">
+      <div className="relative z-10 mb-5 flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <MessageCircle size={20} className="text-emerald-400" /> WhatsApp Report
+          <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <div className="p-1.5 bg-emerald-500/20 rounded-lg">
+              <MessageCircle size={18} className="text-emerald-400" />
+            </div>
+            WhatsApp Report
           </h3>
-          <p className="text-sm text-slate-400">Generator otomatis laporan evaluasi harian</p>
+          <p className="text-xs text-slate-400 mt-1">Generator otomatis laporan evaluasi harian</p>
         </div>
       </div>
       
-      <div className="flex-1 relative z-10 bg-slate-950/50 rounded-lg p-4 font-mono text-sm text-slate-300 whitespace-pre-wrap overflow-y-auto mb-5 border border-slate-800 leading-relaxed shadow-inner scrollbar-thin scrollbar-thumb-slate-700">
+      <div className="flex-1 relative z-10 bg-black/30 backdrop-blur-sm rounded-xl p-4 font-mono-code text-[13px] text-slate-300 whitespace-pre-wrap overflow-y-auto mb-5 border border-slate-700/50 leading-relaxed">
         {messageText}
       </div>
       
       <div className="grid grid-cols-2 gap-3 relative z-10 mt-auto">
         <button
           onClick={handleCopy}
-          className="flex items-center justify-center gap-2 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors font-medium text-sm border border-slate-700"
+          className="flex items-center justify-center gap-2 py-3 px-4 bg-slate-800/80 hover:bg-slate-700 text-white rounded-xl transition-all font-medium text-sm border border-slate-700/50 active:scale-[0.97]"
         >
           {copied ? <Check size={18} className="text-emerald-400" /> : <Copy size={18} />}
-          {copied ? 'Tersalin' : 'Salin Teks'}
+          {copied ? 'Tersalin!' : 'Salin Teks'}
         </button>
         <button
           onClick={handleWA}
-          className="flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium text-sm shadow-emerald-900/50 shadow-lg"
+          className="flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-all font-medium text-sm shadow-lg shadow-emerald-900/40 active:scale-[0.97]"
         >
           <MessageCircle size={18} />
           Kirim via WA
