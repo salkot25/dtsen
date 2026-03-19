@@ -189,10 +189,11 @@ export default function DashboardOverview({ history, totalTarget }) {
                 minTickGap={20} 
               />
               <YAxis 
+                domain={[0, dataMax => Math.max(dataMax, dailyTarget * 1.15)]}
                 axisLine={false} 
                 tickLine={false} 
                 tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'Inter' }} 
-                tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}
+                tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : v}
               />
               <Tooltip content={<CustomTooltip />} />
               <ReferenceLine 
