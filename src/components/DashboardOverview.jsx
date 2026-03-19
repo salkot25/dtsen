@@ -95,7 +95,7 @@ export default function DashboardOverview({ history, totalTarget }) {
         {/* Card 1: Total Capaian */}
         <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-75">
           <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Capaian</p>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Pencapaian</p>
             <div className="p-2 rounded-xl bg-blue-50 text-blue-600"><Activity size={18} /></div>
           </div>
           <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{formatNumber(currentTotal)}</h3>
@@ -108,7 +108,7 @@ export default function DashboardOverview({ history, totalTarget }) {
         {/* Card 2: Kinerja Terakhir */}
         <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-150">
           <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Kinerja Terakhir</p>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Capaian Terakhir</p>
             <div className={`p-2 rounded-xl ${isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
               {isUp ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
             </div>
@@ -118,28 +118,28 @@ export default function DashboardOverview({ history, totalTarget }) {
             <div className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-medium ${isUp ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
               {isUp ? '↑' : '↓'} {formatNumber(Math.abs(lastRealization - previousRealization))}
             </div>
-            <span className="text-[11px] text-slate-400">vs kemarin</span>
+            <span className="text-[11px] text-slate-400">vs hari sebelumnya</span>
           </div>
         </div>
 
         {/* Card 3: Rata-rata Harian */}
         <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-225">
           <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Rata-rata Harian</p>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Rata-rata Aktual</p>
             <div className="p-2 rounded-xl bg-amber-50 text-amber-600"><Target size={18} /></div>
           </div>
           <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{formatNumber(averageDaily)}</h3>
-          <p className="text-[11px] text-slate-400">Target ideal: <span className="font-semibold text-slate-600">1.873</span>/hari</p>
+          <p className="text-[11px] text-slate-400">Target Ideal: <span className="font-semibold text-slate-600">1.873</span>/hari</p>
         </div>
 
         {/* Card 4: Sisa Waktu & Target */}
         <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-300">
           <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Sisa Waktu</p>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Sisa Waktu Kerja</p>
             <div className="p-2 rounded-xl bg-violet-50 text-violet-600"><Clock size={18} /></div>
           </div>
           <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{remainingDays} <span className="text-sm font-normal text-slate-400">hari</span></h3>
-          <p className="text-[11px] text-slate-400">Target baru: <span className="font-bold text-blue-600">{formatNumber(dailyTarget)}</span>/hari</p>
+          <p className="text-[11px] text-slate-400">Target Penyesuaian: <span className="font-bold text-blue-600">{formatNumber(dailyTarget)}</span>/hari</p>
         </div>
       </div>
 
@@ -147,8 +147,8 @@ export default function DashboardOverview({ history, totalTarget }) {
       <div className="bg-white rounded-xl p-6 border border-slate-100 enterprise-shadow animate-fade-in-up delay-300">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Tren Kinerja Capaian</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Realisasi harian vs Target Dinamis</p>
+            <h3 className="text-base font-bold text-slate-900">Tren Kinerja Pencapaian</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Kinerja Aktual dibandingkan Target Dinamis</p>
           </div>
           <div className="flex bg-slate-100/80 p-1 rounded-lg gap-0.5">
             {timeFilterOptions.map((opt) => (
@@ -203,7 +203,7 @@ export default function DashboardOverview({ history, totalTarget }) {
                 strokeWidth={1.5}
                 label={{ 
                   position: 'insideTopRight', 
-                  value: `Target: ${formatNumber(dailyTarget)}`, 
+                  value: `Target Harian: ${formatNumber(dailyTarget)}`, 
                   fill: '#f43f5e', 
                   fontSize: 11,
                   fontFamily: 'Inter',

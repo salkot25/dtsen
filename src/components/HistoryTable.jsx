@@ -19,8 +19,8 @@ export default function HistoryTable({ history, selectedId, onSelectItem }) {
     <div className="bg-white rounded-xl border border-slate-100 enterprise-shadow overflow-hidden flex flex-col">
       <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
         <div>
-          <h3 className="text-base font-bold text-slate-900">Riwayat Input</h3>
-          <p className="text-[11px] text-slate-400">Pilih data untuk dikirim ke WhatsApp</p>
+          <h3 className="text-base font-bold text-slate-900">Riwayat Pendataan</h3>
+          <p className="text-[11px] text-slate-400">Pilih data riwayat untuk dilaporkan melalui WhatsApp</p>
         </div>
         {history.length > 0 && (
           <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">{history.length} data</span>
@@ -76,7 +76,7 @@ export default function HistoryTable({ history, selectedId, onSelectItem }) {
         
         {history.length === 0 && (
           <div className="px-4 py-10 text-center text-slate-300 text-sm">
-            Belum ada riwayat data.
+            Data riwayat pendataan belum tersedia.
           </div>
         )}
       </div>

@@ -32,9 +32,7 @@ export default function InputForm({ onSubmit, lastCumulative }) {
 
     setIsSubmitting(true);
     try {
-      await onSubmit(valueNum);
-      setSuccessMsg('Data berhasil disimpan ke cloud.');
-      setInputValue('');
+      setSuccessMsg('Data capaian berhasil disimpan ke dalam sistem.');
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch {
       setError('Gagal menyimpan data. Silakan coba lagi.');
@@ -51,14 +49,14 @@ export default function InputForm({ onSubmit, lastCumulative }) {
   return (
     <div className="bg-white rounded-xl p-6 border border-slate-100 enterprise-shadow">
       <div className="mb-6">
-        <h3 className="text-base font-bold text-slate-900">Input Capaian Kumulatif</h3>
-        <p className="text-xs text-slate-400 mt-0.5">Masukkan total realisasi terbaru untuk hari ini.</p>
+        <h3 className="text-base font-bold text-slate-900">Formulir Capaian Kumulatif</h3>
+        <p className="text-xs text-slate-400 mt-0.5">Masukkan total realisasi capaian terbaru untuk hari ini.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1.5">
-            Total Kumulatif Terbaru
+            Total Capaian Kumulatif Terbaru
           </label>
           <div className="relative">
              <input
@@ -96,8 +94,7 @@ export default function InputForm({ onSubmit, lastCumulative }) {
           disabled={isSubmitting}
           className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all mt-4 shadow-lg shadow-blue-600/25 disabled:opacity-70"
         >
-          {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={16} />}
-          {isSubmitting ? 'Menyimpan...' : 'Proses Data & Simpan'}
+          {isSubmitting ? 'Memproses Data...' : 'Verifikasi & Simpan Data'}
         </button>
       </form>
 
