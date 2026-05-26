@@ -72,15 +72,16 @@ function doPost(e) {
       var chatSheet = ss.getSheetByName('Riwayat_Chat');
       if (!chatSheet) {
         chatSheet = ss.insertSheet('Riwayat_Chat');
-        chatSheet.appendRow(['ID', 'Role', 'Message', 'Tanggal']);
+        chatSheet.appendRow(['ID', 'Role', 'Message', 'Tanggal', 'SessionID']);
       }
       
       var timestamp = new Date().getTime();
       var dateStr = new Date().toISOString();
+      var sessionId = data.session_id || timestamp.toString(); // Gunakan timestamp sebagai fallback session_id
       
-      chatSheet.appendRow([timestamp, data.role, data.message, dateStr]);
+      chatSheet.appendRow([timestamp, data.role, data.message, dateStr, sessionId]);
       
-      return ContentService.createTextOutput(JSON.stringify({ status: "success", chat_id: timestamp }))
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", chat_id: timestamp, session_id: sessionId }))
         .setMimeType(ContentService.MimeType.JSON);
     }
     
@@ -122,7 +123,8 @@ function doPost(e) {
               id: row[0],
               role: row[1],
               text: row[2],
-              date: row[3]
+              date: row[3],
+              session_id: row[4] || "Riwayat Lama" // Fallback untuk data lama yang belum punya SessionID
             });
           }
         }

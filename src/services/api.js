@@ -153,7 +153,7 @@ export const fetchAiHistory = async () => {
   }
 };
 
-export const saveChatMessage = async (role, message) => {
+export const saveChatMessage = async (role, message, sessionId = null) => {
   if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') return;
 
   try {
@@ -162,7 +162,8 @@ export const saveChatMessage = async (role, message) => {
       body: JSON.stringify({ 
         action: "save_chat", 
         role: role,
-        message: message 
+        message: message,
+        session_id: sessionId 
       }),
       headers: {
         "Content-Type": "text/plain;charset=utf-8",
