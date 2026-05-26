@@ -7,6 +7,7 @@ import HistoryTable from './components/HistoryTable';
 import WhatsAppGenerator from './components/WhatsAppGenerator';
 import Settings from './components/Settings';
 import ExecutiveSummary from './components/ExecutiveSummary';
+import AiChat from './components/AiChat';
 import { saveToSpreadsheet, fetchHistory, saveSettingsToSpreadsheet } from './services/api';
 
 function App() {
@@ -138,6 +139,12 @@ function App() {
       {currentTab === 'executive_summary' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <ExecutiveSummary history={history} settings={settings} />
+        </div>
+      )}
+
+      {currentTab === 'ai_chat' && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full">
+          <AiChat history={history} settings={settings} />
         </div>
       )}
 

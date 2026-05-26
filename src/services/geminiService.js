@@ -76,3 +76,57 @@ Tulis langsung isi laporan tanpa salam pembuka atau penutup.
     throw new Error(`Gagal mengambil respons AI: ${error.message || "Pastikan API Key valid."}`);
   }
 }
+
+export async function sendChatMessage(apiKey, history, message, contextData) {
+  if (!apiKey) {
+    throw new Error("API Key Gemini belum diatur di Pengaturan.");
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  
+  let selectedModelName = "gemini-1.5-flash";
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (response.ok) {
+      const data = await response.json();
+      const models = data.models || [];
+      const flashModel = models.find(m => m.supportedGenerationMethods?.includes('generateContent') && m.name.includes('flash') && !m.name.includes('vision'));
+      if (flashModel) selectedModelName = flashModel.name.replace('models/', '');
+    }
+  } catch (e) {
+    console.warn("Fallback to default model", e);
+  }
+
+  const model = genAI.getGenerativeModel({ model: selectedModelName });
+  
+  // Format history for Gemini SDK
+  const formattedHistory = history.map(msg => ({
+    role: msg.role === 'user' ? 'user' : 'model',
+    parts: [{ text: msg.text }],
+  }));
+
+  // System instruction prepended to the first message if history is empty, 
+  // or injected in startChat. But startChat systemInstruction is only for gemini-1.5-pro/flash.
+  // We can pass it via systemInstruction:
+  
+  const systemInstruction = `Anda adalah asisten AI operasional untuk program "DTSEN ULP Salatiga Kota". 
+Data terkini: Capaian ${contextData?.currentTotal || 0} dari Target ${contextData?.totalTarget || 0}. 
+Berikan jawaban yang ringkas, profesional, dan gunakan Bahasa Indonesia baku.`;
+
+  const chatModel = genAI.getGenerativeModel({ 
+    model: selectedModelName,
+    systemInstruction: { parts: [{ text: systemInstruction }] }
+  });
+
+  try {
+    const chat = chatModel.startChat({
+      history: formattedHistory,
+    });
+    const result = await chat.sendMessage(message);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error("Gemini Chat API Error:", error);
+    throw new Error(`Gagal memproses obrolan: ${error.message}`);
+  }
+}

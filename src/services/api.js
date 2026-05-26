@@ -128,26 +128,70 @@ export async function saveAiSummaryToSpreadsheet(summary) {
   }
 }
 
-export async function fetchAiHistory() {
-  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
-    return [];
+export const fetchAiHistory = async () => {
+  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    throw new Error("URL Google Apps Script belum diatur");
   }
 
   try {
     const response = await fetch(SCRIPT_URL, {
-      method: 'POST',
+      method: "POST",
+      body: JSON.stringify({ action: "get_ai_history" }),
       headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
+        "Content-Type": "text/plain;charset=utf-8",
       },
-      body: JSON.stringify({ action: 'get_ai_history' }),
     });
+
     const result = await response.json();
-    if (result.status === 'success') {
+    if (result.status === "success") {
       return result.data || [];
     }
-    throw new Error(result.message);
+    throw new Error(result.message || "Failed to load AI history");
   } catch (error) {
-    console.error('Error fetching AI history:', error);
+    console.error("Error fetching AI history:", error);
     throw error;
   }
-}
+};
+
+export const saveChatMessage = async (role, message) => {
+  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') return;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ 
+        action: "save_chat", 
+        role: role,
+        message: message 
+      }),
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+    });
+  } catch (error) {
+    console.error("Error saving chat message:", error);
+  }
+};
+
+export const fetchChatHistory = async () => {
+  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') return [];
+
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "get_chat" }),
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+    });
+
+    const result = await response.json();
+    if (result.status === "success") {
+      return result.data || [];
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching chat history:", error);
+    return [];
+  }
+};

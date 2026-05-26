@@ -66,6 +66,23 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
         .setMimeType(ContentService.MimeType.JSON);
     }
+
+    // Simpan Chat AI Router
+    if (data.action === "save_chat") {
+      var chatSheet = ss.getSheetByName('Riwayat_Chat');
+      if (!chatSheet) {
+        chatSheet = ss.insertSheet('Riwayat_Chat');
+        chatSheet.appendRow(['ID', 'Role', 'Message', 'Tanggal']);
+      }
+      
+      var timestamp = new Date().getTime();
+      var dateStr = new Date().toISOString();
+      
+      chatSheet.appendRow([timestamp, data.role, data.message, dateStr]);
+      
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", chat_id: timestamp }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     
     // Ambil Riwayat Laporan AI
     if (data.action === "get_ai_history") {
@@ -87,6 +104,30 @@ function doPost(e) {
         aiHistory.reverse(); // Terbaru di atas
       }
       return ContentService.createTextOutput(JSON.stringify({ status: "success", data: aiHistory }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Ambil Riwayat Chat AI
+    if (data.action === "get_chat") {
+      var chatSheet = ss.getSheetByName('Riwayat_Chat');
+      var chatHistory = [];
+      
+      if (chatSheet) {
+        var chatData = chatSheet.getDataRange().getValues();
+        if (chatData.length > 1) {
+          // Melewatkan header
+          for (var i = 1; i < chatData.length; i++) {
+            var row = chatData[i];
+            chatHistory.push({
+              id: row[0],
+              role: row[1],
+              text: row[2],
+              date: row[3]
+            });
+          }
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", data: chatHistory }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 

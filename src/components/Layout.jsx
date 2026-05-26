@@ -1,11 +1,12 @@
 import React from 'react';
-import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot } from 'lucide-react';
 
 export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
   const tabs = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { id: 'input', label: 'Input Laporan', icon: <FileInput size={20} /> },
     { id: 'executive_summary', label: 'Ringkasan Kinerja', icon: <FileText size={20} /> },
+    { id: 'ai_chat', label: 'Asisten AI', icon: <Bot size={20} /> },
     { id: 'settings', label: 'Pengaturan', icon: <SettingsIcon size={20} /> },
   ];
 
