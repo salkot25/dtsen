@@ -3,9 +3,9 @@ import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as Settings
 
 export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
+    { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { id: 'input', label: 'Input Laporan', icon: <FileInput size={20} /> },
-    { id: 'executive_summary', label: 'Executive Summary', icon: <FileText size={20} /> },
+    { id: 'executive_summary', label: 'Ringkasan Kinerja', icon: <FileText size={20} /> },
     { id: 'settings', label: 'Pengaturan', icon: <SettingsIcon size={20} /> },
   ];
 

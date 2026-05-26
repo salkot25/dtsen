@@ -10,7 +10,9 @@ import ExecutiveSummary from './components/ExecutiveSummary';
 import { saveToSpreadsheet, fetchHistory, saveSettingsToSpreadsheet } from './services/api';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('dtsen_auth_session') === 'true';
+  });
   const [currentTab, setCurrentTab] = useState('overview');
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
 
@@ -62,10 +64,12 @@ function App() {
 
   const handleLogin = () => {
     setIsAuthenticated(true);
+    localStorage.setItem('dtsen_auth_session', 'true');
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    localStorage.removeItem('dtsen_auth_session');
     setCurrentTab('overview');
   };
 

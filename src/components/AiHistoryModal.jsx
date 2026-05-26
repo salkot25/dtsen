@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Clock, Loader2, Sparkles } from 'lucide-react';
+import { X, Clock, Loader2, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { fetchAiHistory } from '../services/api';
 
@@ -8,6 +8,7 @@ const AiHistoryModal = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedSummary, setSelectedSummary] = useState(null);
+  const [isMaximized, setIsMaximized] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -32,8 +33,8 @@ const AiHistoryModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-up">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fade-in p-4`}>
+      <div className="bg-white shadow-xl flex flex-col overflow-hidden animate-slide-up transition-all duration-300 w-full max-w-4xl max-h-[90vh] rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50">
           <div>
@@ -42,18 +43,21 @@ const AiHistoryModal = ({ isOpen, onClose }) => {
             </h2>
             <p className="text-sm text-slate-500 mt-1">Laporan terdahulu yang pernah digenerate oleh AI</p>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-slate-200 rounded-xl transition-colors text-slate-500"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-slate-200 rounded-xl transition-colors text-slate-500"
+              title="Tutup"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar */}
-          <div className="w-1/3 border-r border-slate-100 bg-slate-50/50 overflow-y-auto">
+          <div className={`border-r border-slate-100 bg-slate-50/50 overflow-y-auto transition-all duration-300 ${isMaximized ? 'hidden' : 'w-1/3'}`}>
             {isLoading ? (
               <div className="p-8 flex justify-center text-blue-500">
                 <Loader2 className="animate-spin" />
@@ -81,11 +85,20 @@ const AiHistoryModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Main Content Area */}
-          <div className="w-2/3 p-6 overflow-y-auto bg-white">
+          <div className={`p-6 overflow-y-auto bg-white transition-all duration-300 ${isMaximized ? 'w-full' : 'w-2/3'}`}>
             {selectedSummary ? (
               <div className="prose prose-blue max-w-none text-slate-700 text-sm">
-                <div className="mb-6 pb-4 border-b border-slate-100 flex items-center gap-2 text-indigo-600 font-semibold">
-                  <Sparkles size={18} /> Laporan AI: {new Intl.DateTimeFormat('id-ID', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(selectedSummary.date))}
+                <div className="mb-6 pb-4 border-b border-slate-100 flex items-center justify-between text-indigo-600 font-semibold">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={18} /> Laporan AI: {new Intl.DateTimeFormat('id-ID', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(selectedSummary.date))}
+                  </div>
+                  <button 
+                    onClick={() => setIsMaximized(!isMaximized)}
+                    className="p-1.5 hover:bg-indigo-50 rounded-lg transition-colors text-indigo-500"
+                    title={isMaximized ? "Perkecil Detail" : "Perbesar Detail (Full Screen)"}
+                  >
+                    {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                  </button>
                 </div>
                 <ReactMarkdown
                   components={{
