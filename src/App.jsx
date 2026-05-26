@@ -5,14 +5,38 @@ import DashboardOverview from './components/DashboardOverview';
 import InputForm from './components/InputForm';
 import HistoryTable from './components/HistoryTable';
 import WhatsAppGenerator from './components/WhatsAppGenerator';
-import { saveToSpreadsheet, fetchHistory } from './services/api';
-
-const TOTAL_TARGET = 206533;
+import Settings from './components/Settings';
+import ExecutiveSummary from './components/ExecutiveSummary';
+import { saveToSpreadsheet, fetchHistory, saveSettingsToSpreadsheet } from './services/api';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentTab, setCurrentTab] = useState('overview');
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
+
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('dtsen_settings');
+    return saved ? JSON.parse(saved) : {
+      startDate: '2026-01-01',
+      targetDate: '2026-08-31',
+      startDayOfMonth: 2,
+      endDayOfMonth: 20,
+      totalTarget: 206533,
+      officerCount: 10,
+      excludeWeekends: true,
+      geminiApiKey: ''
+    };
+  });
+
+  const handleSaveSettings = async (newSettings) => {
+    setSettings(newSettings);
+    localStorage.setItem('dtsen_settings', JSON.stringify(newSettings));
+    try {
+      await saveSettingsToSpreadsheet(newSettings);
+    } catch (err) {
+      console.error("Gagal menyimpan ke server:", err);
+    }
+  };
   
   // Real history fetched from GAS
   const [history, setHistory] = useState([]);
@@ -22,7 +46,11 @@ function App() {
     async function loadData() {
       try {
         const data = await fetchHistory();
-        setHistory(data);
+        setHistory(data.history);
+        if (data.settings && Object.keys(data.settings).length > 0) {
+          setSettings(data.settings);
+          localStorage.setItem('dtsen_settings', JSON.stringify(data.settings));
+        }
       } catch (err) {
         console.error("Failed to load history", err);
       } finally {
@@ -77,7 +105,7 @@ function App() {
     <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout}>
       {currentTab === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <DashboardOverview history={history} totalTarget={TOTAL_TARGET} />
+          <DashboardOverview history={history} settings={settings} />
         </div>
       )}
 
@@ -95,11 +123,23 @@ function App() {
              <div className="lg:col-span-2">
                 <WhatsAppGenerator 
                   history={history} 
-                  totalTarget={TOTAL_TARGET} 
+                  settings={settings} 
                   selectedItem={history.find(h => h.id === selectedHistoryId)} 
                 />
              </div>
           </div>
+        </div>
+      )}
+
+      {currentTab === 'executive_summary' && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <ExecutiveSummary history={history} settings={settings} />
+        </div>
+      )}
+
+      {currentTab === 'settings' && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <Settings settings={settings} onSave={handleSaveSettings} />
         </div>
       )}
     </Layout>

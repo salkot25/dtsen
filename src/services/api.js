@@ -55,16 +55,39 @@ export async function loginUser(username, password) {
   }
 }
 
+export async function saveSettingsToSpreadsheet(settings) {
+  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    return new Promise((resolve) => setTimeout(() => resolve({ status: 'success' }), 500));
+  }
+
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({ action: 'save_settings', settings }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    throw error;
+  }
+}
+
 export async function fetchHistory() {
   if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
     // Return mock data for local development if not connected
-    return [
-      { id: 4, date: new Date().toISOString(), value: 125000 },
-      { id: 3, date: new Date(Date.now() - 86400000).toISOString(), value: 121500 },
-      { id: 2, date: new Date(Date.now() - 86400000 * 2).toISOString(), value: 119000 },
-      { id: 1, date: new Date(Date.now() - 86400000 * 3).toISOString(), value: 116200 },
-      { id: 0, date: new Date(Date.now() - 86400000 * 4).toISOString(), value: 114000 },
-    ];
+    return {
+      history: [
+        { id: 4, date: new Date().toISOString(), value: 125000 },
+        { id: 3, date: new Date(Date.now() - 86400000).toISOString(), value: 121500 },
+        { id: 2, date: new Date(Date.now() - 86400000 * 2).toISOString(), value: 119000 },
+        { id: 1, date: new Date(Date.now() - 86400000 * 3).toISOString(), value: 116200 },
+        { id: 0, date: new Date(Date.now() - 86400000 * 4).toISOString(), value: 114000 },
+      ],
+      settings: null
+    };
   }
 
   try {
@@ -73,11 +96,58 @@ export async function fetchHistory() {
     });
     const result = await response.json();
     if (result.status === 'success') {
-      return result.data; // Ini array riwayat data terbaru di atas
+      return {
+        history: result.data || [],
+        settings: result.settings || null
+      };
     }
     throw new Error(result.message);
   } catch (error) {
     console.error('Error fetching data:', error);
+    throw error;
+  }
+}
+
+export async function saveAiSummaryToSpreadsheet(summary) {
+  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    return new Promise((resolve) => setTimeout(() => resolve({ status: 'success' }), 500));
+  }
+
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({ action: 'save_ai_summary', summary }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error saving AI summary:', error);
+    throw error;
+  }
+}
+
+export async function fetchAiHistory() {
+  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    return [];
+  }
+
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({ action: 'get_ai_history' }),
+    });
+    const result = await response.json();
+    if (result.status === 'success') {
+      return result.data || [];
+    }
+    throw new Error(result.message);
+  } catch (error) {
+    console.error('Error fetching AI history:', error);
     throw error;
   }
 }

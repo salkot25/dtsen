@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine
 } from 'recharts';
-import { formatNumber, getRemainingWorkingDays, calculateDailyTarget } from '../utils/dateUtils';
+import { formatNumber, getRemainingWorkingDays, calculateDailyTarget, getTotalWorkingDays } from '../utils/dateUtils';
 
 function KPICard({ title, value, subtitle, icon, iconBg, iconColor, children, delay = '0' }) {
   return (
@@ -42,12 +42,15 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export default function DashboardOverview({ history, totalTarget }) {
+export default function DashboardOverview({ history, settings }) {
   const currentTotal = history.length > 0 ? history[0].value : 0;
-  const percentage = Math.min(((currentTotal / totalTarget) * 100), 100).toFixed(1);
+  const percentage = Math.min(((currentTotal / settings.totalTarget) * 100), 100).toFixed(1);
   
-  const dailyTarget = calculateDailyTarget(currentTotal);
-  const remainingDays = getRemainingWorkingDays();
+  const dailyTarget = calculateDailyTarget(currentTotal, settings);
+  const remainingDays = getRemainingWorkingDays(settings);
+  
+  const totalProjectDays = getTotalWorkingDays(settings);
+  const idealDaily = Math.ceil(settings.totalTarget / totalProjectDays);
   
   const lastRealization = history.length > 0 
     ? (history.length > 1 ? history[0].value - history[1].value : history[0].value) 
@@ -102,7 +105,7 @@ export default function DashboardOverview({ history, totalTarget }) {
           <div className="w-full bg-slate-100 rounded-full h-1.5 mb-1 overflow-hidden">
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 rounded-full transition-all duration-700" style={{ width: `${percentage}%` }}></div>
           </div>
-          <p className="text-[11px] text-slate-400"><span className="font-semibold text-blue-600">{percentage}%</span> dari {formatNumber(totalTarget)}</p>
+          <p className="text-[11px] text-slate-400"><span className="font-semibold text-blue-600">{percentage}%</span> dari {formatNumber(settings.totalTarget)}</p>
         </div>
 
         {/* Card 2: Kinerja Terakhir */}
@@ -129,17 +132,18 @@ export default function DashboardOverview({ history, totalTarget }) {
             <div className="p-2 rounded-xl bg-amber-50 text-amber-600"><Target size={18} /></div>
           </div>
           <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{formatNumber(averageDaily)}</h3>
-          <p className="text-[11px] text-slate-400">Target Ideal: <span className="font-semibold text-slate-600">1.873</span>/hari</p>
+          <p className="text-[11px] text-slate-400">Target Ideal: <span className="font-semibold text-slate-600">{formatNumber(idealDaily)}</span>/hari</p>
         </div>
 
         {/* Card 4: Sisa Waktu & Target */}
         <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-300">
-          <div className="flex justify-between items-start mb-2">
+          <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Sisa Waktu Kerja</p>
             <div className="p-2 rounded-xl bg-violet-50 text-violet-600"><Clock size={18} /></div>
           </div>
           <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{remainingDays} <span className="text-sm font-normal text-slate-400">hari</span></h3>
-          <p className="text-[11px] text-slate-400">Target Penyesuaian: <span className="font-bold text-blue-600">{formatNumber(dailyTarget)}</span>/hari</p>
+          <p className="text-[11px] text-slate-400 mb-1">Target Penyesuaian: <span className="font-bold text-blue-600">{formatNumber(dailyTarget)}</span>/hari</p>
+          <p className="text-[11px] text-violet-500 font-medium">({formatNumber(Math.ceil(dailyTarget / (settings.officerCount || 1)))}/hari per petugas)</p>
         </div>
       </div>
 
@@ -167,8 +171,8 @@ export default function DashboardOverview({ history, totalTarget }) {
           </div>
         </div>
         
-        <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-72 w-full" style={{ minHeight: 288 }}>
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <AreaChart
               data={chartData}
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}

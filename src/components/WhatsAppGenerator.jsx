@@ -4,7 +4,7 @@ import { formatNumber, calculateDailyTarget, getRemainingWorkingDays } from '../
 
 const JML_PETUGAS = 60;
 
-export default function WhatsAppGenerator({ history, totalTarget, selectedItem }) {
+export default function WhatsAppGenerator({ history, settings, selectedItem }) {
   const [copied, setCopied] = useState(false);
   
   // Gunakan data yang dipilih user, atau data terbaru jika tidak ada yang dipilih
@@ -15,14 +15,14 @@ export default function WhatsAppGenerator({ history, totalTarget, selectedItem }
   const realisasiHariIni = selectedItem?.dailyAchieved !== undefined 
     ? selectedItem.dailyAchieved 
     : (currentTotal - previousTotal);
-  const dailyTarget = calculateDailyTarget(currentTotal);
-  const remainingDays = getRemainingWorkingDays();
+  const dailyTarget = calculateDailyTarget(currentTotal, settings);
+  const remainingDays = getRemainingWorkingDays(settings);
   
   // Persentase harian: realisasi hari ini vs target harian
   const pctHarian = dailyTarget > 0 ? ((realisasiHariIni / dailyTarget) * 100).toFixed(2) : '0';
   
   // Target kumulatif s/d hari ini (Total Target)
-  const targetKumulatif = totalTarget;
+  const targetKumulatif = settings.totalTarget;
   const pctKumulatif = targetKumulatif > 0 ? ((currentTotal / targetKumulatif) * 100).toFixed(2) : '0';
 
   // Format tanggal dari selected item atau hari ini
