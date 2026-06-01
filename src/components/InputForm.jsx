@@ -64,10 +64,9 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers, 
         const data = new Uint8Array(evt.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         
-        // Find sheet 'PETUGAS' or fallback to first sheet
-        const sheetName = workbook.SheetNames.includes('PETUGAS') 
-          ? 'PETUGAS' 
-          : workbook.SheetNames[0];
+        // Find sheet 'PETUGAS' case-insensitively or fallback to first sheet
+        const sheetName = workbook.SheetNames.find(name => name.toUpperCase() === 'PETUGAS') 
+          || workbook.SheetNames[0];
         
         const worksheet = workbook.Sheets[sheetName];
         const rawJson = XLSX.utils.sheet_to_json(worksheet);
@@ -88,14 +87,36 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers, 
         let totalSubmittedUploaded = 0;
         let totalOpenUploaded = 0;
         const mappedOfficers = rawJson.map((row, idx) => {
-          const rawRealisasi = row['% REALISASI'] !== undefined ? row['% REALISASI'] : (row['realisasi'] || 0);
-          const openVal = Number(row['OPEN'] || row['open'] || 0);
-          const submittedVal = Number(row['SUBMITTED'] || row['submitted'] || 0);
+          // Parse Open safely (NaN, null, or empty string are parsed as 0)
+          const rawOpen = row['OPEN'] !== undefined ? row['OPEN'] : (row['open'] || 0);
+          const openVal = isNaN(Number(rawOpen)) || rawOpen === null || rawOpen === 'NaN' || rawOpen === '' ? 0 : Number(rawOpen);
+
+          // Parse Submitted safely (supports 'SUBMITTED' or 'SUBMIT')
+          const rawSubmitted = row['SUBMITTED'] !== undefined 
+            ? row['SUBMITTED'] 
+            : (row['SUBMIT'] !== undefined ? row['SUBMIT'] : (row['submitted'] || row['submit'] || 0));
+          const submittedVal = isNaN(Number(rawSubmitted)) ? 0 : Number(rawSubmitted);
+
+          // Parse Rejected safely
+          const rawRejected = row['REJECTED'] !== undefined ? row['REJECTED'] : (row['rejected'] || 0);
+          const rejectedVal = isNaN(Number(rawRejected)) ? 0 : Number(rawRejected);
+
+          // Parse or calculate Realisasi
+          let realisasiVal = 0;
+          const rawRealisasi = row['% REALISASI'] !== undefined ? row['% REALISASI'] : (row['realisasi'] || null);
+          if (rawRealisasi !== null && !isNaN(Number(rawRealisasi))) {
+            realisasiVal = Number(rawRealisasi);
+          } else {
+            // Calculate realisasi dynamically: submitted / (submitted + open + rejected)
+            const total = submittedVal + openVal + rejectedVal;
+            realisasiVal = total > 0 ? (submittedVal / total) : 0;
+          }
+
           totalSubmittedUploaded += submittedVal;
           totalOpenUploaded += openVal;
           
           return {
-            no: Number(row['NO'] || row['no'] || idx + 1),
+            no: Number(row['NO'] || row['no'] || row['No'] || idx + 1),
             unitUpi: row['UNITUPI'] || row['unitUpi'] || '',
             unitAp: row['UNITAP'] || row['unitAp'] || '',
             unitUp: row['UNITUP'] || row['unitUp'] || '',
@@ -103,8 +124,8 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers, 
             email: row['Email Biller'] || row['email'] || row['Email'] || '',
             open: openVal,
             submitted: submittedVal,
-            rejected: Number(row['REJECTED'] || row['rejected'] || 0),
-            realisasi: Number(rawRealisasi)
+            rejected: rejectedVal,
+            realisasi: realisasiVal
           };
         });
 
