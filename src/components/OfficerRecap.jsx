@@ -562,19 +562,19 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           {formatNumber(o.totalSubmitted)}
                         </p>
                       </div>
-                      <div className="rounded-xl bg-blue-50/60 border border-blue-100 px-3 py-2">
-                        <p className="text-blue-700 uppercase tracking-wider font-bold">
+                      <div className="rounded-xl bg-blue-50 border border-blue-100 px-3 py-2">
+                        <p className="text-blue-800 uppercase tracking-wider font-bold">
                           Paska
                         </p>
-                        <p className="text-sm font-extrabold text-blue-700 mt-1">
+                        <p className="text-sm font-extrabold text-blue-800 mt-1">
                           {o.hasPaska ? formatNumber(o.paskaSubmitted) : "-"}
                         </p>
                       </div>
-                      <div className="rounded-xl bg-violet-50/60 border border-violet-100 px-3 py-2">
-                        <p className="text-violet-700 uppercase tracking-wider font-bold">
+                      <div className="rounded-xl bg-violet-50 border border-violet-100 px-3 py-2">
+                        <p className="text-violet-800 uppercase tracking-wider font-bold">
                           Pra
                         </p>
-                        <p className="text-sm font-extrabold text-violet-700 mt-1">
+                        <p className="text-sm font-extrabold text-violet-800 mt-1">
                           {o.hasPra ? formatNumber(o.praSubmitted) : "-"}
                         </p>
                       </div>
@@ -591,7 +591,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                   >
                     <div className="space-y-3 pt-1 pb-1">
                       <div className="grid grid-cols-2 gap-3 text-[11px]">
-                        <div className="rounded-xl bg-blue-50/50 border border-blue-100 p-3">
+                        <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
                           <p className="font-bold text-blue-800 uppercase tracking-wider text-[10px] mb-2">
                             Paskabayar
                           </p>
@@ -629,7 +629,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           </div>
                         </div>
 
-                        <div className="rounded-xl bg-violet-50/50 border border-violet-100 p-3">
+                        <div className="rounded-xl bg-violet-50 border border-violet-100 p-3">
                           <p className="font-bold text-violet-800 uppercase tracking-wider text-[10px] mb-2">
                             Prabayar
                           </p>
@@ -747,7 +747,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                       return (
                         <tr
                           key={index}
-                          className="group transition-all duration-200 hover:bg-slate-50/60 hover:-translate-y-[1px] hover:shadow-[0_6px_18px_rgba(15,23,42,0.06)]"
+                          className="group recap-table-row"
                         >
                           {/* Peringkat */}
                           <td className="py-3.5 px-3 text-center font-bold text-slate-500 border-r border-slate-200">

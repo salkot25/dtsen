@@ -696,20 +696,20 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 7: AI Executive Summary
          ══════════════════════════════════════════════════════════════════════ */}
-      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 shadow-sm border border-indigo-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-gradient-to-br from-indigo-50 dark:from-indigo-950/40 to-purple-50 dark:to-purple-950/40 rounded-2xl p-6 shadow-sm border border-indigo-100 dark:border-indigo-900/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h3 className="text-lg md:text-xl font-bold text-indigo-900 flex items-center gap-2">
-            <Sparkles className="text-purple-500" /> AI Executive Summary
+          <h3 className="text-lg md:text-xl font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+            <Sparkles className="text-purple-500 dark:text-purple-400" /> AI Executive Summary
           </h3>
-          <p className="text-xs md:text-sm text-indigo-700/70 mt-1">Ringkasan cerdas & rekomendasi taktis dari Google Gemini AI — termasuk analisis rekap petugas</p>
+          <p className="text-xs md:text-sm text-indigo-700/70 dark:text-indigo-300/80 mt-1">Ringkasan cerdas & rekomendasi taktis dari Google Gemini AI — termasuk analisis rekap petugas</p>
         </div>
         <div className="flex gap-3 shrink-0">
           <button onClick={() => setIsHistoryModalOpen(true)}
-            className="flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-xl font-medium transition-all shadow-sm text-sm">
+            className="flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-slate-700 border border-indigo-200 dark:border-slate-700 rounded-xl font-medium transition-all shadow-sm text-sm cursor-pointer">
             <Clock size={16} /> Riwayat
           </button>
           <button onClick={handleGenerateAI}
-            className="flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-medium transition-all shadow-md text-sm">
+            className="flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-medium transition-all shadow-md text-sm cursor-pointer">
             <Sparkles size={16} /> Buat Ringkasan
           </button>
         </div>
@@ -718,19 +718,19 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
       {/* AI Result Modal */}
       {showAiModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-up">
-            <div className="flex items-center justify-between p-5 md:p-6 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-purple-50">
-              <h2 className="text-lg md:text-xl font-bold text-indigo-900 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-up border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between p-5 md:p-6 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-indigo-50 dark:from-indigo-950/50 to-purple-50 dark:to-purple-950/50">
+              <h2 className="text-lg md:text-xl font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
                 <Sparkles className="text-purple-500" /> Hasil Analisis AI
               </h2>
               {!isGenerating && (
-                <button onClick={() => setShowAiModal(false)} className="p-2 hover:bg-white/50 rounded-xl transition-colors text-slate-500">
+                <button onClick={() => setShowAiModal(false)} className="p-2 hover:bg-white/50 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-500 dark:text-slate-400 cursor-pointer">
                   <X size={20} />
                 </button>
               )}
             </div>
 
-            <div className="p-5 md:p-6 overflow-y-auto flex-1 bg-white">
+            <div className="p-5 md:p-6 overflow-y-auto flex-1 bg-white dark:bg-slate-900">
               {isGenerating ? (
                 <div className="flex flex-col items-center justify-center py-12 text-indigo-500">
                   <Loader2 size={40} className="animate-spin mb-4" />

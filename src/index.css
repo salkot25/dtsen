@@ -216,9 +216,18 @@ html:not(.dark) .text-slate-400 {
   color: #64748b !important;
 }
 
-html:not(.dark) .border-slate-100,
+html:not(.dark) .border-slate-100 {
+  border-color: #f1f5f9 !important; /* extremely soft slate-100 */
+}
+
 html:not(.dark) .border-slate-200 {
-  border-color: #e2e8f0 !important;
+  border-color: rgba(226, 232, 240, 0.45) !important; /* soft slate-200 with opacity */
+}
+
+html:not(.dark) .divide-slate-50 > :not([hidden]) ~ :not([hidden]),
+html:not(.dark) .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html:not(.dark) .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #f1f5f9 !important;
 }
 
 
@@ -407,6 +416,109 @@ html.dark [class*="bg-slate-200/50"] {
   background-color: rgba(30, 41, 59, 0.5) !important;
   color: #f1f5f9 !important;
 }
+
+/* ==========================================================================
+   GLOBAL SOFT SHADOWS SYSTEM
+   ========================================================================== */
+
+/* Light Mode Premium Soft Shadows */
+html:not(.dark) .shadow-sm {
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02) !important;
+}
+
+html:not(.dark) .shadow,
+html:not(.dark) .enterprise-shadow {
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.03), 0 2px 8px -2px rgba(15, 23, 42, 0.02) !important;
+}
+
+html:not(.dark) .shadow-md {
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.02) !important;
+}
+
+html:not(.dark) .shadow-lg {
+  box-shadow: 0 18px 36px -6px rgba(15, 23, 42, 0.04), 0 6px 16px -3px rgba(15, 23, 42, 0.02) !important;
+}
+
+html:not(.dark) .shadow-xl {
+  box-shadow: 0 24px 48px -8px rgba(15, 23, 42, 0.05), 0 8px 24px -4px rgba(15, 23, 42, 0.03) !important;
+}
+
+html:not(.dark) .shadow-2xl {
+  box-shadow: 0 32px 64px -12px rgba(15, 23, 42, 0.06), 0 16px 32px -6px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Dark Mode Premium Soft Shadows */
+html.dark .shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.dark .shadow,
+html.dark .enterprise-shadow {
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.25), 0 2px 8px -2px rgba(0, 0, 0, 0.15) !important;
+}
+
+html.dark .shadow-md {
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.3), 0 4px 12px -2px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.dark .shadow-lg {
+  box-shadow: 0 18px 36px -6px rgba(0, 0, 0, 0.35), 0 6px 16px -3px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.dark .shadow-xl {
+  box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.4), 0 8px 24px -4px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .shadow-2xl {
+  box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.45), 0 16px 32px -6px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ==========================================================================
+   OFFICER RECAP TABLE ROW PREMIUM HOVER EFFECT
+   ========================================================================== */
+
+.recap-table-row {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  will-change: transform, background-color, box-shadow;
+}
+
+html:not(.dark) .recap-table-row:hover {
+  background-color: rgba(248, 250, 252, 0.85) !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.04) !important;
+}
+
+html:not(.dark) .recap-table-row:hover p.font-bold {
+  color: #2563eb !important; /* blue-600 (warna utama) */
+}
+
+html.dark .recap-table-row:hover {
+  background-color: rgba(30, 41, 59, 0.4) !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .recap-table-row:hover p.font-bold {
+  color: #3b82f6 !important; /* blue-500 (warna utama terang untuk dark mode) */
+}
+
+/* ==========================================================================
+   MOBILE BOTTOM NAVIGATION CENTER PLUS BUTTON SPECIFIC STYLES
+   ========================================================================== */
+
+html:not(.dark) .mobile-nav-plus-btn {
+  border-color: #ffffff !important; /* blends perfectly with white light nav bg */
+}
+
+html.dark .mobile-nav-plus-btn {
+  border-color: #0f172a !important; /* blends perfectly with dark slate-900 nav bg */
+}
+
+
+
+
 
 
 

@@ -180,7 +180,7 @@ const AiChat = ({ history, settings }) => {
   };
 
   return (
-    <div className="flex flex-1 h-full w-full min-h-0 bg-white md:rounded-2xl md:shadow-sm md:border md:border-slate-200 overflow-hidden relative">
+    <div className="flex flex-1 h-full w-full min-h-0 bg-white dark:bg-slate-900 md:rounded-2xl md:shadow-sm md:border md:border-slate-200 dark:border-slate-800 overflow-hidden relative">
       
       {/* Sidebar Overlay (Mobile) */}
       {isSidebarOpen && (
@@ -191,11 +191,11 @@ const AiChat = ({ history, settings }) => {
       )}
       
       {/* Sidebar (Sessions List) */}
-      <div className={`absolute md:static top-0 left-0 h-full w-64 bg-slate-50 border-r border-slate-200 flex flex-col transition-transform duration-300 z-20 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:w-0 md:border-0'}`}>
-        <div className="p-4 border-b border-slate-200">
+      <div className={`absolute md:static top-0 left-0 h-full w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 z-20 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:w-0 md:border-0'}`}>
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800">
           <button 
             onClick={startNewChat}
-            className="w-full flex items-center justify-center gap-2 bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 py-2.5 rounded-xl transition-all shadow-sm font-medium"
+            className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-850 border border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:text-blue-600 text-slate-700 dark:text-slate-300 py-2.5 rounded-xl transition-all shadow-sm font-medium"
           >
             <Plus size={18} /> Chat Baru
           </button>
@@ -213,11 +213,11 @@ const AiChat = ({ history, settings }) => {
                 setActiveSessionId(session.id);
                 if (window.innerWidth < 768) setIsSidebarOpen(false);
               }}
-              className={`w-full text-left flex items-start gap-3 p-3 rounded-xl transition-colors ${activeSessionId === session.id ? 'bg-blue-100/50 text-blue-700' : 'hover:bg-slate-100 text-slate-600'}`}
+              className={`w-full text-left flex items-start gap-3 p-3 rounded-xl transition-all outline-none ${activeSessionId === session.id ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/10' : 'hover:bg-slate-100 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-400'}`}
             >
-              <MessageSquare size={16} className={`mt-0.5 shrink-0 ${activeSessionId === session.id ? 'text-blue-500' : 'text-slate-400'}`} />
+              <MessageSquare size={16} className={`mt-0.5 shrink-0 ${activeSessionId === session.id ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{session.title}</p>
+                <p className={`text-sm font-medium truncate ${activeSessionId === session.id ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>{session.title}</p>
               </div>
             </button>
           ))}
@@ -225,16 +225,16 @@ const AiChat = ({ history, settings }) => {
       </div>
       
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full bg-white z-0">
+      <div className="flex-1 flex flex-col min-w-0 h-full bg-white dark:bg-slate-900 z-0">
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className={`p-2 -ml-2 rounded-xl transition-all ${
                 isSidebarOpen 
-                  ? 'text-blue-600 bg-blue-50 font-bold shadow-sm' 
-                  : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50'
+                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-bold shadow-sm' 
+                  : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800'
               } md:hidden`}
               title="Riwayat Chat"
             >
@@ -244,15 +244,15 @@ const AiChat = ({ history, settings }) => {
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className={`p-2 -ml-2 rounded-xl transition-all ${
                 isSidebarOpen 
-                  ? 'text-blue-600 bg-blue-50 font-bold shadow-sm' 
-                  : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50'
+                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-bold shadow-sm' 
+                  : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800'
               } hidden md:block`}
               title="Toggle Sidebar"
             >
               {isSidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
             </button>
             <div>
-              <h2 className="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base">
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 text-sm md:text-base">
                 <Bot className="text-blue-500" size={20} /> Asisten AI
               </h2>
             </div>
@@ -260,7 +260,7 @@ const AiChat = ({ history, settings }) => {
           <button 
             onClick={loadChatHistory}
             disabled={isFetchingHistory}
-            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
             title="Muat ulang riwayat"
           >
             <RefreshCw size={18} className={isFetchingHistory ? "animate-spin" : ""} />
@@ -316,7 +316,7 @@ const AiChat = ({ history, settings }) => {
         </div>
 
         {/* Input Area */}
-        <div className="p-3 md:p-4 border-t border-slate-200 bg-white shrink-0">
+        <div className="p-3 md:p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <input
               type="text"
@@ -329,12 +329,12 @@ const AiChat = ({ history, settings }) => {
               }}
               placeholder={settings.geminiApiKey ? "Ketik pesan Anda di sini..." : "Masukkan API Key Gemini di Pengaturan"}
               disabled={isLoading || !settings.geminiApiKey}
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm disabled:opacity-50"
+              className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-sm disabled:opacity-50 text-slate-800 dark:text-slate-100"
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim() || !settings.geminiApiKey}
-              className="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shrink-0"
+              className="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shrink-0 cursor-pointer"
             >
               <Send size={20} />
             </button>

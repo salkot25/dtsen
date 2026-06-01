@@ -191,7 +191,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
               <button
                 key={tab.id}
                 onClick={() => setCurrentTab(tab.id)}
-                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border-4 border-white dark:border-slate-950 transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer animate-none"
+                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border-4 mobile-nav-plus-btn transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer animate-none outline-none"
                 aria-label="Tambah Laporan"
               >
                 <Plus size={24} />
@@ -203,19 +203,19 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
             <button
               key={tab.id}
               onClick={() => setCurrentTab(tab.id)}
-              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl min-w-[64px] transition-all duration-200 shrink-0 cursor-pointer`}
+              className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl min-w-[64px] transition-all duration-200 shrink-0 cursor-pointer outline-none"
             >
-              <div className={`p-1 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
+              <div className={`p-1 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110 text-blue-600 dark:text-blue-400 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
                  {tab.icon}
               </div>
-              <span className={`text-[10px] leading-none ${isActive ? 'font-bold text-blue-600' : 'font-semibold text-slate-500 dark:text-slate-400'}`}>
+              <span className={`text-[10px] leading-none ${isActive ? 'font-bold text-blue-600 dark:text-blue-400' : 'font-semibold text-slate-500 dark:text-slate-400'}`}>
                 {tab.id === 'overview' ? 'Dashboard' : 
                  tab.id === 'officer_recap' ? 'Petugas' : 
                  tab.id === 'executive_summary' ? 'Ringkasan' : 
                  tab.id === 'ai_chat' ? 'Asisten AI' : 
                  tab.label}
               </span>
-              {isActive && <div className="w-4 h-0.5 bg-blue-600 rounded-full mt-1 animate-fade-in"></div>}
+              {isActive && <div className="w-4 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full mt-1 animate-fade-in"></div>}
             </button>
           );
         })}
