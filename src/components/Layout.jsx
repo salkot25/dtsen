@@ -135,8 +135,8 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col relative ${
         currentTab === 'ai_chat' 
-          ? 'overflow-hidden pb-[76px] pb-safe md:h-screen md:pb-0' 
-          : 'pb-[84px] pb-safe md:pb-0 overflow-y-auto'
+          ? 'overflow-hidden pb-chat-mobile md:h-screen md:pb-0' 
+          : 'pb-tabs-mobile md:pb-0 overflow-y-auto'
       }`}>
         {/* Desktop Topbar */}
         <header className="hidden md:flex bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 items-center justify-between sticky top-0 z-10 transition-colors">

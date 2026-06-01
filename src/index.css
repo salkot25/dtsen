@@ -109,6 +109,14 @@
   padding-bottom: env(safe-area-inset-bottom, 8px);
 }
 
+.pb-chat-mobile {
+  padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.pb-tabs-mobile {
+  padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
 /* ============================================
    PWA SPECIFIC STYLES
    ============================================ */
