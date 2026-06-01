@@ -54,6 +54,27 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
         .setMimeType(ContentService.MimeType.JSON);
     }
+
+    // Simpan Rekap Petugas Router
+    if (data.action === "save_officers") {
+      var officersSheet = ss.getSheetByName('Rekap_Petugas');
+      if (!officersSheet) {
+        officersSheet = ss.insertSheet('Rekap_Petugas');
+      } else {
+        officersSheet.clear();
+      }
+      
+      var rows = [['no', 'nama', 'email', 'open', 'submitted', 'rejected', 'realisasi']];
+      for (var i = 0; i < data.officers.length; i++) {
+        var o = data.officers[i];
+        rows.push([o.no, o.nama, o.email, o.open, o.submitted, o.rejected, o.realisasi]);
+      }
+      
+      officersSheet.getRange(1, 1, rows.length, 7).setValues(rows);
+      
+      return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     
     // Simpan Riwayat AI Router
     if (data.action === "save_ai_summary") {
@@ -208,6 +229,27 @@ function doGet(e) {
       }
     }
 
+    // Fetch Officers Recap
+    var officersSheet = ss.getSheetByName('Rekap_Petugas');
+    var officersList = null;
+    if (officersSheet) {
+      var oData = officersSheet.getDataRange().getValues();
+      if (oData.length > 1) {
+        officersList = [];
+        for (var k = 1; k < oData.length; k++) {
+          officersList.push({
+            no: parseInt(oData[k][0], 10),
+            nama: oData[k][1],
+            email: oData[k][2],
+            open: parseInt(oData[k][3], 10),
+            submitted: parseInt(oData[k][4], 10),
+            rejected: parseInt(oData[k][5], 10),
+            realisasi: parseFloat(oData[k][6])
+          });
+        }
+      }
+    }
+
     // Fetch History
     var sheet = ss.getSheetByName('Laporan');
     var history = [];
@@ -233,8 +275,12 @@ function doGet(e) {
       history.reverse();
     }
     
-    return ContentService.createTextOutput(JSON.stringify({ status: "success", data: history, settings: settingsObj }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: "success", 
+      data: history, 
+      settings: settingsObj,
+      officers: officersList
+    })).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService.createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);

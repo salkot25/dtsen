@@ -1,10 +1,10 @@
-import React from 'react';
-import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus } from 'lucide-react';
+import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus, Users } from 'lucide-react';
 
 export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
   const tabs = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { id: 'input', label: 'Input Laporan', icon: <FileInput size={20} /> },
+    { id: 'officer_recap', label: 'Rekap Petugas', icon: <Users size={20} /> },
     { id: 'executive_summary', label: 'Ringkasan Kinerja', icon: <FileText size={20} /> },
     { id: 'ai_chat', label: 'Asisten AI', icon: <Bot size={20} /> },
     { id: 'settings', label: 'Pengaturan', icon: <SettingsIcon size={20} /> },
@@ -120,7 +120,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/60 flex justify-around items-center px-4 py-2 z-30 pb-safe">
         {[
           tabs.find(t => t.id === 'overview'),
-          tabs.find(t => t.id === 'executive_summary'),
+          tabs.find(t => t.id === 'officer_recap'),
           tabs.find(t => t.id === 'input'),
           tabs.find(t => t.id === 'ai_chat'),
           tabs.find(t => t.id === 'settings'),
@@ -154,7 +154,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
                  {tab.icon}
               </div>
               <span className={`text-[10px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}>
-                {tab.label === 'Ringkasan Kinerja' ? 'Ringkasan' : (tab.label === 'Dashboard' ? 'Home' : (tab.label === 'Asisten AI' ? 'AI Chat' : tab.label))}
+                {tab.label === 'Ringkasan Kinerja' ? 'Ringkasan' : (tab.label === 'Dashboard' ? 'Home' : (tab.label === 'Asisten AI' ? 'AI Chat' : (tab.label === 'Rekap Petugas' ? 'Rekap' : tab.label)))}
               </span>
               {isActive && <div className="w-4 h-0.5 bg-blue-600 rounded-full mt-1"></div>}
             </button>

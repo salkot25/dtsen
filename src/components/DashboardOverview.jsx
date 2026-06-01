@@ -42,7 +42,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export default function DashboardOverview({ history, settings }) {
+export default function DashboardOverview({ history, settings, setCurrentTab }) {
   const currentTotal = history.length > 0 ? history[0].value : 0;
   const percentage = Math.min(((currentTotal / settings.totalTarget) * 100), 100).toFixed(1);
   
@@ -93,6 +93,23 @@ export default function DashboardOverview({ history, settings }) {
 
   return (
     <div className="space-y-6">
+      {/* Mobile Quick Action Link */}
+      <div className="md:hidden flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100/50 rounded-xl p-3.5 animate-fade-in">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 bg-blue-500 text-white rounded-lg"><CalendarDays size={14} /></div>
+          <div>
+            <span className="block text-xs font-bold text-slate-800">Ringkasan Kinerja & Analisis AI</span>
+            <span className="block text-[10px] text-slate-400 mt-0.5">Analisis tren capaian oleh asisten kecerdasan buatan</span>
+          </div>
+        </div>
+        <button 
+          onClick={() => setCurrentTab && setCurrentTab('executive_summary')}
+          className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-white px-3 py-1.5 rounded-lg border border-blue-200/50 shadow-sm active:scale-95 transition-all"
+        >
+          Lihat
+        </button>
+      </div>
+
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Capaian */}

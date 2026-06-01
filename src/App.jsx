@@ -8,7 +8,9 @@ import WhatsAppGenerator from './components/WhatsAppGenerator';
 import Settings from './components/Settings';
 import ExecutiveSummary from './components/ExecutiveSummary';
 import AiChat from './components/AiChat';
-import { saveToSpreadsheet, fetchHistory, saveSettingsToSpreadsheet } from './services/api';
+import OfficerRecap from './components/OfficerRecap';
+import defaultOfficers from './data/officers.json';
+import { saveToSpreadsheet, fetchHistory, saveSettingsToSpreadsheet, saveOfficersToSpreadsheet } from './services/api';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -32,6 +34,11 @@ function App() {
     };
   });
 
+  const [officers, setOfficers] = useState(() => {
+    const saved = localStorage.getItem('dtsen_officers');
+    return saved ? JSON.parse(saved) : defaultOfficers;
+  });
+
   const handleSaveSettings = async (newSettings) => {
     setSettings(newSettings);
     localStorage.setItem('dtsen_settings', JSON.stringify(newSettings));
@@ -39,6 +46,16 @@ function App() {
       await saveSettingsToSpreadsheet(newSettings);
     } catch (err) {
       console.error("Gagal menyimpan ke server:", err);
+    }
+  };
+
+  const handleUploadOfficers = async (newOfficers) => {
+    setOfficers(newOfficers);
+    localStorage.setItem('dtsen_officers', JSON.stringify(newOfficers));
+    try {
+      await saveOfficersToSpreadsheet(newOfficers);
+    } catch (err) {
+      console.error("Gagal menyimpan rekap petugas ke server:", err);
     }
   };
   
@@ -54,6 +71,10 @@ function App() {
         if (data.settings && Object.keys(data.settings).length > 0) {
           setSettings(data.settings);
           localStorage.setItem('dtsen_settings', JSON.stringify(data.settings));
+        }
+        if (data.officers && data.officers.length > 0) {
+          setOfficers(data.officers);
+          localStorage.setItem('dtsen_officers', JSON.stringify(data.officers));
         }
       } catch (err) {
         console.error("Failed to load history", err);
@@ -111,7 +132,7 @@ function App() {
     <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout}>
       {currentTab === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <DashboardOverview history={history} settings={settings} />
+          <DashboardOverview history={history} settings={settings} setCurrentTab={setCurrentTab} />
         </div>
       )}
 
@@ -119,7 +140,11 @@ function App() {
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
              <div className="lg:col-span-1 flex flex-col gap-6">
-                <InputForm onSubmit={handleSubmitRealisasi} lastCumulative={lastCumulative} />
+                <InputForm 
+                  onSubmit={handleSubmitRealisasi} 
+                  lastCumulative={lastCumulative} 
+                  onUploadOfficers={handleUploadOfficers} 
+                />
                 <HistoryTable 
                   history={history} 
                   selectedId={selectedHistoryId} 
@@ -134,6 +159,12 @@ function App() {
                 />
              </div>
           </div>
+        </div>
+      )}
+
+      {currentTab === 'officer_recap' && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <OfficerRecap officers={officers} />
         </div>
       )}
 

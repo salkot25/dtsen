@@ -75,6 +75,26 @@ export async function saveSettingsToSpreadsheet(settings) {
   }
 }
 
+export async function saveOfficersToSpreadsheet(officers) {
+  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    return new Promise((resolve) => setTimeout(() => resolve({ status: 'success' }), 500));
+  }
+
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({ action: 'save_officers', officers }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error saving officers:', error);
+    throw error;
+  }
+}
+
 export async function fetchHistory() {
   if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
     // Return mock data for local development if not connected
@@ -98,7 +118,8 @@ export async function fetchHistory() {
     if (result.status === 'success') {
       return {
         history: result.data || [],
-        settings: result.settings || null
+        settings: result.settings || null,
+        officers: result.officers || null
       };
     }
     throw new Error(result.message);
