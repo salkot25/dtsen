@@ -1,14 +1,14 @@
 import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus, Users } from 'lucide-react';
 
 export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
-  // Coordinated global tabs list order
+  // Coordinated global tabs list order (Enterprise UX standard)
   const tabs = [
-    { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { id: 'officer_recap', label: 'Rekap Petugas', icon: <Users size={20} /> },
-    { id: 'input', label: 'Input Laporan', icon: <FileInput size={20} /> },
-    { id: 'executive_summary', label: 'Ringkasan Kinerja', icon: <FileText size={20} /> },
-    { id: 'ai_chat', label: 'Asisten AI', icon: <Bot size={20} /> },
-    { id: 'settings', label: 'Pengaturan', icon: <SettingsIcon size={20} /> },
+    { id: 'overview',           label: 'Dashboard',         icon: <LayoutDashboard size={20} /> },
+    { id: 'input',              label: 'Input Laporan',     icon: <FileInput size={20} /> },
+    { id: 'officer_recap',      label: 'Rekap Petugas',     icon: <Users size={20} /> },
+    { id: 'executive_summary',  label: 'Ringkasan Kinerja', icon: <FileText size={20} /> },
+    { id: 'ai_chat',            label: 'Asisten AI',        icon: <Bot size={20} /> },
+    { id: 'settings',           label: 'Pengaturan',        icon: <SettingsIcon size={20} /> },
   ];
 
   const todayStr = new Intl.DateTimeFormat('id-ID', {
