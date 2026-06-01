@@ -113,54 +113,77 @@ export default function DashboardOverview({ history, settings, setCurrentTab }) 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Capaian */}
-        <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-75">
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Pencapaian</p>
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600"><Activity size={18} /></div>
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in-up delay-75">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+            <Activity size={22} />
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{formatNumber(currentTotal)}</h3>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 mb-1 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 rounded-full transition-all duration-700" style={{ width: `${percentage}%` }}></div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Pencapaian</p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(currentTotal)}</h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+              <span>Target: {formatNumber(settings.totalTarget)}</span>
+              <span className="font-bold text-blue-600">{percentage}%</span>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+              <div className="bg-blue-500 h-1 rounded-full transition-all duration-500" style={{ width: `${percentage}%` }} />
+            </div>
           </div>
-          <p className="text-[11px] text-slate-400"><span className="font-semibold text-blue-600">{percentage}%</span> dari {formatNumber(settings.totalTarget)}</p>
         </div>
 
         {/* Card 2: Kinerja Terakhir */}
-        <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-150">
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Capaian Terakhir</p>
-            <div className={`p-2 rounded-xl ${isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-              {isUp ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
-            </div>
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in-up delay-150">
+          <div className={`p-3 rounded-xl shrink-0 ${isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+            {isUp ? <TrendingUp size={22} /> : <TrendingDown size={22} />}
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">+{formatNumber(lastRealization)}</h3>
-          <div className="flex items-center gap-1.5">
-            <div className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-medium ${isUp ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
-              {isUp ? '↑' : '↓'} {formatNumber(Math.abs(lastRealization - previousRealization))}
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Capaian Terakhir</p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">+{formatNumber(lastRealization)}</h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+              <span>Selisih vs kemarin:</span>
+              <span className={`font-bold ${isUp ? 'text-emerald-600' : 'text-rose-600'}`}>
+                {isUp ? '↑' : '↓'} {formatNumber(Math.abs(lastRealization - previousRealization))}
+              </span>
             </div>
-            <span className="text-[11px] text-slate-400">vs hari sebelumnya</span>
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+              <div className={`h-1 rounded-full ${isUp ? 'bg-emerald-500' : 'bg-rose-500'}`} style={{ width: `${Math.min((lastRealization / (averageDaily || 1)) * 100, 100)}%` }} />
+            </div>
           </div>
         </div>
 
         {/* Card 3: Rata-rata Harian */}
-        <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-225">
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Rata-rata Aktual</p>
-            <div className="p-2 rounded-xl bg-amber-50 text-amber-600"><Target size={18} /></div>
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in-up delay-225">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl shrink-0">
+            <Target size={22} />
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{formatNumber(averageDaily)}</h3>
-          <p className="text-[11px] text-slate-400">Target Ideal: <span className="font-semibold text-slate-600">{formatNumber(idealDaily)}</span>/hari</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Rata-rata Aktual</p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(averageDaily)}</h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+              <span>Target Ideal:</span>
+              <span className="font-bold text-amber-600">{formatNumber(idealDaily)}/hari</span>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+              <div className="bg-amber-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min((averageDaily / (idealDaily || 1)) * 100, 100)}%` }} />
+            </div>
+          </div>
         </div>
 
         {/* Card 4: Sisa Waktu & Target */}
-        <div className="kpi-card bg-white rounded-xl p-4 border border-slate-100 enterprise-shadow animate-fade-in-up delay-300">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Sisa Waktu Kerja</p>
-            <div className="p-2 rounded-xl bg-violet-50 text-violet-600"><Clock size={18} /></div>
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in-up delay-300">
+          <div className="p-3 bg-violet-50 text-violet-600 rounded-xl shrink-0">
+            <Clock size={22} />
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">{remainingDays} <span className="text-sm font-normal text-slate-400">hari</span></h3>
-          <p className="text-[11px] text-slate-400 mb-1">Target Penyesuaian: <span className="font-bold text-blue-600">{formatNumber(dailyTarget)}</span>/hari</p>
-          <p className="text-[11px] text-violet-500 font-medium">({formatNumber(Math.ceil(dailyTarget / (settings.officerCount || 1)))}/hari per petugas)</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Sisa Waktu Kerja</p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">{remainingDays} <span className="text-sm font-normal text-slate-400">hari</span></h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+              <span>Target Harian Baru:</span>
+              <span className="font-bold text-violet-600">{formatNumber(dailyTarget)}/hari</span>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+              <div className="bg-violet-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min((remainingDays / (totalProjectDays || 1)) * 100, 100)}%` }} />
+            </div>
+          </div>
         </div>
       </div>
 

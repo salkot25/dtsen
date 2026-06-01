@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { generateExecutiveSummary } from '../services/geminiService';
 import { saveAiSummaryToSpreadsheet } from '../services/api';
 import AiHistoryModal from './AiHistoryModal';
-import { formatNumber, getRemainingWorkingDays, calculateDailyTarget, getWorkingDaysInMonth } from '../utils/dateUtils';
+import { formatNumber, getRemainingWorkingDays, calculateDailyTarget, getWorkingDaysInMonth, getTotalWorkingDays } from '../utils/dateUtils';
 
 const ExecutiveSummary = ({ history, settings }) => {
   const currentTotal = history.length > 0 ? history[0].value : 0;
@@ -12,6 +12,7 @@ const ExecutiveSummary = ({ history, settings }) => {
   const remainingWork = settings.totalTarget - currentTotal;
   const remainingDays = getRemainingWorkingDays(settings);
   const dailyTarget = calculateDailyTarget(currentTotal, settings);
+  const totalProjectDays = getTotalWorkingDays(settings);
 
   const [aiSummary, setAiSummary] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -73,48 +74,76 @@ const ExecutiveSummary = ({ history, settings }) => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-sm font-medium text-slate-500">Pencapaian Total</span>
-            <CheckCircle2 size={18} className="text-emerald-500" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Pencapaian Total */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+            <CheckCircle2 size={22} />
           </div>
-          <div>
-            <div className="text-3xl font-bold text-slate-800">{formatNumber(currentTotal)}</div>
-            <div className="text-sm font-medium text-emerald-600 mt-1">{percentage}% dari Target</div>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-sm font-medium text-slate-500">Sisa Pekerjaan</span>
-            <Target size={18} className="text-rose-500" />
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-slate-800">{formatNumber(remainingWork > 0 ? remainingWork : 0)}</div>
-            <div className="text-sm font-medium text-slate-400 mt-1">Pelanggan</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Pencapaian Total</p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(currentTotal)}</h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+              <span>Target: {formatNumber(settings.totalTarget)}</span>
+              <span className="font-bold text-blue-600">{percentage}%</span>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+              <div className="bg-blue-500 h-1 rounded-full transition-all duration-500" style={{ width: `${percentage}%` }} />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-sm font-medium text-slate-500">Sisa Waktu</span>
-            <Calendar size={18} className="text-blue-500" />
+        {/* Card 2: Sisa Pekerjaan */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-xl shrink-0">
+            <Target size={22} />
           </div>
-          <div>
-            <div className="text-3xl font-bold text-slate-800">{remainingDays}</div>
-            <div className="text-sm font-medium text-slate-400 mt-1">Hari Kerja</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Sisa Pekerjaan</p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(remainingWork > 0 ? remainingWork : 0)}</h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+              <span>Progres Sisa:</span>
+              <span className="font-bold text-rose-600">{(100 - percentage).toFixed(1)}%</span>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+              <div className="bg-rose-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.max(100 - percentage, 0)}%` }} />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-sm font-medium text-slate-500">Target Harian</span>
-            <TrendingUp size={18} className="text-amber-500" />
+        {/* Card 3: Sisa Waktu */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-slate-50 text-slate-500 rounded-xl shrink-0">
+            <Calendar size={22} />
           </div>
-          <div>
-            <div className="text-3xl font-bold text-slate-800">{formatNumber(dailyTarget)}</div>
-            <div className="text-sm font-medium text-amber-600 mt-1">Sisa hari berjalan</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Sisa Waktu</p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">{remainingDays} <span className="text-sm font-normal text-slate-400">hari</span></h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+              <span>Total Hari Kerja:</span>
+              <span className="font-bold text-slate-600">{totalProjectDays} Hari</span>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+              <div className="bg-slate-400 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min((remainingDays / (totalProjectDays || 1)) * 100, 100)}%` }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Target Harian */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl shrink-0">
+            <TrendingUp size={22} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Harian</p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(dailyTarget)}</h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+              <span>Target Per Petugas:</span>
+              <span className="font-bold text-amber-600">{formatNumber(Math.ceil(dailyTarget / (settings.officerCount || 1)))}/hari</span>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+              <div className="bg-amber-500 h-1 rounded-full transition-all duration-500" style={{ width: '100%' }} />
+            </div>
           </div>
         </div>
       </div>
