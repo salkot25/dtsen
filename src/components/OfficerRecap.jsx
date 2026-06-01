@@ -8,7 +8,7 @@ import { formatNumber } from '../utils/dateUtils';
 export default function OfficerRecap({ officers = [] }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [performanceFilter, setPerformanceFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('total_submitted'); // total_submitted, name, paska_realisasi, paska_submitted, pra_submitted
+  const [sortBy, setSortBy] = useState('total_submitted'); // total_submitted, name, paska_submitted, pra_submitted
   const [sortOrder, setSortOrder] = useState('desc'); // asc, desc
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -160,9 +160,6 @@ export default function OfficerRecap({ officers = [] }) {
       if (sortBy === 'name') {
         valA = a.nama || '';
         valB = b.nama || '';
-      } else if (sortBy === 'paska_realisasi') {
-        valA = a.paskaRealisasi || 0;
-        valB = b.paskaRealisasi || 0;
       } else if (sortBy === 'paska_submitted') {
         valA = a.paskaSubmitted || 0;
         valB = b.paskaSubmitted || 0;
@@ -170,7 +167,7 @@ export default function OfficerRecap({ officers = [] }) {
         valA = a.praSubmitted || 0;
         valB = b.praSubmitted || 0;
       } else {
-        // Default: sort by totalSubmitted (Peringkat / Rank)
+        // Default: sort by totalSubmitted ('total_submitted' or fallback)
         valA = a.totalSubmitted || 0;
         valB = b.totalSubmitted || 0;
       }
@@ -353,15 +350,6 @@ export default function OfficerRecap({ officers = [] }) {
                 {/* Sort buttons */}
                 <div className="flex items-center gap-1 bg-slate-50/50 border border-slate-200 rounded-xl p-1">
                   <button
-                    onClick={() => toggleSort('total_submitted')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
-                      sortBy === 'total_submitted' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'
-                    }`}
-                  >
-                    Peringkat (Total Submit)
-                    {sortBy === 'total_submitted' && <ArrowUpDown size={12} />}
-                  </button>
-                  <button
                     onClick={() => toggleSort('name')}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
                       sortBy === 'name' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'
@@ -371,13 +359,13 @@ export default function OfficerRecap({ officers = [] }) {
                     {sortBy === 'name' && <ArrowUpDown size={12} />}
                   </button>
                   <button
-                    onClick={() => toggleSort('paska_realisasi')}
+                    onClick={() => toggleSort('total_submitted')}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
-                      sortBy === 'paska_realisasi' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                      sortBy === 'total_submitted' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
-                    Realisasi Paska
-                    {sortBy === 'paska_realisasi' && <ArrowUpDown size={12} />}
+                    Total
+                    {sortBy === 'total_submitted' && <ArrowUpDown size={12} />}
                   </button>
                   <button
                     onClick={() => toggleSort('paska_submitted')}
@@ -385,7 +373,7 @@ export default function OfficerRecap({ officers = [] }) {
                       sortBy === 'paska_submitted' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
-                    Submit Paska
+                    Paskabayar
                     {sortBy === 'paska_submitted' && <ArrowUpDown size={12} />}
                   </button>
                   <button
@@ -394,7 +382,7 @@ export default function OfficerRecap({ officers = [] }) {
                       sortBy === 'pra_submitted' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
-                    Submit Pra
+                    Prabayar
                     {sortBy === 'pra_submitted' && <ArrowUpDown size={12} />}
                   </button>
                 </div>
