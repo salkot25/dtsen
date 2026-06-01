@@ -180,7 +180,7 @@ const AiChat = ({ history, settings }) => {
   };
 
   return (
-    <div className="flex flex-1 h-full w-full bg-white md:rounded-2xl md:shadow-sm md:border md:border-slate-200 overflow-hidden relative">
+    <div className="flex flex-1 h-full w-full min-h-0 bg-white md:rounded-2xl md:shadow-sm md:border md:border-slate-200 overflow-hidden relative">
       
       {/* Sidebar Overlay (Mobile) */}
       {isSidebarOpen && (

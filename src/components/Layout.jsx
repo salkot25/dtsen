@@ -130,10 +130,10 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
         </header>
 
         {/* Page Content */}
-        <main className={`flex-1 ${currentTab === 'ai_chat' ? 'overflow-hidden h-full flex flex-col' : 'overflow-x-hidden'}`}>
+        <main className={`flex-1 ${currentTab === 'ai_chat' ? 'overflow-hidden min-h-0 flex flex-col' : 'overflow-x-hidden'}`}>
           <div className={`w-full ${
             currentTab === 'ai_chat' 
-              ? 'max-w-[1152px] mx-auto p-0 md:p-6 h-full flex flex-col' 
+              ? 'max-w-[1152px] mx-auto p-0 md:p-6 flex-1 min-h-0 flex flex-col' 
               : 'max-w-[1152px] mx-auto p-4 md:p-8'
           }`}>
             {children}
