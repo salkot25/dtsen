@@ -212,7 +212,7 @@ function App() {
 
       {currentTab === 'input' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_3fr_4fr] gap-6">
              <InputForm 
                onSubmit={handleSubmitRealisasi} 
                lastCumulative={lastCumulative} 
