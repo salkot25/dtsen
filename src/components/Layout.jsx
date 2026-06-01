@@ -134,7 +134,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
       </div>
 
       {/* Mobile Bottom Navigation Bar (Dashboard, Petugas, Add, Ringkasan, Asisten AI) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/60 flex justify-around items-center px-2 py-1.5 z-30 pb-safe shadow-lg">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/60 flex justify-around items-center px-4 py-2 z-30 pb-safe">
         {[
           tabs.find(t => t.id === 'overview'),
           tabs.find(t => t.id === 'officer_recap'),
@@ -151,10 +151,10 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
               <button
                 key={tab.id}
                 onClick={() => setCurrentTab(tab.id)}
-                className="flex flex-col items-center justify-center -translate-y-5.5 w-13 h-13 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-650 text-white shadow-lg shadow-blue-500/35 border-4 border-white transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer"
+                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-650 text-white shadow-lg shadow-blue-500/35 border-4 border-white transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer"
                 aria-label="Tambah Laporan"
               >
-                <Plus size={22} />
+                <Plus size={24} />
               </button>
             );
           }
@@ -163,21 +163,21 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
             <button
               key={tab.id}
               onClick={() => setCurrentTab(tab.id)}
-              className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl min-w-[56px] transition-all duration-200 shrink-0 cursor-pointer ${
-                isActive ? 'text-blue-600 font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl min-w-[64px] transition-all duration-200 shrink-0 cursor-pointer ${
+                isActive ? 'text-blue-600' : 'text-slate-400'
               }`}
             >
-              <div className={`p-0.5 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+              <div className={`p-1 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
                  {tab.icon}
               </div>
-              <span className={`text-[9px] leading-none ${isActive ? 'font-bold' : 'font-semibold'}`}>
+              <span className={`text-[10px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}>
                 {tab.id === 'overview' ? 'Dashboard' : 
                  tab.id === 'officer_recap' ? 'Petugas' : 
                  tab.id === 'executive_summary' ? 'Ringkasan' : 
                  tab.id === 'ai_chat' ? 'Asisten AI' : 
                  tab.label}
               </span>
-              {isActive && <div className="w-3.5 h-0.5 bg-blue-600 rounded-full mt-0.5"></div>}
+              {isActive && <div className="w-4 h-0.5 bg-blue-600 rounded-full mt-1"></div>}
             </button>
           );
         })}
