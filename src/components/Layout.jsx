@@ -30,7 +30,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
     }`}>
       
       {/* Mobile Top AppBar Header (Solid White, Not Transparent) */}
-      <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm transition-colors">
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 pt-safe flex items-center justify-between z-40 shadow-sm transition-colors">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-blue-600 rounded-lg">
             <Zap size={16} className="text-white" />
@@ -133,7 +133,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
       </div>
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col relative ${
+      <div className={`flex-1 flex flex-col relative pt-[56px] pt-safe md:pt-0 ${
         currentTab === 'ai_chat' 
           ? 'overflow-hidden pb-chat-mobile md:h-screen md:pb-0' 
           : 'pb-tabs-mobile md:pb-0 overflow-y-auto'
