@@ -529,7 +529,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               {o.nama}
                             </p>
                           </div>
-                          <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 truncate">
+                          <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 pl-8 truncate">
                             <Mail size={11} className="shrink-0" />
                             <span className="truncate">{o.email}</span>
                           </p>

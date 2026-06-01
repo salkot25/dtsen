@@ -193,6 +193,10 @@ html:not(.dark) .bg-slate-50 {
   background-color: #f8fafc !important;
 }
 
+html:not(.dark) .bg-slate-100 {
+  background-color: #f1f5f9 !important;
+}
+
 html:not(.dark) .bg-white {
   background-color: #ffffff !important;
 }

@@ -155,7 +155,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
                 <Moon size={18} className="text-violet-400 fill-violet-400/10 animate-moon-sway" />
               )}
             </button>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-100/80 dark:bg-slate-800 px-3.5 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
+            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-100 dark:bg-slate-800 px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
               {todayStr}
             </div>
           </div>
