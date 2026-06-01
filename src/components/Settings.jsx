@@ -207,19 +207,19 @@ export default function Settings({ settings, onSave }) {
         </div>
 
         {/* Section 3: AI Integration */}
-        <div className="bg-gradient-to-br from-indigo-50 dark:from-indigo-900/40 to-purple-50 dark:to-purple-900/40 rounded-2xl shadow-sm border border-indigo-100 dark:border-indigo-800 overflow-hidden relative">
+        <div className="bg-white dark:bg-slate-900 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-slate-900 dark:to-slate-950 rounded-2xl shadow-sm border border-indigo-100 dark:border-slate-800 overflow-hidden relative">
           <div className="absolute top-0 right-0 p-6 opacity-10">
             <Sparkles size={120} />
           </div>
-          <div className="relative z-10 p-6 border-b border-indigo-100/50 dark:border-indigo-800 flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
+          <div className="relative z-10 p-6 border-b border-indigo-100/50 dark:border-slate-800 flex items-center gap-3">
+            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-650 dark:text-indigo-400 rounded-lg">
               <Key size={20} />
             </div>
-            <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-100">Integrasi Kecerdasan Buatan (AI)</h3>
+            <h3 className="text-lg font-bold text-indigo-950 dark:text-indigo-200">Integrasi Kecerdasan Buatan (AI)</h3>
           </div>
           <div className="relative z-10 p-6">
             <div className="space-y-3 max-w-2xl">
-              <label className="block text-sm font-semibold text-indigo-900 dark:text-indigo-100">
+              <label className="block text-sm font-semibold text-indigo-950 dark:text-indigo-200">
                 Google Gemini API Key
               </label>
               <div className="relative">
@@ -229,15 +229,15 @@ export default function Settings({ settings, onSave }) {
                   value={formData.geminiApiKey}
                   onChange={handleChange}
                   placeholder="AIzaSy..."
-                  className="w-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 rounded-xl pl-4 pr-12 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors shadow-sm font-mono text-sm text-slate-900 dark:text-slate-100"
+                  className="w-full bg-slate-50 dark:bg-slate-850 border border-indigo-200 dark:border-slate-700 rounded-xl pl-4 pr-12 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors shadow-sm font-mono text-sm text-slate-900 dark:text-slate-100"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                   <Sparkles size={18} className="text-indigo-400 dark:text-indigo-300" />
                 </div>
               </div>
-              <p className="text-sm text-indigo-700/80 dark:text-indigo-200/80 leading-relaxed">
+              <p className="text-sm text-indigo-850 dark:text-slate-400 leading-relaxed">
                 Kunci API ini diperlukan untuk mengaktifkan fitur <strong>Ringkasan Kinerja AI</strong> dan <strong>Asisten AI Chat</strong>. Dapatkan API Key Anda secara gratis di{' '}
-                <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-300 font-semibold hover:underline">
+                <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
                   Google AI Studio
                 </a>.
               </p>

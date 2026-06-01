@@ -696,16 +696,16 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 7: AI Executive Summary
          ══════════════════════════════════════════════════════════════════════ */}
-      <div className="bg-gradient-to-br from-indigo-50 dark:from-indigo-950/40 to-purple-50 dark:to-purple-950/40 rounded-2xl p-6 shadow-sm border border-indigo-100 dark:border-indigo-900/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white dark:bg-slate-900 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-slate-900 dark:to-slate-950 rounded-2xl p-6 shadow-sm border border-indigo-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h3 className="text-lg md:text-xl font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+          <h3 className="text-lg md:text-xl font-bold text-indigo-950 dark:text-indigo-200 flex items-center gap-2">
             <Sparkles className="text-purple-500 dark:text-purple-400" /> AI Executive Summary
           </h3>
-          <p className="text-xs md:text-sm text-indigo-700/70 dark:text-indigo-300/80 mt-1">Ringkasan cerdas & rekomendasi taktis dari Google Gemini AI — termasuk analisis rekap petugas</p>
+          <p className="text-xs md:text-sm text-indigo-850 dark:text-slate-400 mt-1">Ringkasan cerdas & rekomendasi taktis dari Google Gemini AI — termasuk analisis rekap petugas</p>
         </div>
         <div className="flex gap-3 shrink-0">
           <button onClick={() => setIsHistoryModalOpen(true)}
-            className="flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-slate-700 border border-indigo-200 dark:border-slate-700 rounded-xl font-medium transition-all shadow-sm text-sm cursor-pointer">
+            className="flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 bg-white dark:bg-slate-800 text-indigo-650 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-slate-700 border border-indigo-200 dark:border-slate-750 rounded-xl font-medium transition-all shadow-sm text-sm cursor-pointer">
             <Clock size={16} /> Riwayat
           </button>
           <button onClick={handleGenerateAI}
