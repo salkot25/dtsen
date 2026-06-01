@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { formatNumber } from '../utils/dateUtils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 8;
 
 export default function HistoryTable({ history, selectedId, onSelectItem }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,24 +84,29 @@ export default function HistoryTable({ history, selectedId, onSelectItem }) {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <span className="text-[11px] font-bold text-slate-500">
-            Halaman {currentPage} dari {totalPages}
+          <span className="text-xs text-slate-500 font-medium">
+            <span className="font-semibold text-slate-700">{startIdx + 1}</span>-
+            <span className="font-semibold text-slate-700">{Math.min(startIdx + ITEMS_PER_PAGE, history.length)}</span> dari{' '}
+            <span className="font-semibold text-slate-700">{history.length}</span>
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button 
               onClick={() => goTo(currentPage - 1)} 
               disabled={currentPage === 1}
-              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-35 disabled:cursor-not-allowed transition-colors text-xs font-semibold flex items-center gap-1 active:scale-[0.97]"
+              className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-sm"
+              aria-label="Previous page"
             >
               <ChevronLeft size={14} />
-              Prev
             </button>
+            <span className="text-xs font-bold text-slate-700 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200/60 shadow-sm min-w-[50px] text-center">
+              {currentPage} / {totalPages}
+            </span>
             <button 
               onClick={() => goTo(currentPage + 1)} 
               disabled={currentPage === totalPages}
-              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-35 disabled:cursor-not-allowed transition-colors text-xs font-semibold flex items-center gap-1 active:scale-[0.97]"
+              className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-sm"
+              aria-label="Next page"
             >
-              Next
               <ChevronRight size={14} />
             </button>
           </div>
