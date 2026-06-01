@@ -84,9 +84,16 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers }
           throw new Error('Kolom "Nama Biller" tidak ditemukan dalam berkas Excel.');
         }
 
-        // Map columns
+        // Map columns and accumulate totals
+        let totalSubmitted = 0;
+        let totalOpen = 0;
         const mappedOfficers = rawJson.map((row, idx) => {
           const rawRealisasi = row['% REALISASI'] !== undefined ? row['% REALISASI'] : (row['realisasi'] || 0);
+          const openVal = Number(row['OPEN'] || row['open'] || 0);
+          const submittedVal = Number(row['SUBMITTED'] || row['submitted'] || 0);
+          totalSubmitted += submittedVal;
+          totalOpen += openVal;
+          
           return {
             no: Number(row['NO'] || row['no'] || idx + 1),
             unitUpi: row['UNITUPI'] || row['unitUpi'] || '',
@@ -94,8 +101,8 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers }
             unitUp: row['UNITUP'] || row['unitUp'] || '',
             nama: row['Nama Biller'] || row['nama'] || row['Nama'] || '',
             email: row['Email Biller'] || row['email'] || row['Email'] || '',
-            open: Number(row['OPEN'] || row['open'] || 0),
-            submitted: Number(row['SUBMITTED'] || row['submitted'] || 0),
+            open: openVal,
+            submitted: submittedVal,
             rejected: Number(row['REJECTED'] || row['rejected'] || 0),
             realisasi: Number(rawRealisasi)
           };
@@ -103,8 +110,13 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers }
 
         // Trigger parent callback to save in State & GAS
         await onUploadOfficers(mappedOfficers);
-        setExcelSuccess(`Berhasil mengunggah ${mappedOfficers.length} data rekap petugas ke cloud!`);
-        setTimeout(() => setExcelSuccess(''), 5000);
+        
+        // Calculate cumulative achievement: submitted - open
+        const computedAchievement = totalSubmitted - totalOpen;
+        setInputValue(String(computedAchievement));
+
+        setExcelSuccess(`Berhasil mengunggah ${mappedOfficers.length} data rekap petugas ke cloud! Nilai Capaian Kumulatif (${formatNumber(computedAchievement)}) otomatis dimasukkan ke dalam formulir.`);
+        setTimeout(() => setExcelSuccess(''), 6000);
       } catch (err) {
         setExcelError(err.message || 'Gagal membaca berkas Excel. Pastikan format kolom sesuai.');
       } finally {
