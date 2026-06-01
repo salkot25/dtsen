@@ -94,7 +94,7 @@ export default function DashboardOverview({ history, settings, setCurrentTab }) 
   return (
     <div className="space-y-6">
       {/* Mobile Quick Action Link */}
-      <div className="md:hidden flex items-center justify-between bg-white dark:bg-slate-900 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-slate-900 dark:to-slate-950 border border-blue-100/50 dark:border-slate-800 rounded-xl p-3.5 animate-fade-in">
+      <div className="md:hidden flex items-center justify-between bg-white dark:bg-slate-900 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-950 border border-blue-100/50 dark:border-slate-800 rounded-xl p-3.5 animate-fade-in">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-blue-500 text-white rounded-lg"><CalendarDays size={14} /></div>
           <div>

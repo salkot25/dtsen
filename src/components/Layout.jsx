@@ -174,7 +174,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
       </div>
 
       {/* Mobile Bottom Navigation Bar (Solid White, Solid and Clear Colors) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800/80 flex justify-around items-center px-4 py-2 z-30 pb-safe shadow-xl transition-colors">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 flex justify-around items-center px-4 py-2 z-30 pb-safe mobile-bottom-nav transition-colors">
         {[
           tabs.find(t => t.id === 'overview'),
           tabs.find(t => t.id === 'officer_recap'),
