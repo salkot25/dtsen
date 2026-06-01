@@ -139,3 +139,22 @@
   animation: toast-slide-in 0.4s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
 }
 
+/* Medal Animations */
+@keyframes gold-shine {
+  0%, 100% { transform: scale(1); filter: brightness(1); box-shadow: 0 2px 6px rgba(234, 179, 8, 0.3); }
+  50% { transform: scale(1.08); filter: brightness(1.15); box-shadow: 0 4px 12px rgba(234, 179, 8, 0.5); }
+}
+@keyframes silver-sway {
+  0%, 100% { transform: rotate(0deg) scale(1); box-shadow: 0 2px 5px rgba(148, 163, 184, 0.25); }
+  50% { transform: rotate(4deg) scale(1.03); box-shadow: 0 4px 10px rgba(148, 163, 184, 0.4); }
+}
+@keyframes bronze-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2); }
+  50% { transform: scale(1.03); box-shadow: 0 3px 8px rgba(217, 119, 6, 0.35); }
+}
+
+.animate-gold-shine { animation: gold-shine 3s infinite ease-in-out; }
+.animate-silver-sway { animation: silver-sway 3.5s infinite ease-in-out; }
+.animate-bronze-pulse { animation: bronze-pulse 4s infinite ease-in-out; }
+
+

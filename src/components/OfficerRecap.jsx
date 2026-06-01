@@ -511,9 +511,23 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-extrabold text-white bg-gradient-to-r from-slate-500 to-slate-700 shrink-0">
-                              {o.no}
-                            </span>
+                            {o.no === 1 ? (
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 text-yellow-950 border border-yellow-200/50 shadow-md animate-gold-shine shrink-0">
+                                1
+                              </span>
+                            ) : o.no === 2 ? (
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-black bg-gradient-to-r from-slate-300 via-slate-100 to-slate-400 text-slate-900 border border-slate-200/50 shadow-md animate-silver-sway shrink-0">
+                                2
+                              </span>
+                            ) : o.no === 3 ? (
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-600 via-amber-400 to-amber-700 text-amber-50 border border-amber-500/30 shadow-md animate-bronze-pulse shrink-0">
+                                3
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-extrabold text-slate-500 bg-slate-100 border border-slate-200 shrink-0">
+                                {o.no}
+                              </span>
+                            )}
                             <p className="font-bold text-slate-800 leading-snug truncate">
                               {o.nama}
                             </p>
@@ -678,7 +692,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                   <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
                     <th
                       rowSpan="2"
-                      className="py-4 px-6 text-center w-24 border-r border-slate-200 text-[11px] leading-tight"
+                      className="py-4 px-3 text-center w-16 border-r border-slate-200 text-[11px] leading-tight"
                     >
                       Peringkat
                       <span className="block text-[9px] font-normal text-slate-400 normal-case mt-0.5">
@@ -739,10 +753,18 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           className="group transition-all duration-200 hover:bg-slate-50/60 hover:-translate-y-[1px] hover:shadow-[0_6px_18px_rgba(15,23,42,0.06)]"
                         >
                           {/* Peringkat */}
-                          <td className="py-3.5 px-6 text-center font-bold text-slate-500 border-r border-slate-200">
-                            {o.no <= 3 ? (
-                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs text-white font-extrabold bg-gradient-to-r from-amber-400 to-amber-500 shadow-md shadow-amber-500/25">
-                                {o.no}
+                          <td className="py-3.5 px-3 text-center font-bold text-slate-500 border-r border-slate-200">
+                            {o.no === 1 ? (
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 text-yellow-950 border border-yellow-200/50 shadow-md animate-gold-shine">
+                                1
+                              </span>
+                            ) : o.no === 2 ? (
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black bg-gradient-to-r from-slate-300 via-slate-100 to-slate-400 text-slate-900 border border-slate-200/50 shadow-md animate-silver-sway">
+                                2
+                              </span>
+                            ) : o.no === 3 ? (
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black bg-gradient-to-r from-amber-600 via-amber-400 to-amber-700 text-amber-50 border border-amber-500/30 shadow-md animate-bronze-pulse">
+                                3
                               </span>
                             ) : (
                               o.no
@@ -865,7 +887,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2 rounded-lg border border-slate-200 bg-white text-slate-650 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-650 hover:bg-slate-50 disabled:opacity-55 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     aria-label="Halaman Sebelumnya"
                   >
                     <ChevronLeft size={15} />
@@ -879,9 +901,9 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`hidden sm:inline-flex w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                        className={`hidden sm:inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                           currentPage === pageNum
-                            ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25 border-blue-650"
+                            ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25 border-blue-600"
                             : "border border-slate-200 bg-white text-slate-650 hover:bg-slate-50"
                         }`}
                       >
@@ -892,7 +914,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg border border-slate-200 bg-white text-slate-650 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-650 hover:bg-slate-50 disabled:opacity-55 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     aria-label="Halaman Selanjutnya"
                   >
                     <ChevronRight size={15} />
