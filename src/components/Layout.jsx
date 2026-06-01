@@ -1,8 +1,6 @@
 import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus, Users } from 'lucide-react';
-import { usePullToRefresh } from '../hooks/usePullToRefresh';
-import PullToRefreshIndicator from './PullToRefreshIndicator';
 
-export default function Layout({ children, currentTab, setCurrentTab, onLogout, onRefresh }) {
+export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
   // Coordinated global tabs list order (Enterprise UX standard)
   const tabs = [
     { id: 'overview',           label: 'Dashboard',         icon: <LayoutDashboard size={20} /> },
@@ -19,8 +17,6 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
     month: 'long',
     day: 'numeric',
   }).format(new Date());
-
-  const { containerRef, pullDistance, refreshState } = usePullToRefresh(onRefresh);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
@@ -118,17 +114,11 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
       </div>
 
       {/* Main Content Area */}
-      <div 
-        ref={containerRef} 
-        className={`flex-1 flex flex-col relative pb-20 md:pb-0 ${
-          currentTab === 'ai_chat' 
-            ? 'overflow-hidden max-md:h-[calc(100dvh-56px)]' 
-            : 'overflow-y-auto'
-        }`}
-      >
-        {/* Pull to Refresh Mobile Indicator */}
-        <PullToRefreshIndicator state={refreshState} distance={pullDistance} />
-
+      <div className={`flex-1 flex flex-col relative ${
+        currentTab === 'ai_chat' 
+          ? 'h-[calc(100dvh-52px)] overflow-hidden pb-[72px] md:h-screen md:pb-0' 
+          : 'pb-20 md:pb-0 overflow-y-auto'
+      }`}>
         {/* Desktop Topbar */}
         <header className="hidden md:flex bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-4 items-center justify-between sticky top-0 z-10">
           <h2 className="text-lg font-semibold text-slate-800 tracking-tight">
@@ -140,11 +130,11 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
         </header>
 
         {/* Page Content */}
-        <main className={`flex-1 overflow-x-hidden ${currentTab === 'ai_chat' ? 'h-full flex flex-col' : ''}`}>
-          <div className={`mx-auto w-full ${
+        <main className={`flex-1 ${currentTab === 'ai_chat' ? 'overflow-hidden h-full flex flex-col' : 'overflow-x-hidden'}`}>
+          <div className={`w-full ${
             currentTab === 'ai_chat' 
-              ? 'h-full p-2 md:p-6 max-w-[1152px] flex flex-col' 
-              : 'max-w-[1152px] p-4 md:p-8'
+              ? 'max-w-[1152px] mx-auto p-0 md:p-6 h-full flex flex-col' 
+              : 'max-w-[1152px] mx-auto p-4 md:p-8'
           }`}>
             {children}
           </div>

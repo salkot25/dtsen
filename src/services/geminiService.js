@@ -38,7 +38,7 @@ export async function generateExecutiveSummary(apiKey, data) {
 --- DATA REKAP KINERJA PETUGAS ---
 - Jumlah Petugas Terdata: ${data.officerData.totalOfficers} orang
 - Total Submitted Paskabayar: ${data.officerData.totalPaskaSubmitted} pelanggan (Realisasi: ${data.officerData.paskaPct}%)
-- Total Submitted Prabayar: ${data.officerData.totalPraSubmitted} pelanggan (Tingkat Penolakan/Rejected Rate: ${data.officerData.praRejectRate}%)
+- Total Submitted Prabayar: ${data.officerData.totalPraSubmitted} pelanggan (Realisasi: ${data.officerData.praPct}%)
 - Rata-rata Realisasi Paskabayar per Petugas: ${data.officerData.avgRealisasi}%
 
 🏆 Top 3 Performers (berdasarkan total submitted):
@@ -73,7 +73,7 @@ Buatkan laporan dengan struktur berikut:
 Paragraf singkat yang merangkum posisi keseluruhan tim saat ini, termasuk progres kumulatif dan kontribusi dari data rekap petugas jika tersedia.
 
 ### 🔍 Analisis Progres & Dekomposisi
-Bandingkan kinerja rata-rata aktual vs target harian. Jika data rekap tersedia, analisis kontribusi paskabayar (menggunakan realisasi) dan prabayar (menggunakan tingkat penolakan/rejected rate sebagai indikator kualitas kerja) secara terpisah, serta seberapa besar gap masing-masing terhadap target.
+Bandingkan kinerja rata-rata aktual vs target harian. Jika data rekap tersedia, analisis kontribusi paskabayar dan prabayar secara terpisah, serta seberapa besar gap masing-masing terhadap target.
 
 ### 👥 Analisis Kinerja Individual Petugas
 (Isi bagian ini HANYA jika data rekap petugas tersedia)

@@ -13,32 +13,16 @@ import OfficerRecap from './components/OfficerRecap';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import defaultOfficers from './data/officers.json';
 import { saveToSpreadsheet, fetchHistory, saveSettingsToSpreadsheet, saveOfficersToSpreadsheet } from './services/api';
-import { RefreshCw, X, FileInput, FileSpreadsheet, Send } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('dtsen_auth_session') === 'true';
   });
   const [currentTab, setCurrentTab] = useState('overview');
-  const [previousTab, setPreviousTab] = useState('overview');
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   const [showUpdateToast, setShowUpdateToast] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [mobileInputSubTab, setMobileInputSubTab] = useState('form'); // 'form' | 'history' | 'wa'
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const handleTabChange = (newTab) => {
-    if (currentTab !== 'ai_chat') {
-      setPreviousTab(currentTab);
-    }
-    setCurrentTab(newTab);
-  };
 
   // Service Worker update hook – auto-detects new version and lets user refresh
   const { updateServiceWorker } = useRegisterSW({
@@ -115,44 +99,26 @@ function App() {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleRefreshData = async (shouldVibrate = false) => {
-    try {
-      const data = await fetchHistory();
-      setHistory(data.history);
-      if (data.settings && Object.keys(data.settings).length > 0) {
-        setSettings(data.settings);
-        localStorage.setItem('dtsen_settings', JSON.stringify(data.settings));
-      }
-      if (data.officers && data.officers.length > 0) {
-        setOfficers(data.officers);
-        localStorage.setItem('dtsen_officers', JSON.stringify(data.officers));
-      }
-      // Haptic tactile feedback only if user explicitly triggered it
-      if (shouldVibrate && navigator.vibrate) {
-        try {
-          navigator.vibrate(50);
-        } catch (e) {
-          console.warn("Getaran haptic diblokir oleh browser:", e.message);
-        }
-      }
-    } catch (err) {
-      console.error("Gagal memperbarui data:", err);
-      throw err;
-    }
-  };
-
   useEffect(() => {
-    async function init() {
-      setIsLoading(true);
+    async function loadData() {
       try {
-        await handleRefreshData();
+        const data = await fetchHistory();
+        setHistory(data.history);
+        if (data.settings && Object.keys(data.settings).length > 0) {
+          setSettings(data.settings);
+          localStorage.setItem('dtsen_settings', JSON.stringify(data.settings));
+        }
+        if (data.officers && data.officers.length > 0) {
+          setOfficers(data.officers);
+          localStorage.setItem('dtsen_officers', JSON.stringify(data.officers));
+        }
       } catch (err) {
-        console.error("Gagal inisialisasi data:", err);
+        console.error("Failed to load history", err);
       } finally {
         setIsLoading(false);
       }
     }
-    init();
+    loadData();
   }, []);
 
   const handleLogin = () => {
@@ -197,7 +163,6 @@ function App() {
   }
 
   const lastCumulative = history.length > 0 ? history[0].value : 0;
-  const activeTabToRender = currentTab === 'ai_chat' && isMobile ? previousTab : currentTab;
 
   return (
     <>
@@ -238,123 +203,61 @@ function App() {
       </div>
     )}
 
-    <Layout currentTab={currentTab} setCurrentTab={handleTabChange} onLogout={handleLogout} onRefresh={() => handleRefreshData(true)}>
-      {activeTabToRender === 'overview' && (
+    <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout}>
+      {currentTab === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <DashboardOverview history={history} settings={settings} setCurrentTab={handleTabChange} />
+          <DashboardOverview history={history} settings={settings} setCurrentTab={setCurrentTab} />
         </div>
       )}
 
-      {activeTabToRender === 'input' && (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
-          
-          {/* Mobile-Only Segmented Control Tab Bar */}
-          <div className="lg:hidden bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200/50 shadow-inner">
-            <button
-              onClick={() => setMobileInputSubTab('form')}
-              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                mobileInputSubTab === 'form'
-                  ? 'bg-white text-blue-600 shadow-sm border border-slate-200/30'
-                  : 'text-slate-500 hover:text-slate-700 active:scale-95'
-              }`}
-            >
-              <FileInput size={14} />
-              Form Input
-            </button>
-            <button
-              onClick={() => setMobileInputSubTab('history')}
-              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                mobileInputSubTab === 'history'
-                  ? 'bg-white text-blue-600 shadow-sm border border-slate-200/30'
-                  : 'text-slate-500 hover:text-slate-700 active:scale-95'
-              }`}
-            >
-              <FileSpreadsheet size={14} />
-              Riwayat
-            </button>
-            <button
-              onClick={() => setMobileInputSubTab('wa')}
-              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                mobileInputSubTab === 'wa'
-                  ? 'bg-white text-blue-600 shadow-sm border border-slate-200/30'
-                  : 'text-slate-500 hover:text-slate-700 active:scale-95'
-              }`}
-            >
-              <Send size={14} />
-              Generator WA
-            </button>
-          </div>
-
+      {currentTab === 'input' && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-             {/* 1. Form Input: displayed on desktop OR when mobile tab is 'form' */}
-             <div className={`${mobileInputSubTab === 'form' ? 'block animate-in fade-in duration-300' : 'hidden lg:block'}`}>
-                <InputForm 
-                  onSubmit={handleSubmitRealisasi} 
-                  lastCumulative={lastCumulative} 
-                  onUploadOfficers={handleUploadOfficers} 
-                  officers={officers}
-                />
-             </div>
-             
-             {/* 2. History Table: displayed on desktop OR when mobile tab is 'history' */}
-             <div className={`${mobileInputSubTab === 'history' ? 'block animate-in fade-in duration-300' : 'hidden lg:block'}`}>
-                <HistoryTable 
-                  history={history} 
-                  selectedId={selectedHistoryId} 
-                  onSelectItem={(id) => setSelectedHistoryId(id === selectedHistoryId ? null : id)} 
-                />
-             </div>
-
-             {/* 3. WhatsApp Generator: displayed on desktop OR when mobile tab is 'wa' */}
-             <div className={`${mobileInputSubTab === 'wa' ? 'block animate-in fade-in duration-300' : 'hidden lg:block'}`}>
-                <WhatsAppGenerator 
-                  history={history} 
-                  settings={settings} 
-                  selectedItem={history.find(h => h.id === selectedHistoryId)} 
-                />
-             </div>
+             <InputForm 
+               onSubmit={handleSubmitRealisasi} 
+               lastCumulative={lastCumulative} 
+               onUploadOfficers={handleUploadOfficers} 
+               officers={officers}
+             />
+             <HistoryTable 
+               history={history} 
+               selectedId={selectedHistoryId} 
+               onSelectItem={(id) => setSelectedHistoryId(id === selectedHistoryId ? null : id)} 
+             />
+             <WhatsAppGenerator 
+               history={history} 
+               settings={settings} 
+               selectedItem={history.find(h => h.id === selectedHistoryId)} 
+             />
           </div>
         </div>
       )}
 
-      {activeTabToRender === 'officer_recap' && (
+      {currentTab === 'officer_recap' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <OfficerRecap officers={officers} settings={settings} />
         </div>
       )}
 
-      {activeTabToRender === 'executive_summary' && (
+      {currentTab === 'executive_summary' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <ExecutiveSummary history={history} settings={settings} officers={officers} />
         </div>
       )}
 
-      {/* AI Chat (Desktop Only - inside layout main area) */}
-      {currentTab === 'ai_chat' && !isMobile && (
+      {currentTab === 'ai_chat' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full">
           <AiChat history={history} settings={settings} />
         </div>
       )}
 
-      {activeTabToRender === 'settings' && (
+      {currentTab === 'settings' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <Settings settings={settings} onSave={handleSaveSettings} />
         </div>
       )}
     </Layout>
     <PWAInstallBanner />
-
-    {/* AI Chat Mobile Bottom Sheet - absolute position outside layout, on top of everything! */}
-    {isMobile && (
-      <div className={`transition-all duration-300 ${currentTab === 'ai_chat' ? 'visible z-[9999]' : 'invisible pointer-events-none'}`}>
-        <AiChat 
-          history={history} 
-          settings={settings} 
-          isMobileSheet={true} 
-          onClose={() => handleTabChange(previousTab)} 
-        />
-      </div>
-    )}
     </>
   );
 }
