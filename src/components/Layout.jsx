@@ -72,7 +72,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex flex-col w-64 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white flex-shrink-0 sticky top-0 h-screen">
+      <div className="hidden md:flex flex-col w-64 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white flex-shrink-0 sticky top-0 h-screen border-r border-slate-800/60">
         <div className="p-6 pb-4">
           <div className="flex items-center gap-3 mb-1">
             <div className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-600/20">
@@ -94,10 +94,10 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
             <button
               key={tab.id}
               onClick={() => setCurrentTab(tab.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer ${
                 currentTab === tab.id
                   ? 'bg-blue-600 text-white font-medium shadow-lg shadow-blue-600/20'
-                  : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
               {tab.icon}
