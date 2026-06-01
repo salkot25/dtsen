@@ -373,14 +373,14 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
             {/* 4. Submitted Prabayar */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-violet-50 text-violet-650 rounded-xl shrink-0">
+              <div className="p-3 bg-violet-50 text-violet-600 rounded-xl shrink-0">
                 <Sparkles size={22} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                   Submitted Prabayar
                 </p>
-                <h3 className="text-2xl font-black text-violet-900 leading-none">
+                <h3 className="text-2xl font-black text-violet-800 leading-none">
                   {formatNumber(stats.totalPraSubmitted)}
                 </h3>
                 <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
@@ -506,9 +506,6 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 border border-slate-200 flex items-center justify-center shrink-0">
-                          <User size={16} />
-                        </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 min-w-0">
                             {o.no === 1 ? (
@@ -713,14 +710,14 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     </th>
                     <th
                       colSpan="2"
-                      className="py-2.5 px-4 text-center bg-violet-50/50 text-violet-850 border-b border-violet-100 font-extrabold"
+                      className="py-2.5 px-4 text-center bg-violet-50/50 text-violet-800 border-b border-violet-100 font-extrabold"
                     >
                       Prabayar (Prepaid)
                     </th>
                   </tr>
                   <tr className="bg-slate-50/50 border-b border-slate-200 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">
-                      Open (Tunggak)
+                      Open
                     </th>
                     <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">
                       Submitted
@@ -774,9 +771,6 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           {/* Identitas */}
                           <td className="py-3.5 px-6 border-r border-slate-200">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 border border-slate-200 flex items-center justify-center group-hover:bg-white group-hover:text-blue-500 transition-all duration-200 shrink-0">
-                                <User size={16} />
-                              </div>
                               <div className="min-w-0">
                                 <p className="font-bold text-slate-800 leading-snug truncate group-hover:text-blue-700 transition-colors">
                                   {o.nama}
