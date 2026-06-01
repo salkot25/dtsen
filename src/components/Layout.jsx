@@ -1,6 +1,8 @@
 import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus, Users } from 'lucide-react';
+import { usePullToRefresh } from '../hooks/usePullToRefresh';
+import PullToRefreshIndicator from './PullToRefreshIndicator';
 
-export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
+export default function Layout({ children, currentTab, setCurrentTab, onLogout, onRefresh }) {
   // Coordinated global tabs list order (Enterprise UX standard)
   const tabs = [
     { id: 'overview',           label: 'Dashboard',         icon: <LayoutDashboard size={20} /> },
@@ -17,6 +19,8 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
     month: 'long',
     day: 'numeric',
   }).format(new Date());
+
+  const { containerRef, pullDistance, refreshState } = usePullToRefresh(onRefresh);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
@@ -114,7 +118,10 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col relative pb-20 md:pb-0 overflow-y-auto">
+      <div ref={containerRef} className="flex-1 flex flex-col relative pb-20 md:pb-0 overflow-y-auto">
+        {/* Pull to Refresh Mobile Indicator */}
+        <PullToRefreshIndicator state={refreshState} distance={pullDistance} />
+
         {/* Desktop Topbar */}
         <header className="hidden md:flex bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-4 items-center justify-between sticky top-0 z-10">
           <h2 className="text-lg font-semibold text-slate-800 tracking-tight">

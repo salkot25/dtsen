@@ -13,7 +13,7 @@ import OfficerRecap from './components/OfficerRecap';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import defaultOfficers from './data/officers.json';
 import { saveToSpreadsheet, fetchHistory, saveSettingsToSpreadsheet, saveOfficersToSpreadsheet } from './services/api';
-import { RefreshCw, X } from 'lucide-react';
+import { RefreshCw, X, FileInput, FileSpreadsheet, Send } from 'lucide-react';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -23,6 +23,7 @@ function App() {
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   const [showUpdateToast, setShowUpdateToast] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [mobileInputSubTab, setMobileInputSubTab] = useState('form'); // 'form' | 'history' | 'wa'
 
   // Service Worker update hook – auto-detects new version and lets user refresh
   const { updateServiceWorker } = useRegisterSW({
@@ -99,26 +100,40 @@ function App() {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleRefreshData = async () => {
+    try {
+      const data = await fetchHistory();
+      setHistory(data.history);
+      if (data.settings && Object.keys(data.settings).length > 0) {
+        setSettings(data.settings);
+        localStorage.setItem('dtsen_settings', JSON.stringify(data.settings));
+      }
+      if (data.officers && data.officers.length > 0) {
+        setOfficers(data.officers);
+        localStorage.setItem('dtsen_officers', JSON.stringify(data.officers));
+      }
+      // Haptic tactile feedback for supported mobile devices (vibration)
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    } catch (err) {
+      console.error("Gagal memperbarui data:", err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
-    async function loadData() {
+    async function init() {
+      setIsLoading(true);
       try {
-        const data = await fetchHistory();
-        setHistory(data.history);
-        if (data.settings && Object.keys(data.settings).length > 0) {
-          setSettings(data.settings);
-          localStorage.setItem('dtsen_settings', JSON.stringify(data.settings));
-        }
-        if (data.officers && data.officers.length > 0) {
-          setOfficers(data.officers);
-          localStorage.setItem('dtsen_officers', JSON.stringify(data.officers));
-        }
+        await handleRefreshData();
       } catch (err) {
-        console.error("Failed to load history", err);
+        console.error("Gagal inisialisasi data:", err);
       } finally {
         setIsLoading(false);
       }
     }
-    loadData();
+    init();
   }, []);
 
   const handleLogin = () => {
@@ -203,7 +218,7 @@ function App() {
       </div>
     )}
 
-    <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout}>
+    <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout} onRefresh={handleRefreshData}>
       {currentTab === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <DashboardOverview history={history} settings={settings} setCurrentTab={setCurrentTab} />
@@ -211,24 +226,73 @@ function App() {
       )}
 
       {currentTab === 'input' && (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
+          
+          {/* Mobile-Only Segmented Control Tab Bar */}
+          <div className="lg:hidden bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200/50 shadow-inner">
+            <button
+              onClick={() => setMobileInputSubTab('form')}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                mobileInputSubTab === 'form'
+                  ? 'bg-white text-blue-600 shadow-sm border border-slate-200/30'
+                  : 'text-slate-500 hover:text-slate-700 active:scale-95'
+              }`}
+            >
+              <FileInput size={14} />
+              Form Input
+            </button>
+            <button
+              onClick={() => setMobileInputSubTab('history')}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                mobileInputSubTab === 'history'
+                  ? 'bg-white text-blue-600 shadow-sm border border-slate-200/30'
+                  : 'text-slate-500 hover:text-slate-700 active:scale-95'
+              }`}
+            >
+              <FileSpreadsheet size={14} />
+              Riwayat
+            </button>
+            <button
+              onClick={() => setMobileInputSubTab('wa')}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                mobileInputSubTab === 'wa'
+                  ? 'bg-white text-blue-600 shadow-sm border border-slate-200/30'
+                  : 'text-slate-500 hover:text-slate-700 active:scale-95'
+              }`}
+            >
+              <Send size={14} />
+              Generator WA
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-             <InputForm 
-               onSubmit={handleSubmitRealisasi} 
-               lastCumulative={lastCumulative} 
-               onUploadOfficers={handleUploadOfficers} 
-               officers={officers}
-             />
-             <HistoryTable 
-               history={history} 
-               selectedId={selectedHistoryId} 
-               onSelectItem={(id) => setSelectedHistoryId(id === selectedHistoryId ? null : id)} 
-             />
-             <WhatsAppGenerator 
-               history={history} 
-               settings={settings} 
-               selectedItem={history.find(h => h.id === selectedHistoryId)} 
-             />
+             {/* 1. Form Input: displayed on desktop OR when mobile tab is 'form' */}
+             <div className={`${mobileInputSubTab === 'form' ? 'block animate-in fade-in duration-300' : 'hidden lg:block'}`}>
+                <InputForm 
+                  onSubmit={handleSubmitRealisasi} 
+                  lastCumulative={lastCumulative} 
+                  onUploadOfficers={handleUploadOfficers} 
+                  officers={officers}
+                />
+             </div>
+             
+             {/* 2. History Table: displayed on desktop OR when mobile tab is 'history' */}
+             <div className={`${mobileInputSubTab === 'history' ? 'block animate-in fade-in duration-300' : 'hidden lg:block'}`}>
+                <HistoryTable 
+                  history={history} 
+                  selectedId={selectedHistoryId} 
+                  onSelectItem={(id) => setSelectedHistoryId(id === selectedHistoryId ? null : id)} 
+                />
+             </div>
+
+             {/* 3. WhatsApp Generator: displayed on desktop OR when mobile tab is 'wa' */}
+             <div className={`${mobileInputSubTab === 'wa' ? 'block animate-in fade-in duration-300' : 'hidden lg:block'}`}>
+                <WhatsAppGenerator 
+                  history={history} 
+                  settings={settings} 
+                  selectedItem={history.find(h => h.id === selectedHistoryId)} 
+                />
+             </div>
           </div>
         </div>
       )}
