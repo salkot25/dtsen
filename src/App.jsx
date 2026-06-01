@@ -20,10 +20,25 @@ function App() {
     return localStorage.getItem('dtsen_auth_session') === 'true';
   });
   const [currentTab, setCurrentTab] = useState('overview');
+  const [previousTab, setPreviousTab] = useState('overview');
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   const [showUpdateToast, setShowUpdateToast] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [mobileInputSubTab, setMobileInputSubTab] = useState('form'); // 'form' | 'history' | 'wa'
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleTabChange = (newTab) => {
+    if (currentTab !== 'ai_chat') {
+      setPreviousTab(currentTab);
+    }
+    setCurrentTab(newTab);
+  };
 
   // Service Worker update hook – auto-detects new version and lets user refresh
   const { updateServiceWorker } = useRegisterSW({
@@ -178,6 +193,7 @@ function App() {
   }
 
   const lastCumulative = history.length > 0 ? history[0].value : 0;
+  const activeTabToRender = currentTab === 'ai_chat' && isMobile ? previousTab : currentTab;
 
   return (
     <>
@@ -218,14 +234,14 @@ function App() {
       </div>
     )}
 
-    <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout} onRefresh={handleRefreshData}>
-      {currentTab === 'overview' && (
+    <Layout currentTab={currentTab} setCurrentTab={handleTabChange} onLogout={handleLogout} onRefresh={handleRefreshData}>
+      {activeTabToRender === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <DashboardOverview history={history} settings={settings} setCurrentTab={setCurrentTab} />
+          <DashboardOverview history={history} settings={settings} setCurrentTab={handleTabChange} />
         </div>
       )}
 
-      {currentTab === 'input' && (
+      {activeTabToRender === 'input' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
           
           {/* Mobile-Only Segmented Control Tab Bar */}
@@ -297,31 +313,44 @@ function App() {
         </div>
       )}
 
-      {currentTab === 'officer_recap' && (
+      {activeTabToRender === 'officer_recap' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <OfficerRecap officers={officers} settings={settings} />
         </div>
       )}
 
-      {currentTab === 'executive_summary' && (
+      {activeTabToRender === 'executive_summary' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <ExecutiveSummary history={history} settings={settings} officers={officers} />
         </div>
       )}
 
-      {currentTab === 'ai_chat' && (
+      {/* AI Chat (Desktop Only - inside layout main area) */}
+      {currentTab === 'ai_chat' && !isMobile && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full">
           <AiChat history={history} settings={settings} />
         </div>
       )}
 
-      {currentTab === 'settings' && (
+      {activeTabToRender === 'settings' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <Settings settings={settings} onSave={handleSaveSettings} />
         </div>
       )}
     </Layout>
     <PWAInstallBanner />
+
+    {/* AI Chat Mobile Bottom Sheet - absolute position outside layout, on top of everything! */}
+    {isMobile && (
+      <div className={`transition-all duration-300 ${currentTab === 'ai_chat' ? 'visible z-[9999]' : 'invisible pointer-events-none'}`}>
+        <AiChat 
+          history={history} 
+          settings={settings} 
+          isMobileSheet={true} 
+          onClose={() => handleTabChange(previousTab)} 
+        />
+      </div>
+    )}
     </>
   );
 }
