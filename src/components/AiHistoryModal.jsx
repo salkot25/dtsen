@@ -36,7 +36,7 @@ const AiHistoryModal = ({ isOpen, onClose }) => {
     <div className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fade-in p-4`}>
       <div className="bg-white dark:bg-slate-900 shadow-xl flex flex-col overflow-hidden animate-slide-up transition-all duration-300 w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] rounded-2xl border border-slate-200 dark:border-slate-800">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-t-2xl">
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
               <Clock className="text-blue-500" size={20} /> Riwayat AI Insights
@@ -57,7 +57,7 @@ const AiHistoryModal = ({ isOpen, onClose }) => {
         {/* Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar */}
-          <div className={`border-r border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 overflow-y-auto transition-all duration-300 ${selectedSummary ? 'hidden lg:block' : 'w-full'} ${isMaximized ? 'hidden' : 'lg:w-1/3'}`}>
+          <div className={`border-r border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 overflow-y-auto transition-all duration-300 ${isMaximized ? 'hidden' : (selectedSummary ? 'hidden lg:block lg:w-1/3' : 'w-full')}`}>
             {isLoading ? (
               <div className="p-8 flex justify-center text-blue-500">
                 <Loader2 className="animate-spin" />
@@ -85,7 +85,7 @@ const AiHistoryModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Main Content Area */}
-          <div className={`p-4 sm:p-6 overflow-y-auto bg-white dark:bg-slate-900 transition-all duration-300 ${!selectedSummary ? 'hidden lg:block' : 'w-full'} ${isMaximized ? 'w-full' : 'lg:w-2/3'}`}>
+          <div className={`p-4 sm:p-6 overflow-y-auto bg-white dark:bg-slate-900 transition-all duration-300 ${isMaximized ? 'w-full' : (!selectedSummary ? 'hidden lg:block lg:w-2/3' : 'w-full lg:w-2/3')}`}>
             {selectedSummary ? (
               <div className="prose prose-blue dark:prose-invert max-w-none text-slate-700 dark:text-slate-350 text-sm">
                 <button 
