@@ -1,7 +1,7 @@
 import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus, Users } from 'lucide-react';
 
 export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
-  // Coordinated global tabs list order (Nama, Total, Paskabayar, Prabayar sync)
+  // Coordinated global tabs list order
   const tabs = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { id: 'officer_recap', label: 'Rekap Petugas', icon: <Users size={20} /> },
@@ -21,8 +21,8 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       
-      {/* Mobile Top AppBar Header */}
-      <div className="md:hidden bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+      {/* Mobile Top AppBar Header (Solid White, Not Transparent) */}
+      <div className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-blue-600 rounded-lg">
             <Zap size={16} className="text-white" />
@@ -33,14 +33,14 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
           </div>
         </div>
         
-        {/* AppBar Actions (Settings placed directly to the left of Logout) */}
+        {/* AppBar Actions (Settings placed directly to the left of Logout, clear solid colors) */}
         <div className="flex items-center gap-1">
           <button
             onClick={() => setCurrentTab('settings')}
             className={`p-2 rounded-xl transition-colors ${
               currentTab === 'settings' 
                 ? 'text-blue-600 bg-blue-50' 
-                : 'text-slate-400 hover:bg-slate-100'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
             }`}
             aria-label="Settings"
           >
@@ -48,7 +48,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
           </button>
           <button
             onClick={onLogout}
-            className="p-2 text-slate-400 hover:bg-slate-100 hover:text-rose-600 rounded-xl transition-colors"
+            className="p-2 text-slate-500 hover:bg-slate-100 hover:text-rose-600 rounded-xl transition-colors"
             aria-label="Logout"
           >
             <LogOut size={18} />
@@ -133,8 +133,8 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation Bar (Dashboard, Petugas, Add, Ringkasan, Asisten AI) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/60 flex justify-around items-center px-4 py-2 z-30 pb-safe">
+      {/* Mobile Bottom Navigation Bar (Solid White, Solid and Clear Colors) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 flex justify-around items-center px-4 py-2 z-30 pb-safe shadow-xl">
         {[
           tabs.find(t => t.id === 'overview'),
           tabs.find(t => t.id === 'officer_recap'),
@@ -151,7 +151,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
               <button
                 key={tab.id}
                 onClick={() => setCurrentTab(tab.id)}
-                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-650 text-white shadow-lg shadow-blue-500/35 border-4 border-white transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer"
+                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-650 text-white shadow-lg shadow-blue-500/35 border-4 border-white transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer animate-none"
                 aria-label="Tambah Laporan"
               >
                 <Plus size={24} />
@@ -163,21 +163,19 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
             <button
               key={tab.id}
               onClick={() => setCurrentTab(tab.id)}
-              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl min-w-[64px] transition-all duration-200 shrink-0 cursor-pointer ${
-                isActive ? 'text-blue-600' : 'text-slate-400'
-              }`}
+              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl min-w-[64px] transition-all duration-200 shrink-0 cursor-pointer`}
             >
-              <div className={`p-1 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+              <div className={`p-1 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110 text-blue-600 font-bold' : 'text-slate-500'}`}>
                  {tab.icon}
               </div>
-              <span className={`text-[10px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}>
+              <span className={`text-[10px] leading-none ${isActive ? 'font-bold text-blue-600' : 'font-semibold text-slate-500'}`}>
                 {tab.id === 'overview' ? 'Dashboard' : 
                  tab.id === 'officer_recap' ? 'Petugas' : 
                  tab.id === 'executive_summary' ? 'Ringkasan' : 
                  tab.id === 'ai_chat' ? 'Asisten AI' : 
                  tab.label}
               </span>
-              {isActive && <div className="w-4 h-0.5 bg-blue-600 rounded-full mt-1"></div>}
+              {isActive && <div className="w-4 h-0.5 bg-blue-600 rounded-full mt-1 animate-fade-in"></div>}
             </button>
           );
         })}
