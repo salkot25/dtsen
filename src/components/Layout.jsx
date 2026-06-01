@@ -1,6 +1,10 @@
-import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus, Users } from 'lucide-react';
+import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus, Users, Sun, Moon } from 'lucide-react';
 
-export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
+export default function Layout({ children, currentTab, setCurrentTab, onLogout, theme, setTheme }) {
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
   // Coordinated global tabs list order (Enterprise UX standard)
   const tabs = [
     { id: 'overview',           label: 'Dashboard',         icon: <LayoutDashboard size={20} /> },
@@ -19,32 +23,39 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
   }).format(new Date());
 
   return (
-    <div className={`bg-slate-50 flex flex-col md:flex-row ${
+    <div className={`bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row transition-colors duration-200 ${
       currentTab === 'ai_chat' 
         ? 'h-[100dvh] md:h-screen overflow-hidden' 
         : 'min-h-screen'
     }`}>
       
       {/* Mobile Top AppBar Header (Solid White, Not Transparent) */}
-      <div className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
+      <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm transition-colors">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-blue-600 rounded-lg">
             <Zap size={16} className="text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-slate-900 text-base leading-tight">DTSEN Salkot</h1>
-            <p className="text-[10px] text-slate-400">{todayStr}</p>
+            <h1 className="font-bold text-slate-900 dark:text-white text-base leading-tight">DTSEN Salkot</h1>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500">{todayStr}</p>
           </div>
         </div>
         
-        {/* AppBar Actions (Settings placed directly to the left of Logout, clear solid colors) */}
+        {/* AppBar Actions */}
         <div className="flex items-center gap-1">
+          <button
+            onClick={toggleTheme}
+            className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200 rounded-xl transition-all duration-200"
+            aria-label="Toggle Theme"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <button
             onClick={() => setCurrentTab('settings')}
             className={`p-2 rounded-xl transition-colors ${
               currentTab === 'settings' 
-                ? 'text-blue-600 bg-blue-50' 
-                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' 
+                : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
             aria-label="Settings"
           >
@@ -52,7 +63,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
           </button>
           <button
             onClick={onLogout}
-            className="p-2 text-slate-500 hover:bg-slate-100 hover:text-rose-600 rounded-xl transition-colors"
+            className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl transition-colors"
             aria-label="Logout"
           >
             <LogOut size={18} />
@@ -124,12 +135,21 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
           : 'pb-20 md:pb-0 overflow-y-auto'
       }`}>
         {/* Desktop Topbar */}
-        <header className="hidden md:flex bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-4 items-center justify-between sticky top-0 z-10">
-          <h2 className="text-lg font-semibold text-slate-800 tracking-tight">
+        <header className="hidden md:flex bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800 px-8 py-4 items-center justify-between sticky top-0 z-10 transition-colors">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-white tracking-tight">
             {tabs.find((t) => t.id === currentTab)?.label}
           </h2>
-          <div className="text-xs text-slate-500 font-medium bg-slate-100/80 px-3.5 py-1.5 rounded-lg border border-slate-200/50">
-            {todayStr}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all duration-200 cursor-pointer"
+              title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-100/80 dark:bg-slate-800 px-3.5 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
+              {todayStr}
+            </div>
           </div>
         </header>
 
@@ -146,7 +166,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
       </div>
 
       {/* Mobile Bottom Navigation Bar (Solid White, Solid and Clear Colors) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 flex justify-around items-center px-4 py-2 z-30 pb-safe shadow-xl">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800/80 flex justify-around items-center px-4 py-2 z-30 pb-safe shadow-xl transition-colors">
         {[
           tabs.find(t => t.id === 'overview'),
           tabs.find(t => t.id === 'officer_recap'),
@@ -163,7 +183,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
               <button
                 key={tab.id}
                 onClick={() => setCurrentTab(tab.id)}
-                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border-4 border-white transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer animate-none"
+                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border-4 border-white dark:border-slate-950 transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer animate-none"
                 aria-label="Tambah Laporan"
               >
                 <Plus size={24} />
@@ -177,10 +197,10 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
               onClick={() => setCurrentTab(tab.id)}
               className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl min-w-[64px] transition-all duration-200 shrink-0 cursor-pointer`}
             >
-              <div className={`p-1 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110 text-blue-600 font-bold' : 'text-slate-500'}`}>
+              <div className={`p-1 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110 text-blue-600 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
                  {tab.icon}
               </div>
-              <span className={`text-[10px] leading-none ${isActive ? 'font-bold text-blue-600' : 'font-semibold text-slate-500'}`}>
+              <span className={`text-[10px] leading-none ${isActive ? 'font-bold text-blue-600' : 'font-semibold text-slate-500 dark:text-slate-400'}`}>
                 {tab.id === 'overview' ? 'Dashboard' : 
                  tab.id === 'officer_recap' ? 'Petugas' : 
                  tab.id === 'executive_summary' ? 'Ringkasan' : 

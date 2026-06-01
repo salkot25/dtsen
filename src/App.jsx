@@ -16,6 +16,19 @@ import { saveToSpreadsheet, fetchHistory, saveSettingsToSpreadsheet, saveOfficer
 import { RefreshCw, X } from 'lucide-react';
 
 function App() {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('dtsen_theme') || 'light';
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('dtsen_theme', theme);
+  }, [theme]);
+
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('dtsen_auth_session') === 'true';
   });
@@ -203,7 +216,7 @@ function App() {
       </div>
     )}
 
-    <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout}>
+    <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout} theme={theme} setTheme={setTheme}>
       {currentTab === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <DashboardOverview history={history} settings={settings} setCurrentTab={setCurrentTab} />

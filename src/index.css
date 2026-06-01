@@ -158,3 +158,192 @@
 .animate-bronze-pulse { animation: bronze-pulse 4s infinite ease-in-out; }
 
 
+/* ==========================================================================
+/* ==========================================================================
+   GLOBAL DARK MODE OVERRIDES (Centralized & Clean theme for DTSEN Salkot)
+   ========================================================================== */
+
+html.dark body {
+  background-color: #020617; /* slate-950 */
+  color: #f8fafc; /* slate-50 */
+}
+
+/* Background overrides */
+html.dark .bg-white {
+  background-color: #0f172a !important; /* slate-900 */
+}
+
+html.dark .bg-slate-50 {
+  background-color: #020617 !important; /* slate-950 */
+}
+
+html.dark [class*="bg-slate-50/50"] {
+  background-color: rgba(2, 6, 23, 0.4) !important;
+}
+
+html.dark .bg-slate-100 {
+  background-color: #1e293b !important; /* slate-800 */
+}
+
+html.dark [class*="bg-slate-100/80"] {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+html.dark [class*="bg-slate-900/80"] {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+}
+
+html.dark [class*="bg-slate-50/10"] {
+  background-color: rgba(15, 23, 42, 0.3) !important;
+}
+
+/* Border and divider overrides */
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark [class*="border-slate-200/60"],
+html.dark [class*="border-slate-200/50"],
+html.dark [class*="border-slate-200/80"],
+html.dark .border-slate-300,
+html.dark .divide-slate-50 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1e293b !important; /* slate-800 */
+}
+
+/* Text overrides */
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700 {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+  color: #94a3b8 !important; /* slate-400 */
+}
+
+/* Interactive elements overrides */
+html.dark [class*="hover:bg-slate-50"]:hover,
+html.dark [class*="hover:bg-slate-100"]:hover,
+html.dark button.hover\:bg-slate-50:hover,
+html.dark button.hover\:bg-slate-100:hover,
+html.dark tr.hover\:bg-slate-50:hover,
+html.dark tr.hover\:bg-slate-100:hover {
+  background-color: #1e293b !important;
+}
+
+html.dark input, 
+html.dark select, 
+html.dark textarea {
+  background-color: #020617 !important;
+  color: #f8fafc !important;
+  border-color: #1e293b !important;
+}
+
+html.dark input::placeholder {
+  color: #475569 !important;
+}
+
+/* Badge and color highlights overrides */
+html.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: #93c5fd !important;
+}
+
+html.dark .bg-violet-50 {
+  background-color: rgba(139, 92, 246, 0.15) !important;
+  color: #c084fc !important;
+}
+
+html.dark .bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fcd34d !important;
+}
+
+html.dark .bg-rose-50 {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+  color: #fca5a5 !important;
+}
+
+html.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #6ee7b7 !important;
+}
+
+html.dark .text-blue-800 {
+  color: #93c5fd !important;
+}
+
+html.dark .text-violet-800,
+html.dark .text-violet-850 {
+  color: #c084fc !important;
+}
+
+html.dark .text-emerald-700,
+html.dark .text-emerald-600 {
+  color: #34d399 !important;
+}
+
+html.dark [class*="bg-blue-50/5"] {
+  background-color: rgba(59, 130, 246, 0.04) !important;
+}
+
+html.dark [class*="bg-blue-50/10"] {
+  background-color: rgba(59, 130, 246, 0.08) !important;
+}
+
+html.dark [class*="bg-violet-50/5"] {
+  background-color: rgba(139, 92, 246, 0.04) !important;
+}
+
+html.dark [class*="bg-violet-50/10"] {
+  background-color: rgba(139, 92, 246, 0.08) !important;
+}
+
+/* Scrollbar inside dark mode */
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Chart tweaks */
+html.dark .recharts-cartesian-grid-horizontal line {
+  stroke: #1e293b !important;
+}
+
+html.dark [class*="bg-white/95"] {
+  background-color: rgba(15, 23, 42, 0.95) !important;
+}
+
+/* AI Chat mobile top bar and list styles */
+html.dark [class*="border-slate-700/50"] {
+  border-color: #1e293b !important;
+}
+
+html.dark [class*="bg-slate-800/60"] {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+html.dark [class*="bg-slate-50/5"] {
+  background-color: rgba(2, 6, 23, 0.05) !important;
+}
+
+html.dark .border-blue-100 {
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+html.dark .border-violet-100 {
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+html.dark [class*="bg-slate-200/50"] {
+  background-color: rgba(30, 41, 59, 0.5) !important;
+  color: #f1f5f9 !important;
+}
+
+
+
