@@ -37,6 +37,19 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
   const isSlightlyBehind = avgRecent > 0 && avgRecent < dailyTarget;
   const isOnTrack = avgRecent >= dailyTarget;
 
+  // 1. Waktu Berlalu (Time Elapsed)
+  const elapsedDays = Math.max(totalProjectDays - remainingDays, 0);
+  const elapsedPct = totalProjectDays > 0 ? Math.min((elapsedDays / totalProjectDays) * 100, 100).toFixed(1) : '0.0';
+
+  // 2. Rasio Kecukupan Kinerja Aktual vs Target
+  const performanceRatio = dailyTarget > 0 ? Math.round((avgRecent / dailyTarget) * 100) : 0;
+
+  const getPerformanceRatioColor = (ratio) => {
+    if (ratio >= 100) return 'bg-emerald-500';
+    if (ratio >= 80) return 'bg-amber-500';
+    return 'bg-rose-500';
+  };
+
   // ============================================================
   // OFFICER RECAP AGGREGATION (from OfficerRecap logic)
   // ============================================================
@@ -87,6 +100,11 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
     const paskaPct = targetPaska > 0 ? (totalPaskaSubmitted / targetPaska * 100).toFixed(1) : '0.0';
     const targetPra = totalTarget - targetPaska;
     const praPct = targetPra > 0 ? (totalPraSubmitted / targetPra * 100).toFixed(1) : '0.0';
+    
+    // Hitung tingkat penolakan Prabayar
+    const totalPraTotal = totalPraSubmitted + totalPraRejected;
+    const praRejectRate = totalPraTotal > 0 ? (totalPraRejected / totalPraTotal * 100).toFixed(1) : '0.0';
+    
     const avgRealisasi = countRealisasi > 0 ? (sumRealisasi / countRealisasi * 100).toFixed(1) : '0.0';
 
     // Top 3 & bottom 3
@@ -98,8 +116,10 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
       totalPaskaSubmitted,
       totalPaskaOpen,
       totalPraSubmitted,
+      totalPraRejected,
       paskaPct,
       praPct,
+      praRejectRate,
       avgRealisasi,
       top3,
       bottom3,
@@ -121,7 +141,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
         totalPaskaSubmitted: formatNumber(officerStats.totalPaskaSubmitted),
         paskaPct: officerStats.paskaPct,
         totalPraSubmitted: formatNumber(officerStats.totalPraSubmitted),
-        praPct: officerStats.praPct,
+        praRejectRate: officerStats.praRejectRate,
         avgRealisasi: officerStats.avgRealisasi,
         top3: officerStats.top3.map((o, i) => `${i + 1}. ${o.nama} (Paska: ${o.paskaSubmitted}, Pra: ${o.praSubmitted}, Total: ${o.totalSubmitted})`).join('\n'),
         bottom3: officerStats.bottom3.map((o, i) => `${i + 1}. ${o.nama} (Paska: ${o.paskaSubmitted}, Pra: ${o.praSubmitted}, Total: ${o.totalSubmitted})`).join('\n'),
@@ -209,11 +229,11 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Sisa Waktu</p>
             <h3 className="text-2xl font-black text-slate-800 leading-none">{remainingDays} <span className="text-sm font-normal text-slate-400">hari</span></h3>
             <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
-              <span>Total Hari Kerja:</span>
-              <span className="font-bold text-slate-600">{totalProjectDays} Hari</span>
+              <span>Waktu Berlalu:</span>
+              <span className="font-bold text-slate-600">{elapsedPct}% ({elapsedDays} hari)</span>
             </div>
             <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
-              <div className="bg-slate-400 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min((remainingDays / (totalProjectDays || 1)) * 100, 100)}%` }} />
+              <div className="bg-slate-400 h-1 rounded-full transition-all duration-500" style={{ width: `${elapsedPct}%` }} />
             </div>
           </div>
         </div>
@@ -227,11 +247,11 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Harian</p>
             <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(dailyTarget)}</h3>
             <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
-              <span>Target Per Petugas:</span>
-              <span className="font-bold text-amber-600">{formatNumber(Math.ceil(dailyTarget / (settings.officerCount || 1)))}/hari</span>
+              <span>Kecukupan Laju Tim:</span>
+              <span className={`font-bold ${avgRecent >= dailyTarget ? 'text-emerald-600' : 'text-rose-600'}`}>{performanceRatio}%</span>
             </div>
             <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
-              <div className="bg-amber-500 h-1 rounded-full transition-all duration-500" style={{ width: '100%' }} />
+              <div className={`h-1 rounded-full transition-all duration-500 ${getPerformanceRatioColor(performanceRatio)}`} style={{ width: `${Math.min(performanceRatio, 100)}%` }} />
             </div>
           </div>
         </div>
@@ -284,7 +304,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Prabayar</p>
                   <h4 className="text-xl font-black text-slate-800">{formatNumber(officerStats.totalPraSubmitted)}</h4>
-                  <p className="text-[10px] font-bold text-violet-600">{officerStats.praPct}% realisasi</p>
+                  <p className="text-[10px] font-bold text-violet-600">{officerStats.praRejectRate}% penolakan</p>
                 </div>
               </div>
               <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-3">
