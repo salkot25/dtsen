@@ -118,7 +118,14 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
       </div>
 
       {/* Main Content Area */}
-      <div ref={containerRef} className="flex-1 flex flex-col relative pb-20 md:pb-0 overflow-y-auto">
+      <div 
+        ref={containerRef} 
+        className={`flex-1 flex flex-col relative pb-20 md:pb-0 ${
+          currentTab === 'ai_chat' 
+            ? 'overflow-hidden max-md:h-[calc(100dvh-56px)]' 
+            : 'overflow-y-auto'
+        }`}
+      >
         {/* Pull to Refresh Mobile Indicator */}
         <PullToRefreshIndicator state={refreshState} distance={pullDistance} />
 
@@ -133,8 +140,12 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-x-hidden">
-          <div className="max-w-[1152px] mx-auto p-4 md:p-8">
+        <main className={`flex-1 overflow-x-hidden ${currentTab === 'ai_chat' ? 'h-full flex flex-col' : ''}`}>
+          <div className={`mx-auto w-full ${
+            currentTab === 'ai_chat' 
+              ? 'h-full p-2 md:p-6 max-w-[1152px] flex flex-col' 
+              : 'max-w-[1152px] p-4 md:p-8'
+          }`}>
             {children}
           </div>
         </main>
