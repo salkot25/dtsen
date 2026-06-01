@@ -20,7 +20,8 @@ export default function Settings({ settings, onSave }) {
     endDayOfMonth: settings.endDayOfMonth !== undefined ? settings.endDayOfMonth : 20,
     totalTarget: settings.totalTarget,
     officerCount: settings.officerCount !== undefined ? settings.officerCount : 10,
-    excludeWeekends: settings.excludeWeekends !== undefined ? settings.excludeWeekends : true,
+    excludeSaturday: settings.excludeSaturday !== undefined ? settings.excludeSaturday : (settings.excludeWeekends !== undefined ? settings.excludeWeekends : true),
+    excludeSunday: settings.excludeSunday !== undefined ? settings.excludeSunday : (settings.excludeWeekends !== undefined ? settings.excludeWeekends : true),
     geminiApiKey: settings.geminiApiKey || ''
   });
 
@@ -34,7 +35,8 @@ export default function Settings({ settings, onSave }) {
       endDayOfMonth: settings.endDayOfMonth !== undefined ? settings.endDayOfMonth : 20,
       totalTarget: settings.totalTarget,
       officerCount: settings.officerCount !== undefined ? settings.officerCount : 10,
-      excludeWeekends: settings.excludeWeekends !== undefined ? settings.excludeWeekends : true,
+      excludeSaturday: settings.excludeSaturday !== undefined ? settings.excludeSaturday : (settings.excludeWeekends !== undefined ? settings.excludeWeekends : true),
+      excludeSunday: settings.excludeSunday !== undefined ? settings.excludeSunday : (settings.excludeWeekends !== undefined ? settings.excludeWeekends : true),
       geminiApiKey: settings.geminiApiKey || ''
     });
   }, [settings]);
@@ -63,19 +65,6 @@ export default function Settings({ settings, onSave }) {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
       
-      {/* Page Header */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 shadow-lg text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <h2 className="text-3xl font-bold flex items-center gap-3 mb-2">
-            <SettingsIcon className="text-blue-400" size={32} />
-            Pengaturan Sistem
-          </h2>
-          <p className="text-slate-300">
-            Sesuaikan parameter operasional, target waktu, dan integrasi AI untuk memonitor kinerja dengan akurat.
-          </p>
-        </div>
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-8">
         
         {/* Section 1: Timeline & Dates */}
@@ -137,19 +126,36 @@ export default function Settings({ settings, onSave }) {
             </div>
             
             <div className="md:col-span-2 pt-2">
-              <label className="flex items-start gap-4 p-5 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm">
-                <input
-                  type="checkbox"
-                  name="excludeWeekends"
-                  checked={formData.excludeWeekends}
-                  onChange={handleChange}
-                  className="mt-1 w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                />
-                <div>
-                  <span className="block text-base font-semibold text-slate-800">Kecualikan Akhir Pekan (Sabtu & Minggu)</span>
-                  <span className="block text-sm text-slate-500 mt-1">Sisa hari hanya akan menghitung hari kerja efektif (Senin-Jumat). Kalkulasi target harian akan disesuaikan secara otomatis.</span>
-                </div>
-              </label>
+              <div className="block text-sm font-semibold text-slate-700 mb-3">Pengecualian Hari Libur</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className="flex items-start gap-4 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm">
+                  <input
+                    type="checkbox"
+                    name="excludeSaturday"
+                    checked={formData.excludeSaturday}
+                    onChange={handleChange}
+                    className="mt-1 w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                  />
+                  <div>
+                    <span className="block text-base font-semibold text-slate-800">Libur Hari Sabtu</span>
+                    <span className="block text-xs text-slate-500 mt-1">Sisa hari kerja tidak akan menghitung hari Sabtu.</span>
+                  </div>
+                </label>
+                
+                <label className="flex items-start gap-4 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm">
+                  <input
+                    type="checkbox"
+                    name="excludeSunday"
+                    checked={formData.excludeSunday}
+                    onChange={handleChange}
+                    className="mt-1 w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                  />
+                  <div>
+                    <span className="block text-base font-semibold text-slate-800">Libur Hari Minggu</span>
+                    <span className="block text-xs text-slate-500 mt-1">Sisa hari kerja tidak akan menghitung hari Minggu.</span>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
         </div>

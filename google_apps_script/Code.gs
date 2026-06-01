@@ -43,7 +43,12 @@ function doPost(e) {
       settingsSheet.appendRow(['endDayOfMonth', data.settings.endDayOfMonth]);
       settingsSheet.appendRow(['totalTarget', data.settings.totalTarget]);
       settingsSheet.appendRow(['officerCount', data.settings.officerCount]);
-      settingsSheet.appendRow(['excludeWeekends', data.settings.excludeWeekends]);
+      settingsSheet.appendRow(['excludeSaturday', data.settings.excludeSaturday]);
+      settingsSheet.appendRow(['excludeSunday', data.settings.excludeSunday]);
+      
+      // Simpan juga versi lama untuk kompatibilitas jika diperlukan
+      var isBothExcluded = (data.settings.excludeSaturday && data.settings.excludeSunday);
+      settingsSheet.appendRow(['excludeWeekends', isBothExcluded]);
       settingsSheet.appendRow(['geminiApiKey', data.settings.geminiApiKey || '']);
       
       return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
@@ -183,6 +188,12 @@ function doGet(e) {
         }
         if (settingsObj.officerCount) {
           settingsObj.officerCount = parseInt(settingsObj.officerCount, 10);
+        }
+        if (settingsObj.excludeSaturday !== undefined) {
+          settingsObj.excludeSaturday = settingsObj.excludeSaturday === 'true' || settingsObj.excludeSaturday === true;
+        }
+        if (settingsObj.excludeSunday !== undefined) {
+          settingsObj.excludeSunday = settingsObj.excludeSunday === 'true' || settingsObj.excludeSunday === true;
         }
         if (settingsObj.excludeWeekends !== undefined) {
           settingsObj.excludeWeekends = settingsObj.excludeWeekends === 'true' || settingsObj.excludeWeekends === true;

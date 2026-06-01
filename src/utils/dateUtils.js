@@ -4,7 +4,8 @@ export function getRemainingWorkingDays(settings) {
   const { 
     startDayOfMonth = 2, 
     endDayOfMonth = 20, 
-    excludeWeekends = true,
+    excludeSaturday = true,
+    excludeSunday = true,
     targetDate: projectTargetDateStr
   } = settings;
   
@@ -22,8 +23,9 @@ export function getRemainingWorkingDays(settings) {
     const dayOfMonth = curr.getDate();
     // Check if the current day is within the valid monthly window
     if (dayOfMonth >= startDayOfMonth && dayOfMonth <= endDayOfMonth) {
-      const isWeekend = curr.getDay() === 0 || curr.getDay() === 6;
-      if (!(excludeWeekends && isWeekend)) {
+      const dayOfWeek = curr.getDay();
+      const isExcludedWeekend = (excludeSaturday && dayOfWeek === 6) || (excludeSunday && dayOfWeek === 0);
+      if (!isExcludedWeekend) {
         remaining++;
       }
     }
@@ -46,7 +48,8 @@ export function getTotalWorkingDays(settings) {
   const { 
     startDayOfMonth = 2, 
     endDayOfMonth = 20, 
-    excludeWeekends = true,
+    excludeSaturday = true,
+    excludeSunday = true,
     startDate: projectStartDateStr,
     targetDate: projectTargetDateStr
   } = settings;
@@ -63,8 +66,9 @@ export function getTotalWorkingDays(settings) {
   while (!isAfter(curr, targetDate)) {
     const dayOfMonth = curr.getDate();
     if (dayOfMonth >= startDayOfMonth && dayOfMonth <= endDayOfMonth) {
-      const isWeekend = curr.getDay() === 0 || curr.getDay() === 6;
-      if (!(excludeWeekends && isWeekend)) {
+      const dayOfWeek = curr.getDay();
+      const isExcludedWeekend = (excludeSaturday && dayOfWeek === 6) || (excludeSunday && dayOfWeek === 0);
+      if (!isExcludedWeekend) {
         total++;
       }
     }
@@ -75,7 +79,7 @@ export function getTotalWorkingDays(settings) {
 }
 
 export function getWorkingDaysInMonth(settings, date = new Date()) {
-  const { startDayOfMonth = 2, endDayOfMonth = 20, excludeWeekends = true } = settings;
+  const { startDayOfMonth = 2, endDayOfMonth = 20, excludeSaturday = true, excludeSunday = true } = settings;
   const start = new Date(date.getFullYear(), date.getMonth(), startDayOfMonth);
   const end = new Date(date.getFullYear(), date.getMonth(), endDayOfMonth);
   
@@ -85,8 +89,12 @@ export function getWorkingDaysInMonth(settings, date = new Date()) {
   let curr = new Date(start);
   
   while (!isAfter(curr, end)) {
-    const isWeekend = curr.getDay() === 0 || curr.getDay() === 6;
-    if (!(excludeWeekends && isWeekend)) {
+    const dayOfWeek = curr.getDay();
+    const isSaturday = dayOfWeek === 6;
+    const isSunday = dayOfWeek === 0;
+    const isExcludedWeekend = (excludeSaturday && isSaturday) || (excludeSunday && isSunday);
+
+    if (!isExcludedWeekend) {
       total++;
     }
     curr.setDate(curr.getDate() + 1);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot } from 'lucide-react';
+import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus } from 'lucide-react';
 
 export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
   const tabs = [
@@ -117,26 +117,49 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/60 flex justify-around px-6 py-2 z-30 pb-safe">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setCurrentTab(tab.id)}
-            className={`flex flex-col items-center justify-center py-1.5 px-4 rounded-xl min-w-[72px] transition-all duration-200 ${
-              currentTab === tab.id
-                ? 'text-blue-600'
-                : 'text-slate-400'
-            }`}
-          >
-            <div className={`p-1 mb-0.5 transition-transform duration-200 ${currentTab === tab.id ? 'scale-110' : ''}`}>
-               {tab.icon}
-            </div>
-            <span className={`text-[10px] leading-none ${currentTab === tab.id ? 'font-semibold' : 'font-medium'}`}>
-              {tab.label}
-            </span>
-            {currentTab === tab.id && <div className="w-4 h-0.5 bg-blue-600 rounded-full mt-1"></div>}
-          </button>
-        ))}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/60 flex justify-around items-center px-4 py-2 z-30 pb-safe">
+        {[
+          tabs.find(t => t.id === 'overview'),
+          tabs.find(t => t.id === 'executive_summary'),
+          tabs.find(t => t.id === 'input'),
+          tabs.find(t => t.id === 'ai_chat'),
+          tabs.find(t => t.id === 'settings'),
+        ].map((tab) => {
+          if (!tab) return null;
+          const isInput = tab.id === 'input';
+          const isActive = currentTab === tab.id;
+          
+          if (isInput) {
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setCurrentTab(tab.id)}
+                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border-4 border-white transition-all duration-300 active:scale-95 z-50 shrink-0"
+                aria-label="Tambah Laporan"
+              >
+                <Plus size={24} />
+              </button>
+            );
+          }
+          
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setCurrentTab(tab.id)}
+              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl min-w-[64px] transition-all duration-200 ${
+                isActive ? 'text-blue-600' : 'text-slate-400'
+              }`}
+            >
+              <div className={`p-1 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+                 {tab.icon}
+              </div>
+              <span className={`text-[10px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                {tab.label === 'Ringkasan Kinerja' ? 'Ringkasan' : (tab.label === 'Dashboard' ? 'Home' : (tab.label === 'Asisten AI' ? 'AI Chat' : tab.label))}
+              </span>
+              {isActive && <div className="w-4 h-0.5 bg-blue-600 rounded-full mt-1"></div>}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

@@ -26,7 +26,8 @@ function App() {
       endDayOfMonth: 20,
       totalTarget: 206533,
       officerCount: 10,
-      excludeWeekends: true,
+      excludeSaturday: true,
+      excludeSunday: true,
       geminiApiKey: ''
     };
   });
