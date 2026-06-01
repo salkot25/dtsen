@@ -8,7 +8,7 @@ import { formatNumber } from '../utils/dateUtils';
 export default function OfficerRecap({ officers = [] }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [performanceFilter, setPerformanceFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('paska_realisasi'); // name, paska_realisasi, paska_submitted, pra_submitted
+  const [sortBy, setSortBy] = useState('total_submitted'); // total_submitted, name, paska_realisasi, paska_submitted, pra_submitted
   const [sortOrder, setSortOrder] = useState('desc'); // asc, desc
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -58,7 +58,23 @@ export default function OfficerRecap({ officers = [] }) {
       }
     });
     
-    return Array.from(map.values());
+    // Convert to list, calculate total submitted (Postpaid + Prepaid) for each officer
+    const list = Array.from(map.values()).map(o => {
+      const totalSubmitted = o.paskaSubmitted + o.praSubmitted;
+      return {
+        ...o,
+        totalSubmitted
+      };
+    });
+
+    // Sort by totalSubmitted descending to calculate absolute global ranking
+    list.sort((a, b) => b.totalSubmitted - a.totalSubmitted);
+
+    // Assign rank (no) based on the absolute global ranking
+    return list.map((o, idx) => ({
+      ...o,
+      no: idx + 1
+    }));
   }, [officers]);
 
   // 2. Global KPI Aggregations
@@ -144,6 +160,9 @@ export default function OfficerRecap({ officers = [] }) {
       if (sortBy === 'name') {
         valA = a.nama || '';
         valB = b.nama || '';
+      } else if (sortBy === 'paska_realisasi') {
+        valA = a.paskaRealisasi || 0;
+        valB = b.paskaRealisasi || 0;
       } else if (sortBy === 'paska_submitted') {
         valA = a.paskaSubmitted || 0;
         valB = b.paskaSubmitted || 0;
@@ -151,9 +170,9 @@ export default function OfficerRecap({ officers = [] }) {
         valA = a.praSubmitted || 0;
         valB = b.praSubmitted || 0;
       } else {
-        // Default to paska_realisasi
-        valA = a.paskaRealisasi || 0;
-        valB = b.paskaRealisasi || 0;
+        // Default: sort by totalSubmitted (Peringkat / Rank)
+        valA = a.totalSubmitted || 0;
+        valB = b.totalSubmitted || 0;
       }
 
       if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
@@ -334,6 +353,15 @@ export default function OfficerRecap({ officers = [] }) {
                 {/* Sort buttons */}
                 <div className="flex items-center gap-1 bg-slate-50/50 border border-slate-200 rounded-xl p-1">
                   <button
+                    onClick={() => toggleSort('total_submitted')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
+                      sortBy === 'total_submitted' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Peringkat (Total Submit)
+                    {sortBy === 'total_submitted' && <ArrowUpDown size={12} />}
+                  </button>
+                  <button
                     onClick={() => toggleSort('name')}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
                       sortBy === 'name' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'
@@ -381,7 +409,10 @@ export default function OfficerRecap({ officers = [] }) {
               <table className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    <th rowSpan="2" className="py-4 px-6 text-center w-16 border-r border-slate-200">Peringkat</th>
+                    <th rowSpan="2" className="py-4 px-6 text-center w-24 border-r border-slate-200 text-[11px] leading-tight">
+                      Peringkat
+                      <span className="block text-[9px] font-normal text-slate-400 normal-case mt-0.5">(Total Submit)</span>
+                    </th>
                     <th rowSpan="2" className="py-4 px-6 border-r border-slate-200 w-64">Identitas Petugas</th>
                     <th colSpan="4" className="py-2.5 px-4 text-center bg-blue-50/50 text-blue-800 border-r border-b border-blue-100 font-extrabold">Paskabayar (Postpaid)</th>
                     <th colSpan="2" className="py-2.5 px-4 text-center bg-violet-50/50 text-violet-850 border-b border-violet-100 font-extrabold">Prabayar (Prepaid)</th>
@@ -398,7 +429,6 @@ export default function OfficerRecap({ officers = [] }) {
                 <tbody className="divide-y divide-slate-100 text-sm">
                   {paginatedOfficers.length > 0 ? (
                     paginatedOfficers.map((o, index) => {
-                      const rank = (currentPage - 1) * itemsPerPage + index + 1;
                       const style = getPerformanceBadge(o.paskaRealisasi);
                       const paskaPercentage = (o.paskaRealisasi * 100).toFixed(1);
 
@@ -407,11 +437,11 @@ export default function OfficerRecap({ officers = [] }) {
                           
                           {/* Peringkat */}
                           <td className="py-3.5 px-6 text-center font-bold text-slate-500 border-r border-slate-200">
-                            {rank <= 3 && sortOrder === 'desc' && sortBy === 'paska_realisasi' ? (
+                            {o.no <= 3 ? (
                               <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs text-white font-extrabold bg-gradient-to-r from-amber-400 to-amber-500 shadow-md shadow-amber-500/25">
-                                {rank}
+                                {o.no}
                               </span>
-                            ) : rank}
+                            ) : o.no}
                           </td>
 
                           {/* Identitas */}
