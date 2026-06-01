@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Send, AlertCircle, CheckCircle2, Loader2, FileSpreadsheet, Trash2 } from 'lucide-react';
 import { formatNumber } from '../utils/dateUtils';
 import * as XLSX from 'xlsx';

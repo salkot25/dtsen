@@ -189,7 +189,7 @@ export default function DashboardOverview({ history, settings, setCurrentTab }) 
         </div>
         
         <div className="h-72 w-full" style={{ minHeight: 288 }}>
-          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          <ResponsiveContainer width="100%" height={288} minWidth={0}>
             <AreaChart
               data={chartData}
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
