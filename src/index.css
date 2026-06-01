@@ -75,6 +75,24 @@
   .delay-300 { animation-delay: 300ms; }
 }
 
+/* Theme Toggle Animations */
+@keyframes sun-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes moon-gently-sway {
+  0%, 100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(167, 139, 250, 0.2)); }
+  50% { transform: rotate(-8deg) scale(1.05); filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.5)); }
+}
+
+.animate-sun-spin {
+  animation: sun-spin 8s infinite linear;
+}
+.animate-moon-sway {
+  animation: moon-gently-sway 4s infinite ease-in-out;
+}
+
+
 .font-mono-code {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
 }

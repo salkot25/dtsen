@@ -45,10 +45,14 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
         <div className="flex items-center gap-1">
           <button
             onClick={toggleTheme}
-            className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-slate-200 rounded-xl transition-all duration-200"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all duration-200 flex items-center justify-center shrink-0 cursor-pointer"
             aria-label="Toggle Theme"
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === 'light' ? (
+              <Sun size={18} className="text-amber-500 fill-amber-500/10 animate-sun-spin" />
+            ) : (
+              <Moon size={18} className="text-violet-400 fill-violet-400/10 animate-moon-sway" />
+            )}
           </button>
           <button
             onClick={() => setCurrentTab('settings')}
@@ -135,17 +139,21 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
           : 'pb-20 md:pb-0 overflow-y-auto'
       }`}>
         {/* Desktop Topbar */}
-        <header className="hidden md:flex bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800 px-8 py-4 items-center justify-between sticky top-0 z-10 transition-colors">
+        <header className="hidden md:flex bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 items-center justify-between sticky top-0 z-10 transition-colors">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-white tracking-tight">
             {tabs.find((t) => t.id === currentTab)?.label}
           </h2>
           <div className="flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all duration-200 cursor-pointer"
-              title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0"
+              title={theme === 'light' ? 'Mode Gelap' : 'Mode Terang'}
             >
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              {theme === 'light' ? (
+                <Sun size={18} className="text-amber-500 fill-amber-500/10 animate-sun-spin" />
+              ) : (
+                <Moon size={18} className="text-violet-400 fill-violet-400/10 animate-moon-sway" />
+              )}
             </button>
             <div className="text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-100/80 dark:bg-slate-800 px-3.5 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
               {todayStr}
