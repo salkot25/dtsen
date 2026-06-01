@@ -191,7 +191,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
               <button
                 key={tab.id}
                 onClick={() => setCurrentTab(tab.id)}
-                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border-4 mobile-nav-plus-btn transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer animate-none outline-none"
+                className="relative flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border-4 mobile-nav-plus-btn transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer animate-none outline-none"
                 aria-label="Tambah Laporan"
               >
                 <Plus size={24} />
