@@ -139,25 +139,21 @@ function App() {
       {currentTab === 'input' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-             <div className="lg:col-span-1 flex flex-col gap-6">
-                <InputForm 
-                  onSubmit={handleSubmitRealisasi} 
-                  lastCumulative={lastCumulative} 
-                  onUploadOfficers={handleUploadOfficers} 
-                />
-                <HistoryTable 
-                  history={history} 
-                  selectedId={selectedHistoryId} 
-                  onSelectItem={(id) => setSelectedHistoryId(id === selectedHistoryId ? null : id)} 
-                />
-             </div>
-             <div className="lg:col-span-2">
-                <WhatsAppGenerator 
-                  history={history} 
-                  settings={settings} 
-                  selectedItem={history.find(h => h.id === selectedHistoryId)} 
-                />
-             </div>
+             <InputForm 
+               onSubmit={handleSubmitRealisasi} 
+               lastCumulative={lastCumulative} 
+               onUploadOfficers={handleUploadOfficers} 
+             />
+             <WhatsAppGenerator 
+               history={history} 
+               settings={settings} 
+               selectedItem={history.find(h => h.id === selectedHistoryId)} 
+             />
+             <HistoryTable 
+               history={history} 
+               selectedId={selectedHistoryId} 
+               onSelectItem={(id) => setSelectedHistoryId(id === selectedHistoryId ? null : id)} 
+             />
           </div>
         </div>
       )}
