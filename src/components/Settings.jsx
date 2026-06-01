@@ -6,7 +6,11 @@ const formatDateForInput = (dateValue) => {
   if (typeof dateValue === 'string' && dateValue.length === 10) return dateValue;
   try {
     const d = new Date(dateValue);
-    return d.toISOString().split('T')[0];
+    if (isNaN(d.getTime())) return dateValue;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   } catch (e) {
     return dateValue;
   }

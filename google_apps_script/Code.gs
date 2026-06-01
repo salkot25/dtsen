@@ -175,7 +175,14 @@ function doGet(e) {
       if (sData.length > 1) {
         settingsObj = {};
         for (var j = 1; j < sData.length; j++) {
-          settingsObj[sData[j][0]] = sData[j][1];
+          var val = sData[j][1];
+          if (Object.prototype.toString.call(val) === '[object Date]') {
+            var year = val.getFullYear();
+            var month = ('0' + (val.getMonth() + 1)).slice(-2);
+            var day = ('0' + val.getDate()).slice(-2);
+            val = year + '-' + month + '-' + day;
+          }
+          settingsObj[sData[j][0]] = val;
         }
         if (settingsObj.startDayOfMonth) {
           settingsObj.startDayOfMonth = parseInt(settingsObj.startDayOfMonth, 10);

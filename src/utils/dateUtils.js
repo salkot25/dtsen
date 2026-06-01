@@ -1,5 +1,26 @@
 import { isAfter, startOfDay } from 'date-fns';
 
+export function parseLocalDate(dateValue) {
+  if (!dateValue) return new Date();
+  if (dateValue instanceof Date) return dateValue;
+  if (typeof dateValue === 'string') {
+    // If it's a YYYY-MM-DD string, parse as local midnight
+    if (dateValue.includes('T')) {
+      // It has timezone info, parse normally but we will construct from it
+      const d = new Date(dateValue);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+    const parts = dateValue.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      return new Date(year, month, day);
+    }
+  }
+  return new Date(dateValue);
+}
+
 export function getRemainingWorkingDays(settings) {
   const { 
     startDayOfMonth = 2, 
@@ -10,7 +31,7 @@ export function getRemainingWorkingDays(settings) {
   } = settings;
   
   const today = startOfDay(new Date());
-  const targetDate = projectTargetDateStr ? startOfDay(new Date(projectTargetDateStr)) : new Date(today.getFullYear(), 11, 31);
+  const targetDate = projectTargetDateStr ? startOfDay(parseLocalDate(projectTargetDateStr)) : new Date(today.getFullYear(), 11, 31);
   
   if (isAfter(today, targetDate)) {
     return 0; // Project has ended
@@ -55,8 +76,8 @@ export function getTotalWorkingDays(settings) {
   } = settings;
   
   const today = startOfDay(new Date());
-  const startDate = projectStartDateStr ? startOfDay(new Date(projectStartDateStr)) : new Date(today.getFullYear(), 0, 1);
-  const targetDate = projectTargetDateStr ? startOfDay(new Date(projectTargetDateStr)) : new Date(today.getFullYear(), 11, 31);
+  const startDate = projectStartDateStr ? startOfDay(parseLocalDate(projectStartDateStr)) : new Date(today.getFullYear(), 0, 1);
+  const targetDate = projectTargetDateStr ? startOfDay(parseLocalDate(projectTargetDateStr)) : new Date(today.getFullYear(), 11, 31);
   
   if (isAfter(startDate, targetDate)) return 1;
   
