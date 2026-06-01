@@ -1,10 +1,11 @@
 import { LayoutDashboard, FileInput, LogOut, Zap, FileText, Settings as SettingsIcon, Bot, Plus, Users } from 'lucide-react';
 
 export default function Layout({ children, currentTab, setCurrentTab, onLogout }) {
+  // Coordinated global tabs list order (Nama, Total, Paskabayar, Prabayar sync)
   const tabs = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { id: 'input', label: 'Input Laporan', icon: <FileInput size={20} /> },
     { id: 'officer_recap', label: 'Rekap Petugas', icon: <Users size={20} /> },
+    { id: 'input', label: 'Input Laporan', icon: <FileInput size={20} /> },
     { id: 'executive_summary', label: 'Ringkasan Kinerja', icon: <FileText size={20} /> },
     { id: 'ai_chat', label: 'Asisten AI', icon: <Bot size={20} /> },
     { id: 'settings', label: 'Pengaturan', icon: <SettingsIcon size={20} /> },
@@ -19,7 +20,8 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      {/* Mobile Header */}
+      
+      {/* Mobile Top AppBar Header */}
       <div className="md:hidden bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-blue-600 rounded-lg">
@@ -30,13 +32,28 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
             <p className="text-[10px] text-slate-400">{todayStr}</p>
           </div>
         </div>
-        <button
-          onClick={onLogout}
-          className="p-2 text-slate-400 hover:bg-slate-100 rounded-xl transition-colors"
-          aria-label="Logout"
-        >
-          <LogOut size={18} />
-        </button>
+        
+        {/* AppBar Actions (Settings placed directly to the left of Logout) */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setCurrentTab('settings')}
+            className={`p-2 rounded-xl transition-colors ${
+              currentTab === 'settings' 
+                ? 'text-blue-600 bg-blue-50' 
+                : 'text-slate-400 hover:bg-slate-100'
+            }`}
+            aria-label="Settings"
+          >
+            <SettingsIcon size={18} />
+          </button>
+          <button
+            onClick={onLogout}
+            className="p-2 text-slate-400 hover:bg-slate-100 hover:text-rose-600 rounded-xl transition-colors"
+            aria-label="Logout"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Desktop Sidebar */}
@@ -116,14 +133,14 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/60 flex justify-around items-center px-4 py-2 z-30 pb-safe">
+      {/* Mobile Bottom Navigation Bar (Dashboard, Petugas, Add, Ringkasan, Asisten AI) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200/60 flex justify-around items-center px-2 py-1.5 z-30 pb-safe shadow-lg">
         {[
           tabs.find(t => t.id === 'overview'),
           tabs.find(t => t.id === 'officer_recap'),
           tabs.find(t => t.id === 'input'),
+          tabs.find(t => t.id === 'executive_summary'),
           tabs.find(t => t.id === 'ai_chat'),
-          tabs.find(t => t.id === 'settings'),
         ].map((tab) => {
           if (!tab) return null;
           const isInput = tab.id === 'input';
@@ -134,10 +151,10 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
               <button
                 key={tab.id}
                 onClick={() => setCurrentTab(tab.id)}
-                className="flex flex-col items-center justify-center -translate-y-5 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/35 border-4 border-white transition-all duration-300 active:scale-95 z-50 shrink-0"
+                className="flex flex-col items-center justify-center -translate-y-5.5 w-13 h-13 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-650 text-white shadow-lg shadow-blue-500/35 border-4 border-white transition-all duration-300 active:scale-95 z-50 shrink-0 cursor-pointer"
                 aria-label="Tambah Laporan"
               >
-                <Plus size={24} />
+                <Plus size={22} />
               </button>
             );
           }
@@ -146,21 +163,26 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
             <button
               key={tab.id}
               onClick={() => setCurrentTab(tab.id)}
-              className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl min-w-[64px] transition-all duration-200 ${
-                isActive ? 'text-blue-600' : 'text-slate-400'
+              className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl min-w-[56px] transition-all duration-200 shrink-0 cursor-pointer ${
+                isActive ? 'text-blue-600 font-bold' : 'text-slate-400'
               }`}
             >
-              <div className={`p-1 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+              <div className={`p-0.5 mb-0.5 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
                  {tab.icon}
               </div>
-              <span className={`text-[10px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}>
-                {tab.label === 'Ringkasan Kinerja' ? 'Ringkasan' : (tab.label === 'Dashboard' ? 'Home' : (tab.label === 'Asisten AI' ? 'AI Chat' : (tab.label === 'Rekap Petugas' ? 'Rekap' : tab.label)))}
+              <span className={`text-[9px] leading-none ${isActive ? 'font-bold' : 'font-semibold'}`}>
+                {tab.id === 'overview' ? 'Dashboard' : 
+                 tab.id === 'officer_recap' ? 'Petugas' : 
+                 tab.id === 'executive_summary' ? 'Ringkasan' : 
+                 tab.id === 'ai_chat' ? 'Asisten AI' : 
+                 tab.label}
               </span>
-              {isActive && <div className="w-4 h-0.5 bg-blue-600 rounded-full mt-1"></div>}
+              {isActive && <div className="w-3.5 h-0.5 bg-blue-600 rounded-full mt-0.5"></div>}
             </button>
           );
         })}
       </div>
+      
     </div>
   );
 }
