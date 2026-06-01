@@ -266,25 +266,31 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
             
             {/* 1. Total Petugas */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-slate-50 text-slate-600 rounded-xl">
-                <Users size={24} />
+              <div className="p-3 bg-slate-50 text-slate-500 rounded-xl shrink-0">
+                <Users size={22} />
               </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Petugas</p>
-                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{stats.total} <span className="text-xs font-normal text-slate-400">petugas</span></h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">100% Kontributor Terdaftar</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Petugas</p>
+                <h3 className="text-2xl font-black text-slate-800 leading-none">{stats.total}</h3>
+                <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+                  <span>Kontribusi Aktif:</span>
+                  <span className="font-bold text-slate-600">100%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+                  <div className="bg-slate-400 h-1 rounded-full" style={{ width: '100%' }} />
+                </div>
               </div>
             </div>
 
             {/* 2. Total Target */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-                <Award size={24} />
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-xl shrink-0">
+                <Award size={22} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Target</p>
-                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{formatNumber(totalTarget)}</h3>
-                <div className="flex justify-between items-center text-[10px] text-slate-405 mt-1.5 font-medium">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Target</p>
+                <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(totalTarget)}</h3>
+                <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
                   <span>Progres Gabungan:</span>
                   <span className="font-bold text-amber-600">{combinedPct}%</span>
                 </div>
@@ -296,13 +302,13 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
             {/* 3. Submitted Paskabayar */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                <CheckCircle2 size={24} />
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                <CheckCircle2 size={22} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Submitted Paskabayar</p>
-                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{formatNumber(stats.totalPaskaSubmitted)}</h3>
-                <div className="flex justify-between items-center text-[10px] text-slate-405 mt-1.5 font-medium">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Submitted Paskabayar</p>
+                <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(stats.totalPaskaSubmitted)}</h3>
+                <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
                   <span>Rasio Realisasi:</span>
                   <span className="font-bold text-blue-600">{paskaPct}%</span>
                 </div>
@@ -314,14 +320,14 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
             {/* 4. Submitted Prabayar */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-violet-50 text-violet-600 rounded-xl">
-                <Sparkles size={24} />
+              <div className="p-3 bg-violet-50 text-violet-650 rounded-xl shrink-0">
+                <Sparkles size={22} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Submitted Prabayar</p>
-                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight text-violet-900">{formatNumber(stats.totalPraSubmitted)}</h3>
-                <div className="flex justify-between items-center text-[10px] text-slate-405 mt-1.5 font-medium">
-                  <span>Rasio vs Target Pra:</span>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Submitted Prabayar</p>
+                <h3 className="text-2xl font-black text-violet-900 leading-none">{formatNumber(stats.totalPraSubmitted)}</h3>
+                <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+                  <span>Rasio Realisasi:</span>
                   <span className="font-bold text-violet-600">{praPct}%</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
