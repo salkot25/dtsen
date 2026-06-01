@@ -94,17 +94,17 @@ export default function DashboardOverview({ history, settings, setCurrentTab }) 
   return (
     <div className="space-y-6">
       {/* Mobile Quick Action Link */}
-      <div className="md:hidden flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100/50 rounded-xl p-3.5 animate-fade-in">
+      <div className="md:hidden flex items-center justify-between bg-white dark:bg-slate-900 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-slate-900 dark:to-slate-950 border border-blue-100/50 dark:border-slate-800 rounded-xl p-3.5 animate-fade-in">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-blue-500 text-white rounded-lg"><CalendarDays size={14} /></div>
           <div>
-            <span className="block text-xs font-bold text-slate-800">Ringkasan Kinerja & Analisis AI</span>
-            <span className="block text-[10px] text-slate-400 mt-0.5">Analisis tren capaian oleh asisten kecerdasan buatan</span>
+            <span className="block text-xs font-bold text-slate-800 dark:text-slate-200">Ringkasan Kinerja & Analisis AI</span>
+            <span className="block text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Analisis tren capaian oleh asisten kecerdasan buatan</span>
           </div>
         </div>
         <button 
           onClick={() => setCurrentTab && setCurrentTab('executive_summary')}
-          className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-white px-3 py-1.5 rounded-lg border border-blue-200/50 shadow-sm active:scale-95 transition-all"
+          className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-blue-200/50 dark:border-slate-700 shadow-sm active:scale-95 transition-all"
         >
           Lihat
         </button>

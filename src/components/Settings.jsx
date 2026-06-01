@@ -74,7 +74,7 @@ export default function Settings({ settings, onSave }) {
         {/* Section 1: Timeline & Dates */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
               <CalendarDays size={20} />
             </div>
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Waktu & Periode Kerja</h3>
@@ -167,7 +167,7 @@ export default function Settings({ settings, onSave }) {
         {/* Section 2: Operasional */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg">
+            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
               <Target size={20} />
             </div>
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Target Operasional</h3>
@@ -190,7 +190,7 @@ export default function Settings({ settings, onSave }) {
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                <Users size={16} className="text-slate-400" dark:text-slate-500 />
+                <Users size={16} className="text-slate-400" />
                 Jumlah Petugas Aktif
               </label>
               <input
@@ -212,7 +212,7 @@ export default function Settings({ settings, onSave }) {
             <Sparkles size={120} />
           </div>
           <div className="relative z-10 p-6 border-b border-indigo-100/50 dark:border-slate-800 flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-650 dark:text-indigo-400 rounded-lg">
+            <div className="p-2 bg-violet-50 text-violet-600 rounded-lg">
               <Key size={20} />
             </div>
             <h3 className="text-lg font-bold text-indigo-950 dark:text-indigo-200">Integrasi Kecerdasan Buatan (AI)</h3>
