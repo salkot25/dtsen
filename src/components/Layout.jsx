@@ -19,7 +19,11 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
   }).format(new Date());
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+    <div className={`bg-slate-50 flex flex-col md:flex-row ${
+      currentTab === 'ai_chat' 
+        ? 'h-[100dvh] md:h-screen overflow-hidden' 
+        : 'min-h-screen'
+    }`}>
       
       {/* Mobile Top AppBar Header (Solid White, Not Transparent) */}
       <div className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
@@ -116,7 +120,7 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout }
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col relative ${
         currentTab === 'ai_chat' 
-          ? 'h-[calc(100dvh-52px)] overflow-hidden pb-[72px] md:h-screen md:pb-0' 
+          ? 'overflow-hidden pb-[72px] md:h-screen md:pb-0' 
           : 'pb-20 md:pb-0 overflow-y-auto'
       }`}>
         {/* Desktop Topbar */}
