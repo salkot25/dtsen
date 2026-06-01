@@ -234,18 +234,6 @@ export default function OfficerRecap({ officers = [] }) {
   return (
     <div className="space-y-6">
       
-      {/* Header Panel */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
-        <div>
-          <h3 className="text-base font-bold text-slate-800">Rekap Kinerja Petugas Gabungan</h3>
-          <p className="text-xs text-slate-400 mt-0.5">Satu tabel rekapitulasi data Paskabayar dan Prabayar untuk seluruh petugas</p>
-        </div>
-        <div className="bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 flex items-center gap-1.5">
-          <Users size={14} className="text-slate-400" />
-          <span>{stats.total} Petugas Terdaftar</span>
-        </div>
-      </div>
-
       {stats.total === 0 ? (
         <div className="bg-white rounded-2xl p-12 border border-slate-200 shadow-sm text-center">
           <Users size={48} className="mx-auto text-slate-300 mb-3" />
