@@ -170,7 +170,7 @@ function App() {
 
       {currentTab === 'officer_recap' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <OfficerRecap officers={officers} />
+          <OfficerRecap officers={officers} settings={settings} />
         </div>
       )}
 

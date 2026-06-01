@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { formatNumber } from '../utils/dateUtils';
 
-export default function OfficerRecap({ officers = [] }) {
+export default function OfficerRecap({ officers = [], settings = {} }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [performanceFilter, setPerformanceFilter] = useState('all');
   const [sortBy, setSortBy] = useState('total_submitted'); // total_submitted, name, paska_submitted, pra_submitted
@@ -231,8 +231,16 @@ export default function OfficerRecap({ officers = [] }) {
     }
   };
 
+  // Percentage Calculations relative to totalTarget
+  const totalTarget = settings.totalTarget || 206533;
+  const totalCombinedSubmitted = stats.totalPaskaSubmitted + stats.totalPraSubmitted;
+  
+  const combinedPct = totalTarget > 0 ? (totalCombinedSubmitted / totalTarget * 100).toFixed(1) : '0.0';
+  const paskaPct = totalTarget > 0 ? (stats.totalPaskaSubmitted / totalTarget * 100).toFixed(1) : '0.0';
+  const praPct = totalTarget > 0 ? (stats.totalPraSubmitted / totalTarget * 100).toFixed(1) : '0.0';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {stats.total === 0 ? (
         <div className="bg-white rounded-2xl p-12 border border-slate-200 shadow-sm text-center">
@@ -247,7 +255,7 @@ export default function OfficerRecap({ officers = [] }) {
           {/* KPI Summary Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
-            {/* Total Petugas */}
+            {/* 1. Total Petugas */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
               <div className="p-3 bg-slate-50 text-slate-600 rounded-xl">
                 <Users size={24} />
@@ -255,48 +263,61 @@ export default function OfficerRecap({ officers = [] }) {
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Petugas</p>
                 <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{stats.total} <span className="text-xs font-normal text-slate-400">petugas</span></h3>
+                <p className="text-[10px] text-slate-400 mt-0.5">100% Kontributor Terdaftar</p>
               </div>
             </div>
 
-            {/* Capaian Paskabayar */}
+            {/* 2. Total Target */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                <CheckCircle2 size={24} />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Submitted Paskabayar</p>
-                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{formatNumber(stats.totalPaskaSubmitted)}</h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">
-                  Open: <span className="font-semibold text-slate-600">{formatNumber(stats.totalPaskaOpen)}</span> | Rej: <span className="font-semibold text-rose-500">{formatNumber(stats.totalPaskaRejected)}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Rata-rata Realisasi Paskabayar */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
                 <Award size={24} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rata-rata Realisasi</p>
-                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{stats.avgPaskaRealisasi}%</h3>
-                <div className="w-full bg-slate-100 rounded-full h-1 mt-1.5 overflow-hidden">
-                  <div className="bg-emerald-500 h-1 rounded-full" style={{ width: `${stats.avgPaskaRealisasi}%` }} />
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Target</p>
+                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{formatNumber(totalTarget)}</h3>
+                <div className="flex justify-between items-center text-[10px] text-slate-405 mt-1.5 font-medium">
+                  <span>Progres Gabungan:</span>
+                  <span className="font-bold text-amber-600">{combinedPct}%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+                  <div className="bg-amber-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min(combinedPct, 100)}%` }} />
                 </div>
               </div>
             </div>
 
-            {/* Capaian Prabayar */}
+            {/* 3. Submitted Paskabayar */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                <CheckCircle2 size={24} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Submitted Paskabayar</p>
+                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{formatNumber(stats.totalPaskaSubmitted)}</h3>
+                <div className="flex justify-between items-center text-[10px] text-slate-405 mt-1.5 font-medium">
+                  <span>Rasio vs Target:</span>
+                  <span className="font-bold text-blue-600">{paskaPct}%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+                  <div className="bg-blue-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min(paskaPct, 100)}%` }} style={{ width: `${Math.min(paskaPct, 100)}%` }} />
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Submitted Prabayar */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
               <div className="p-3 bg-violet-50 text-violet-600 rounded-xl">
                 <Sparkles size={24} />
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Submitted Prabayar</p>
                 <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight text-violet-900">{formatNumber(stats.totalPraSubmitted)}</h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">
-                  Rejected: <span className="font-semibold text-rose-500">{formatNumber(stats.totalPraRejected)}</span>
-                </p>
+                <div className="flex justify-between items-center text-[10px] text-slate-405 mt-1.5 font-medium">
+                  <span>Rasio vs Target:</span>
+                  <span className="font-bold text-violet-600">{praPct}%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+                  <div className="bg-violet-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min(praPct, 100)}%` }} />
+                </div>
               </div>
             </div>
 
