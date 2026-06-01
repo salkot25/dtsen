@@ -516,9 +516,15 @@ html.dark .mobile-nav-plus-btn {
   border-color: #0f172a !important; /* blends perfectly with dark slate-900 nav bg */
 }
 
+/* ==========================================================================
+   IOS SAFARI AUTO-ZOOM PREVENTION FOR INPUTS/SELECTS/TEXTAREAS
+   ========================================================================== */
 
-
-
-
-
+@media (max-width: 767px) {
+  input, 
+  select, 
+  textarea {
+    font-size: 16px !important;
+  }
+}
 
