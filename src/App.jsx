@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 import Layout from './components/Layout';
 import Login from './components/Login';
 import DashboardOverview from './components/DashboardOverview';
@@ -9,8 +10,10 @@ import Settings from './components/Settings';
 import ExecutiveSummary from './components/ExecutiveSummary';
 import AiChat from './components/AiChat';
 import OfficerRecap from './components/OfficerRecap';
+import PWAInstallBanner from './components/PWAInstallBanner';
 import defaultOfficers from './data/officers.json';
 import { saveToSpreadsheet, fetchHistory, saveSettingsToSpreadsheet, saveOfficersToSpreadsheet } from './services/api';
+import { RefreshCw, X } from 'lucide-react';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -18,6 +21,30 @@ function App() {
   });
   const [currentTab, setCurrentTab] = useState('overview');
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
+  const [showUpdateToast, setShowUpdateToast] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  // Service Worker update hook – auto-detects new version and lets user refresh
+  const { updateServiceWorker } = useRegisterSW({
+    onNeedRefresh() {
+      setShowUpdateToast(true);
+    },
+    onOfflineReady() {
+      // App is ready for offline use, no action needed
+    },
+  });
+
+  // Online / offline status detection
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('dtsen_settings');
@@ -138,6 +165,44 @@ function App() {
   const lastCumulative = history.length > 0 ? history[0].value : 0;
 
   return (
+    <>
+    {/* Offline status banner */}
+    {isOffline && (
+      <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white text-xs font-semibold text-center py-2 px-4 flex items-center justify-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-white/80 animate-pulse"></span>
+        Mode Luring – Menampilkan data terakhir yang tersimpan
+      </div>
+    )}
+
+    {/* PWA Update Toast */}
+    {showUpdateToast && (
+      <div className="fixed bottom-24 left-4 right-4 md:left-auto md:right-6 md:w-80 z-50 animate-toast">
+        <div className="bg-slate-900 text-white rounded-2xl shadow-2xl p-4 flex items-center gap-3">
+          <div className="p-2 bg-blue-600 rounded-xl shrink-0">
+            <RefreshCw size={16} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold leading-tight">Versi Baru Tersedia!</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Muat ulang untuk mendapatkan pembaruan terbaru.</p>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => updateServiceWorker(true)}
+              className="text-xs font-bold text-blue-400 hover:text-blue-300 px-2 py-1.5 rounded-lg transition-colors"
+            >
+              Muat Ulang
+            </button>
+            <button
+              onClick={() => setShowUpdateToast(false)}
+              className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              <X size={12} />
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
     <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout}>
       {currentTab === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -192,6 +257,8 @@ function App() {
         </div>
       )}
     </Layout>
+    <PWAInstallBanner />
+    </>
   );
 }
 
