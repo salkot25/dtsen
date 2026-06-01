@@ -144,15 +144,15 @@ function App() {
                lastCumulative={lastCumulative} 
                onUploadOfficers={handleUploadOfficers} 
              />
-             <WhatsAppGenerator 
-               history={history} 
-               settings={settings} 
-               selectedItem={history.find(h => h.id === selectedHistoryId)} 
-             />
              <HistoryTable 
                history={history} 
                selectedId={selectedHistoryId} 
                onSelectItem={(id) => setSelectedHistoryId(id === selectedHistoryId ? null : id)} 
+             />
+             <WhatsAppGenerator 
+               history={history} 
+               settings={settings} 
+               selectedItem={history.find(h => h.id === selectedHistoryId)} 
              />
           </div>
         </div>

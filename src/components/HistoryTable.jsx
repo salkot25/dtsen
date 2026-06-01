@@ -16,7 +16,7 @@ export default function HistoryTable({ history, selectedId, onSelectItem }) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-100 enterprise-shadow overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl border border-slate-100 enterprise-shadow overflow-hidden flex flex-col h-full">
       <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
         <div>
           <h3 className="text-base font-bold text-slate-900">Riwayat Pendataan</h3>
@@ -28,7 +28,7 @@ export default function HistoryTable({ history, selectedId, onSelectItem }) {
       </div>
       
       {/* Card-style list - no horizontal scroll */}
-      <div className="divide-y divide-slate-50">
+      <div className="divide-y divide-slate-50 flex-1">
         {paginatedData.map((item, pageIndex) => {
           const globalIndex = startIdx + pageIndex;
           const previousCumulative = history[globalIndex + 1] ? history[globalIndex + 1].value : 0;
