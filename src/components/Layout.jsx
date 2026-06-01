@@ -26,11 +26,11 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
     <div className={`bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row transition-colors duration-200 ${
       currentTab === 'ai_chat' 
         ? 'h-[100dvh] md:h-screen overflow-hidden' 
-        : 'min-h-screen'
+        : 'min-h-screen md:h-screen md:overflow-hidden'
     }`}>
       
       {/* Mobile Top AppBar Header (Solid White, Not Transparent) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 pt-safe flex items-center justify-between z-40 shadow-sm transition-colors">
+      <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm transition-colors">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-blue-600 rounded-lg">
             <Zap size={16} className="text-white" />
@@ -133,16 +133,31 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
       </div>
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col relative pt-[56px] pt-safe md:pt-0 ${
+      <div className={`flex-1 flex flex-col relative ${
         currentTab === 'ai_chat' 
           ? 'overflow-hidden pb-chat-mobile md:h-screen md:pb-0' 
-          : 'pb-tabs-mobile md:pb-0 overflow-y-auto'
+          : 'pb-tabs-mobile md:pb-0 overflow-y-auto md:h-screen md:overflow-hidden'
       }`}>
         {/* Desktop Topbar */}
         <header className="hidden md:flex bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 items-center justify-between sticky top-0 z-10 transition-colors">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-white tracking-tight">
-            {tabs.find((t) => t.id === currentTab)?.label}
-          </h2>
+          <div>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">
+              {tabs.find((t) => t.id === currentTab)?.label}
+            </h2>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+              {(() => {
+                const subtitles = {
+                  overview: "Ringkasan metrik kinerja dan pencapaian kumulatif aktual",
+                  input: "Catat capaian harian kumulatif terbaru dan kelola riwayat data",
+                  officer_recap: "Analisis kinerja individual petugas prabayar dan paskabayar",
+                  executive_summary: "Analisis tren strategis dan ringkasan eksekutif cerdas berbasis AI",
+                  ai_chat: "Konsultasikan data kinerja dan strategi taktis dengan AI",
+                  settings: "Konfigurasi target, periode kerja, libur, dan integrasi API Key"
+                };
+                return subtitles[currentTab] || "";
+              })()}
+            </p>
+          </div>
           <div className="flex items-center gap-3">
             <button
               onClick={toggleTheme}
@@ -162,7 +177,11 @@ export default function Layout({ children, currentTab, setCurrentTab, onLogout, 
         </header>
 
         {/* Page Content */}
-        <main className={`flex-1 ${currentTab === 'ai_chat' ? 'overflow-hidden min-h-0 flex flex-col' : 'overflow-x-hidden'}`}>
+        <main className={`flex-1 ${
+          currentTab === 'ai_chat' 
+            ? 'overflow-hidden min-h-0 flex flex-col' 
+            : 'overflow-x-hidden md:overflow-y-auto'
+        }`}>
           <div className={`w-full ${
             currentTab === 'ai_chat' 
               ? 'max-w-[1152px] mx-auto p-0 md:p-6 flex-1 min-h-0 flex flex-col' 
