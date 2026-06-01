@@ -181,7 +181,11 @@ const AiChat = ({ history, settings, isMobileSheet = false, onClose }) => {
 
       // Getaran halus setelah balasan AI masuk
       if (navigator.vibrate) {
-        navigator.vibrate(30);
+        try {
+          navigator.vibrate(30);
+        } catch (e) {
+          console.warn("Getaran haptic diblokir oleh browser:", e.message);
+        }
       }
     } catch (error) {
       const errorMsg = { id: Date.now(), role: 'model', text: `**Error:** ${error.message}`, session_id: currentSession };
@@ -198,7 +202,11 @@ const AiChat = ({ history, settings, isMobileSheet = false, onClose }) => {
 
   const handleQuickPrompt = (queryText) => {
     if (navigator.vibrate) {
-      navigator.vibrate(20);
+      try {
+        navigator.vibrate(20);
+      } catch (e) {
+        console.warn("Getaran haptic diblokir oleh browser:", e.message);
+      }
     }
     sendMessage(queryText);
   };

@@ -115,7 +115,7 @@ function App() {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleRefreshData = async () => {
+  const handleRefreshData = async (shouldVibrate = false) => {
     try {
       const data = await fetchHistory();
       setHistory(data.history);
@@ -127,9 +127,13 @@ function App() {
         setOfficers(data.officers);
         localStorage.setItem('dtsen_officers', JSON.stringify(data.officers));
       }
-      // Haptic tactile feedback for supported mobile devices (vibration)
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
+      // Haptic tactile feedback only if user explicitly triggered it
+      if (shouldVibrate && navigator.vibrate) {
+        try {
+          navigator.vibrate(50);
+        } catch (e) {
+          console.warn("Getaran haptic diblokir oleh browser:", e.message);
+        }
       }
     } catch (err) {
       console.error("Gagal memperbarui data:", err);
@@ -234,7 +238,7 @@ function App() {
       </div>
     )}
 
-    <Layout currentTab={currentTab} setCurrentTab={handleTabChange} onLogout={handleLogout} onRefresh={handleRefreshData}>
+    <Layout currentTab={currentTab} setCurrentTab={handleTabChange} onLogout={handleLogout} onRefresh={() => handleRefreshData(true)}>
       {activeTabToRender === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <DashboardOverview history={history} settings={settings} setCurrentTab={handleTabChange} />
