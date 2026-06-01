@@ -231,13 +231,22 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
     }
   };
 
-  // Percentage Calculations relative to totalTarget
+  // Target & Percentage Calculations according to customized formula
   const totalTarget = settings.totalTarget || 206533;
-  const totalCombinedSubmitted = stats.totalPaskaSubmitted + stats.totalPraSubmitted;
   
+  // Paskabayar target = Total Open Paskabayar + Total Submitted Paskabayar
+  const targetPaska = stats.totalPaskaOpen + stats.totalPaskaSubmitted;
+  // Paskabayar percentage = (Total Submitted / targetPaska) * 100
+  const paskaPct = targetPaska > 0 ? (stats.totalPaskaSubmitted / targetPaska * 100).toFixed(1) : '0.0';
+  
+  // Prabayar target = Total Target - targetPaska
+  const targetPra = totalTarget - targetPaska;
+  // Prabayar percentage = (Total Submitted / targetPra) * 100
+  const praPct = targetPra > 0 ? (stats.totalPraSubmitted / targetPra * 100).toFixed(1) : '0.0';
+  
+  // Combined progress = Total Combined Submitted / Total Target
+  const totalCombinedSubmitted = stats.totalPaskaSubmitted + stats.totalPraSubmitted;
   const combinedPct = totalTarget > 0 ? (totalCombinedSubmitted / totalTarget * 100).toFixed(1) : '0.0';
-  const paskaPct = totalTarget > 0 ? (stats.totalPaskaSubmitted / totalTarget * 100).toFixed(1) : '0.0';
-  const praPct = totalTarget > 0 ? (stats.totalPraSubmitted / totalTarget * 100).toFixed(1) : '0.0';
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -294,11 +303,11 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Submitted Paskabayar</p>
                 <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{formatNumber(stats.totalPaskaSubmitted)}</h3>
                 <div className="flex justify-between items-center text-[10px] text-slate-405 mt-1.5 font-medium">
-                  <span>Rasio vs Target:</span>
+                  <span>Rasio Realisasi:</span>
                   <span className="font-bold text-blue-600">{paskaPct}%</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
-                  <div className="bg-blue-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min(paskaPct, 100)}%` }} style={{ width: `${Math.min(paskaPct, 100)}%` }} />
+                  <div className="bg-blue-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min(paskaPct, 100)}%` }} />
                 </div>
               </div>
             </div>
@@ -312,7 +321,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Submitted Prabayar</p>
                 <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight text-violet-900">{formatNumber(stats.totalPraSubmitted)}</h3>
                 <div className="flex justify-between items-center text-[10px] text-slate-405 mt-1.5 font-medium">
-                  <span>Rasio vs Target:</span>
+                  <span>Rasio vs Target Pra:</span>
                   <span className="font-bold text-violet-600">{praPct}%</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
