@@ -83,37 +83,26 @@ export default function HistoryTable({ history, selectedId, onSelectItem }) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-4 py-2.5 border-t border-slate-100 flex items-center justify-between">
-          <span className="text-[11px] text-slate-400">
-            {startIdx + 1}-{Math.min(startIdx + ITEMS_PER_PAGE, history.length)} dari {history.length}
+        <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <span className="text-[11px] font-bold text-slate-500">
+            Halaman {currentPage} dari {totalPages}
           </span>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <button 
               onClick={() => goTo(currentPage - 1)} 
               disabled={currentPage === 1}
-              className="p-1 rounded-md hover:bg-slate-100 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-35 disabled:cursor-not-allowed transition-colors text-xs font-semibold flex items-center gap-1 active:scale-[0.97]"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={14} />
+              Prev
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => goTo(page)}
-                className={`w-7 h-7 rounded-md text-xs font-medium transition-all ${
-                  page === currentPage 
-                    ? 'bg-blue-600 text-white shadow-sm' 
-                    : 'text-slate-500 hover:bg-slate-100'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
             <button 
               onClick={() => goTo(currentPage + 1)} 
               disabled={currentPage === totalPages}
-              className="p-1 rounded-md hover:bg-slate-100 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-35 disabled:cursor-not-allowed transition-colors text-xs font-semibold flex items-center gap-1 active:scale-[0.97]"
             >
-              <ChevronRight size={16} />
+              Next
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>
