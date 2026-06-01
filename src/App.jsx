@@ -241,7 +241,7 @@ function App() {
 
       {currentTab === 'executive_summary' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <ExecutiveSummary history={history} settings={settings} />
+          <ExecutiveSummary history={history} settings={settings} officers={officers} />
         </div>
       )}
 

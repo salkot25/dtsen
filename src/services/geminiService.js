@@ -33,36 +33,60 @@ export async function generateExecutiveSummary(apiKey, data) {
 
   const model = genAI.getGenerativeModel({ model: selectedModelName });
 
+  const officerSection = data.officerData ? `
+
+--- DATA REKAP KINERJA PETUGAS ---
+- Jumlah Petugas Terdata: ${data.officerData.totalOfficers} orang
+- Total Submitted Paskabayar: ${data.officerData.totalPaskaSubmitted} pelanggan (Realisasi: ${data.officerData.paskaPct}%)
+- Total Submitted Prabayar: ${data.officerData.totalPraSubmitted} pelanggan (Realisasi: ${data.officerData.praPct}%)
+- Rata-rata Realisasi Paskabayar per Petugas: ${data.officerData.avgRealisasi}%
+
+🏆 Top 3 Performers (berdasarkan total submitted):
+${data.officerData.top3 || '(Belum ada data)'}
+
+⚠️ Petugas yang Membutuhkan Perhatian (submitted terendah):
+${data.officerData.bottom3 || '(Belum ada data)'}
+` : '';
+
   const prompt = `
 Anda adalah seorang analis data ahli dan manajer operasional untuk program "DTSEN ULP Salatiga Kota".
-Tugas Anda adalah membuat Ringkasan Eksekutif (Executive Summary) yang tajam, profesional, dan memberikan rekomendasi yang dapat ditindaklanjuti (actionable) berdasarkan data kinerja saat ini.
+Tugas Anda adalah membuat Ringkasan Eksekutif (Executive Summary) yang tajam, profesional, komprehensif, dan memberikan rekomendasi yang dapat ditindaklanjuti (actionable) berdasarkan data kinerja keseluruhan tim maupun kinerja individual petugas.
 
-Gunakan bahasa Indonesia yang baku, profesional, serta format markdown yang rapi (gunakan bold, bullet points, dan heading kecil).
+Gunakan bahasa Indonesia yang baku dan profesional, serta format markdown yang rapi (bold, bullet points, dan heading kecil).
 
-Berikut adalah data kinerja operasional terkini:
-- Pencapaian Total: ${data.currentTotal} pelanggan (${data.percentage}% dari Target Keseluruhan)
+=== DATA KINERJA KUMULATIF ===
+- Pencapaian Total: ${data.currentTotal} pelanggan (${data.percentage}% dari Target)
 - Target Keseluruhan: ${data.totalTarget} pelanggan
 - Sisa Pekerjaan: ${data.remainingWork} pelanggan
-- Jumlah Petugas Aktif: ${data.officerCount} orang
-- Sisa Waktu Kerja (Sisa hari di bulan ini / periode aktif): ${data.remainingDays} hari kerja
-- Target Harian Total (Agar selesai tepat waktu): ${data.dailyTarget} pelanggan/hari
+- Jumlah Petugas Aktif (Setting): ${data.officerCount} orang
+- Sisa Waktu Kerja: ${data.remainingDays} hari kerja
+- Target Harian Total (agar selesai tepat waktu): ${data.dailyTarget} pelanggan/hari
 - Target Harian per Petugas: ${data.targetPerOfficer} pelanggan/hari
 - Kinerja Rata-Rata Aktual (7 hari terakhir): ${data.avgRecent} pelanggan/hari
 - Kinerja Tertinggi (7 hari terakhir): ${data.maxRecent} pelanggan/hari
-- Status Sistem Saat Ini: ${data.statusLabel}
+- Status Sistem: ${data.statusLabel}
+${officerSection}
 
 Buatkan laporan dengan struktur berikut:
-### 📊 Intisari Kinerja
-Paragraf singkat yang merangkum posisi saat ini secara keseluruhan.
 
-### 🔍 Analisis Progres
-Berdasarkan perbandingan antara Kinerja Rata-Rata Aktual vs Target Harian Total, analisis apakah tim sedang tertinggal, on track, atau melampaui target. Sebutkan besaran defisit atau surplusnya.
+### 📊 Intisari Kinerja
+Paragraf singkat yang merangkum posisi keseluruhan tim saat ini, termasuk progres kumulatif dan kontribusi dari data rekap petugas jika tersedia.
+
+### 🔍 Analisis Progres & Dekomposisi
+Bandingkan kinerja rata-rata aktual vs target harian. Jika data rekap tersedia, analisis kontribusi paskabayar dan prabayar secara terpisah, serta seberapa besar gap masing-masing terhadap target.
+
+### 👥 Analisis Kinerja Individual Petugas
+(Isi bagian ini HANYA jika data rekap petugas tersedia)
+Berikan analisis singkat tentang pola kinerja: siapa yang menonjol, siapa yang perlu bimbingan, dan apakah ada disparitas performa yang signifikan antar petugas. Jangan hanya mengulangi nama – berikan interpretasi manajerial.
 
 ### 📈 Prognosa Pencapaian Target
-Berdasarkan kecepatan rata-rata saat ini (${data.avgRecent} pelanggan/hari) dan sisa waktu kerja (${data.remainingDays} hari), berikan hitungan kasar prediksi perolehan di akhir periode. Nyatakan secara objektif probabilitas target tercapai (Rendah/Sedang/Tinggi) jika tren ini dipertahankan, serta berapa tambahan pelanggan ekstra mutlak per hari yang diperlukan untuk membalikkan keadaan.
+Berdasarkan kecepatan rata-rata saat ini (${data.avgRecent} pelanggan/hari) dan sisa ${data.remainingDays} hari kerja, hitung prediksi perolehan akhir periode dan nyatakan probabilitas target tercapai (Rendah/Sedang/Tinggi). Sertakan angka ekstra yang dibutuhkan per hari agar target kembali on track.
 
 ### 💡 Rekomendasi Taktis
-Berikan 3 rekomendasi taktis untuk petugas lapangan atau manajemen. Jika tertinggal, berikan simulasi beban tambahan per petugas agar target kembali *on track*.
+Berikan 3–4 rekomendasi spesifik dan dapat ditindaklanjuti, mencakup:
+- Strategi tim secara keseluruhan
+- Penanganan petugas berkinerja rendah (jika data tersedia)
+- Optimasi segmen (paskabayar vs prabayar) jika relevan
 
 Tulis langsung isi laporan tanpa salam pembuka atau penutup.
   `;
