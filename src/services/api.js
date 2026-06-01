@@ -75,7 +75,7 @@ export async function saveSettingsToSpreadsheet(settings) {
   }
 }
 
-export async function saveOfficersToSpreadsheet(officers) {
+export async function saveOfficersToSpreadsheet(officers, type) {
   if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
     return new Promise((resolve) => setTimeout(() => resolve({ status: 'success' }), 500));
   }
@@ -86,7 +86,7 @@ export async function saveOfficersToSpreadsheet(officers) {
       headers: {
         'Content-Type': 'text/plain;charset=utf-8',
       },
-      body: JSON.stringify({ action: 'save_officers', officers }),
+      body: JSON.stringify({ action: 'save_officers', officers, type }),
     });
     return await response.json();
   } catch (error) {

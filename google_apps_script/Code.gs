@@ -60,17 +60,43 @@ function doPost(e) {
       var officersSheet = ss.getSheetByName('Rekap_Petugas');
       if (!officersSheet) {
         officersSheet = ss.insertSheet('Rekap_Petugas');
-      } else {
-        officersSheet.clear();
       }
       
-      var rows = [['no', 'nama', 'email', 'open', 'submitted', 'rejected', 'realisasi']];
+      // Ambil data lama jika ada
+      var existingData = [];
+      if (officersSheet.getLastRow() > 1) {
+        existingData = officersSheet.getRange(2, 1, officersSheet.getLastRow() - 1, 8).getValues();
+      }
+      
+      // Filter data tipe lain (misal jika kita upload paska, simpan data pra)
+      var uploadType = data.type || "paskabayar";
+      var filteredData = existingData.filter(function(row) {
+        return row[7] !== uploadType; // kolom ke-8 adalah type
+      });
+      
+      // Tambahkan data baru hasil upload
       for (var i = 0; i < data.officers.length; i++) {
         var o = data.officers[i];
-        rows.push([o.no, o.nama, o.email, o.open, o.submitted, o.rejected, o.realisasi]);
+        filteredData.push([
+          o.no,
+          o.nama,
+          o.email,
+          o.open,
+          o.submitted,
+          o.rejected,
+          o.realisasi,
+          uploadType
+        ]);
       }
       
-      officersSheet.getRange(1, 1, rows.length, 7).setValues(rows);
+      // Bersihkan sheet dan tulis ulang seluruh data gabungan
+      officersSheet.clear();
+      var rows = [['no', 'nama', 'email', 'open', 'submitted', 'rejected', 'realisasi', 'type']];
+      for (var j = 0; j < filteredData.length; j++) {
+        rows.push(filteredData[j]);
+      }
+      
+      officersSheet.getRange(1, 1, rows.length, 8).setValues(rows);
       
       return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
         .setMimeType(ContentService.MimeType.JSON);
@@ -244,7 +270,8 @@ function doGet(e) {
             open: parseInt(oData[k][3], 10),
             submitted: parseInt(oData[k][4], 10),
             rejected: parseInt(oData[k][5], 10),
-            realisasi: parseFloat(oData[k][6])
+            realisasi: parseFloat(oData[k][6]),
+            type: oData[k][7] || 'paskabayar'
           });
         }
       }

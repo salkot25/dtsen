@@ -36,7 +36,8 @@ function App() {
 
   const [officers, setOfficers] = useState(() => {
     const saved = localStorage.getItem('dtsen_officers');
-    return saved ? JSON.parse(saved) : defaultOfficers;
+    if (saved) return JSON.parse(saved);
+    return defaultOfficers.map(o => ({ ...o, type: o.type || 'paskabayar' }));
   });
 
   const handleSaveSettings = async (newSettings) => {
@@ -49,11 +50,19 @@ function App() {
     }
   };
 
-  const handleUploadOfficers = async (newOfficers) => {
-    setOfficers(newOfficers);
-    localStorage.setItem('dtsen_officers', JSON.stringify(newOfficers));
+  const handleUploadOfficers = async (newOfficers, type) => {
+    setOfficers(prev => {
+      const filtered = prev.filter(o => o.type !== type);
+      const combined = [
+        ...filtered,
+        ...newOfficers.map(o => ({ ...o, type }))
+      ];
+      localStorage.setItem('dtsen_officers', JSON.stringify(combined));
+      return combined;
+    });
+
     try {
-      await saveOfficersToSpreadsheet(newOfficers);
+      await saveOfficersToSpreadsheet(newOfficers, type);
     } catch (err) {
       console.error("Gagal menyimpan rekap petugas ke server:", err);
     }
@@ -143,6 +152,7 @@ function App() {
                onSubmit={handleSubmitRealisasi} 
                lastCumulative={lastCumulative} 
                onUploadOfficers={handleUploadOfficers} 
+               officers={officers}
              />
              <HistoryTable 
                history={history} 

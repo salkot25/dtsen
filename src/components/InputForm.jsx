@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Send, AlertCircle, CheckCircle2, Loader2, Upload, FileSpreadsheet } from 'lucide-react';
+import { Send, AlertCircle, CheckCircle2, Loader2, FileSpreadsheet } from 'lucide-react';
 import { formatNumber } from '../utils/dateUtils';
 import * as XLSX from 'xlsx';
 
-export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers }) {
+export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers, officers = [] }) {
   // Card 1 state
   const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState('');
@@ -50,7 +50,7 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers }
     }
   };
 
-  const handleExcelUpload = (e) => {
+  const handleExcelUpload = (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
     
@@ -76,7 +76,7 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers }
           throw new Error('Berkas Excel kosong atau tidak memiliki data.');
         }
 
-        // Validate headers (must contain Nama Biller and Email Biller)
+        // Validate headers (must contain Nama Biller)
         const firstRow = rawJson[0];
         const hasName = 'Nama Biller' in firstRow || 'nama' in firstRow || 'Nama' in firstRow;
         
@@ -84,15 +84,15 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers }
           throw new Error('Kolom "Nama Biller" tidak ditemukan dalam berkas Excel.');
         }
 
-        // Map columns and accumulate totals
-        let totalSubmitted = 0;
-        let totalOpen = 0;
+        // Map columns and accumulate totals from uploaded file
+        let totalSubmittedUploaded = 0;
+        let totalOpenUploaded = 0;
         const mappedOfficers = rawJson.map((row, idx) => {
           const rawRealisasi = row['% REALISASI'] !== undefined ? row['% REALISASI'] : (row['realisasi'] || 0);
           const openVal = Number(row['OPEN'] || row['open'] || 0);
           const submittedVal = Number(row['SUBMITTED'] || row['submitted'] || 0);
-          totalSubmitted += submittedVal;
-          totalOpen += openVal;
+          totalSubmittedUploaded += submittedVal;
+          totalOpenUploaded += openVal;
           
           return {
             no: Number(row['NO'] || row['no'] || idx + 1),
@@ -109,14 +109,20 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers }
         });
 
         // Trigger parent callback to save in State & GAS
-        await onUploadOfficers(mappedOfficers);
+        await onUploadOfficers(mappedOfficers, type);
         
-        // Calculate cumulative achievement: submitted - open
-        const computedAchievement = totalSubmitted - totalOpen;
+        // Calculate cumulative achievement: (submittedUploaded - openUploaded) + (otherTypeSubmitted - otherTypeOpen)
+        const otherType = type === 'paskabayar' ? 'prabayar' : 'paskabayar';
+        const otherOfficers = (officers || []).filter(o => o.type === otherType);
+        const totalSubmittedOther = otherOfficers.reduce((sum, o) => sum + (o.submitted || 0), 0);
+        const totalOpenOther = otherOfficers.reduce((sum, o) => sum + (o.open || 0), 0);
+
+        const computedAchievement = (totalSubmittedUploaded - totalOpenUploaded) + (totalSubmittedOther - totalOpenOther);
         setInputValue(String(computedAchievement));
 
-        setExcelSuccess(`Berhasil mengunggah ${mappedOfficers.length} data rekap petugas ke cloud! Nilai Capaian Kumulatif (${formatNumber(computedAchievement)}) otomatis dimasukkan ke dalam formulir.`);
-        setTimeout(() => setExcelSuccess(''), 6000);
+        const typeLabel = type === 'paskabayar' ? 'Paskabayar' : 'Prabayar';
+        setExcelSuccess(`Berhasil mengunggah rekap ${typeLabel} ke cloud! Capaian Kumulatif Gabungan ULP Salatiga Kota (${formatNumber(computedAchievement)}) otomatis dimasukkan.`);
+        setTimeout(() => setExcelSuccess(''), 7000);
       } catch (err) {
         setExcelError(err.message || 'Gagal membaca berkas Excel. Pastikan format kolom sesuai.');
       } finally {
@@ -201,27 +207,50 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers }
         </div>
 
         <div className="space-y-4">
-          {/* Custom Dashed File Upload Dropzone */}
-          <label className="border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/10 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all text-center group">
-            <input
-              type="file"
-              accept=".xlsx, .xls"
-              onChange={handleExcelUpload}
-              className="hidden"
-              disabled={isParsingExcel}
-            />
-            {isParsingExcel ? (
-              <Loader2 size={32} className="text-blue-500 animate-spin mb-2" />
-            ) : (
-              <FileSpreadsheet size={32} className="text-slate-400 group-hover:text-blue-500 group-hover:scale-110 transition-all mb-2" />
-            )}
-            <span className="text-sm font-semibold text-slate-700 mt-1">
-              {isParsingExcel ? 'Membaca Excel...' : 'Pilih File Excel'}
-            </span>
-            <span className="text-xs text-slate-400 mt-1">
-              Format .xlsx atau .xls (Sheet: 'PETUGAS')
-            </span>
-          </label>
+          {/* Side-by-Side Upload Dropzones */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            {/* Upload Paskabayar */}
+            <label className={`border-2 border-dashed rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer transition-all text-center group ${
+              isParsingExcel ? 'border-slate-100 opacity-50 cursor-not-allowed' : 'border-blue-100 hover:border-blue-400 bg-blue-50/5 hover:bg-blue-50/20'
+            }`}>
+              <input
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={(e) => handleExcelUpload(e, 'paskabayar')}
+                className="hidden"
+                disabled={isParsingExcel}
+              />
+              {isParsingExcel ? (
+                <Loader2 size={24} className="text-blue-500 animate-spin mb-1.5" />
+              ) : (
+                <FileSpreadsheet size={24} className="text-blue-400 group-hover:text-blue-600 group-hover:scale-110 transition-all mb-1.5" />
+              )}
+              <span className="text-xs font-bold text-blue-900">Unggah Paskabayar</span>
+              <span className="text-[10px] text-slate-400 mt-1">Format .xlsx (Sheet: 'PETUGAS')</span>
+            </label>
+
+            {/* Upload Prabayar */}
+            <label className={`border-2 border-dashed rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer transition-all text-center group ${
+              isParsingExcel ? 'border-slate-100 opacity-50 cursor-not-allowed' : 'border-violet-100 hover:border-violet-400 bg-violet-50/5 hover:bg-violet-50/20'
+            }`}>
+              <input
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={(e) => handleExcelUpload(e, 'prabayar')}
+                className="hidden"
+                disabled={isParsingExcel}
+              />
+              {isParsingExcel ? (
+                <Loader2 size={24} className="text-violet-500 animate-spin mb-1.5" />
+              ) : (
+                <FileSpreadsheet size={24} className="text-violet-400 group-hover:text-violet-600 group-hover:scale-110 transition-all mb-1.5" />
+              )}
+              <span className="text-xs font-bold text-violet-900">Unggah Prabayar</span>
+              <span className="text-[10px] text-slate-400 mt-1">Format .xlsx (Sheet: 'PETUGAS')</span>
+            </label>
+            
+          </div>
 
           {/* Excel Parser Status Messages */}
           {excelError && (
