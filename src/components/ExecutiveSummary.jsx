@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import {
   Target, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Calendar,
   Activity, BarChart2, FileText, Users, Sparkles, Loader2, Clock, X,
-  Award, Medal, Zap, ArrowRight, Gauge, ChevronRight
+  Award, Medal, Zap, ArrowRight, Gauge, ChevronRight, HelpCircle
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -63,7 +63,45 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const ExecutiveSummary = ({ history, settings, officers = [] }) => {
-  const currentTotal = history.length > 0 ? history[0].value : 0;
+  const [considerCategories, setConsiderCategories] = useState(true);
+  const [infoMetric, setInfoMetric] = useState(null); // 'target' | 'avg' | 'max' | 'time' | 'trend' | null
+
+  // ─── Calculate dynamic totals from officers if available ───
+  const hasOfficerData = officers && officers.length > 0;
+  
+  const totalsFromOfficers = useMemo(() => {
+    if (!hasOfficerData) return { realisasi: 0, submitted: 0 };
+    
+    let totalPaskaSubmitted = 0;
+    let totalPaskaRejected = 0;
+    let totalPraSubmitted = 0;
+    let totalPraRejected = 0;
+
+    officers.forEach(o => {
+      const colJ = o.colJ !== undefined ? o.colJ : 0;
+      const colK = o.colK !== undefined ? o.colK : 0;
+      const colL = o.colL !== undefined ? o.colL : 0;
+      const rejected = colJ + colK + colL;
+
+      if (o.type === 'prabayar') {
+        totalPraSubmitted += o.submitted || 0;
+        totalPraRejected += rejected;
+      } else {
+        totalPaskaSubmitted += o.submitted || 0;
+        totalPaskaRejected += rejected;
+      }
+    });
+
+    const realisasi = (totalPaskaSubmitted - totalPaskaRejected) + (totalPraSubmitted - totalPraRejected);
+    const submitted = totalPaskaSubmitted + totalPraSubmitted;
+
+    return { realisasi, submitted };
+  }, [officers]);
+
+  const currentTotal = considerCategories
+    ? (history.length > 0 ? history[0].value : 0)
+    : (hasOfficerData ? totalsFromOfficers.submitted : (history.length > 0 ? history[0].value : 0));
+
   const percentage = Math.min(((currentTotal / settings.totalTarget) * 100), 100).toFixed(1);
   const remainingWork = settings.totalTarget - currentTotal;
   const remainingDays = getRemainingWorkingDays(settings);
@@ -77,8 +115,18 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [timeFilter, setTimeFilter] = useState('7d');
 
+  // ─── History Scaling Dinamis ───
+  const scaleFactor = (history.length > 0 && history[0].value > 0) ? (currentTotal / history[0].value) : 1;
+  const adjustedHistory = useMemo(() => {
+    return history.map(item => ({
+      ...item,
+      value: item.value * scaleFactor,
+      dailyAchieved: item.dailyAchieved !== undefined ? item.dailyAchieved * scaleFactor : undefined
+    }));
+  }, [history, scaleFactor]);
+
   // ─── 7-Day Analysis ───
-  const recentHistory = history.slice(0, 7);
+  const recentHistory = adjustedHistory.slice(0, 7);
   const recentAchieved = recentHistory.map((item, idx, arr) => {
     if (item.dailyAchieved !== undefined) return item.dailyAchieved;
     if (idx < arr.length - 1) return item.value - arr[idx + 1].value;
@@ -88,17 +136,39 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
   const avgRecent = recentAchieved.length > 0
     ? Math.round(recentAchieved.reduce((a, b) => a + b, 0) / recentAchieved.length)
     : 0;
-  const maxRecent = recentAchieved.length > 0 ? Math.max(...recentAchieved) : 0;
-  const minRecent = recentAchieved.length > 0 ? Math.min(...recentAchieved) : 0;
+  const maxRecent = recentAchieved.length > 0 ? Math.round(Math.max(...recentAchieved)) : 0;
+  const minRecent = recentAchieved.length > 0 ? Math.round(Math.min(...recentAchieved)) : 0;
+
+  const latestRealProgress = useMemo(() => {
+    if (!history || history.length === 0) return 0;
+    const latest = history[0];
+    if (latest.dailyAchieved !== undefined) return latest.dailyAchieved;
+    if (history.length > 1) {
+      return latest.value - history[1].value;
+    }
+    return latest.value;
+  }, [history]);
+
+  const latestRealDate = useMemo(() => {
+    if (!history || history.length === 0) return '-';
+    try {
+      const dateObj = new Date(history[0].date);
+      return dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    } catch {
+      return '-';
+    }
+  }, [history]);
+
+  const latestRealPct = dailyTarget > 0 ? Math.min((latestRealProgress / dailyTarget) * 100, 100) : 0;
 
   const isOnTrack = avgRecent >= dailyTarget;
   const isSlightlyBehind = avgRecent > 0 && avgRecent < dailyTarget;
 
   // ─── Chart Data ───
-  const sliceMap = { '7d': 8, '30d': 31, 'all': history.length };
+  const sliceMap = { '7d': 8, '30d': 31, 'all': adjustedHistory.length };
   const pointsToSlice = sliceMap[timeFilter] || 8;
 
-  const chartData = [...history]
+  const chartData = [...adjustedHistory]
     .slice(0, pointsToSlice)
     .reverse()
     .map((item, idx, arr) => {
@@ -107,15 +177,19 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
       const dateObj = new Date(item.date);
       return {
         name: `${dateObj.getDate()}/${dateObj.getMonth() + 1}`,
-        realisasi: realisasi > 0 ? realisasi : 0,
+        realisasi: realisasi > 0 ? Math.round(realisasi) : 0,
       };
     })
     .filter(Boolean);
 
   // ─── Scenario Calculations ───
-  const scenarioOptimistic = currentTotal + (maxRecent * remainingDays);
-  const scenarioRealistic = currentTotal + (avgRecent * remainingDays);
-  const scenarioTarget = currentTotal + (dailyTarget * remainingDays);
+  const elapsedDays = Math.max(totalProjectDays - remainingDays, 1);
+  const avgDailyVelocity = currentTotal / elapsedDays;
+  const accelerationVelocity = dailyTarget * 1.15;
+
+  const scenarioCurrent = Math.round(currentTotal + (avgDailyVelocity * remainingDays));
+  const scenarioTarget = Math.round(currentTotal + (dailyTarget * remainingDays));
+  const scenarioAcceleration = Math.round(currentTotal + (accelerationVelocity * remainingDays));
 
   const getScenarioStatus = (predicted) => {
     if (predicted >= settings.totalTarget) return { label: 'Tercapai', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100', prob: 'Tinggi' };
@@ -135,45 +209,112 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
           nama: o.nama,
           paskaOpen: 0, paskaSubmitted: 0, paskaRejected: 0, paskaRealisasi: 0,
           praSubmitted: 0, praRejected: 0,
+          paskaColI: 0, paskaColJ: 0, paskaColK: 0, paskaColL: 0,
+          praColI: 0, praColJ: 0, praColK: 0, praColL: 0,
         });
       }
       const entry = map.get(nameKey);
       if (o.type === 'prabayar') {
         entry.praSubmitted = o.submitted || 0;
         entry.praRejected = o.rejected || 0;
+        entry.praColI = o.colI !== undefined ? o.colI : 0;
+        entry.praColJ = o.colJ !== undefined ? o.colJ : 0;
+        entry.praColK = o.colK !== undefined ? o.colK : 0;
+        entry.praColL = o.colL !== undefined ? o.colL : 0;
       } else {
         entry.paskaOpen = o.open || 0;
         entry.paskaSubmitted = o.submitted || 0;
         entry.paskaRejected = o.rejected || 0;
         entry.paskaRealisasi = o.realisasi || 0;
+        entry.paskaColI = o.colI !== undefined ? o.colI : 0;
+        entry.paskaColJ = o.colJ !== undefined ? o.colJ : 0;
+        entry.paskaColK = o.colK !== undefined ? o.colK : 0;
+        entry.paskaColL = o.colL !== undefined ? o.colL : 0;
       }
     });
 
-    const list = Array.from(map.values()).map(o => ({
-      ...o,
-      totalSubmitted: o.paskaSubmitted + o.praSubmitted,
-    })).sort((a, b) => b.totalSubmitted - a.totalSubmitted);
+    const list = Array.from(map.values()).map(o => {
+      const paskaRejected = o.paskaColJ + o.paskaColK + o.paskaColL;
+      const praRejected = o.praColJ + o.praColK + o.praColL;
+      const paskaRealisasiVal = o.paskaSubmitted - paskaRejected;
+      const praRealisasiVal = o.praSubmitted - praRejected;
+
+      const totalSubmitted = o.paskaSubmitted + o.praSubmitted;
+      const totalRealisasiVal = paskaRealisasiVal + praRealisasiVal;
+      
+      const displayTotal = considerCategories ? totalRealisasiVal : totalSubmitted;
+
+      return {
+        ...o,
+        paskaRejected,
+        praRejected,
+        paskaRealisasiVal,
+        praRealisasiVal,
+        totalSubmitted,
+        totalRealisasiVal,
+        displayTotal,
+      };
+    }).sort((a, b) => b.displayTotal - a.displayTotal);
 
     let totalPaskaSubmitted = 0, totalPaskaOpen = 0, totalPraSubmitted = 0;
+    let totalPaskaRejected = 0, totalPraRejected = 0;
     let sumRealisasi = 0, countRealisasi = 0;
     list.forEach(o => {
       totalPaskaSubmitted += o.paskaSubmitted;
       totalPaskaOpen += o.paskaOpen;
+      totalPaskaRejected += o.paskaRejected;
       totalPraSubmitted += o.praSubmitted;
-      if (o.paskaRealisasi > 0) { sumRealisasi += o.paskaRealisasi; countRealisasi++; }
+      totalPraRejected += o.praRejected;
+      
+      // Calculate dynamic paskaRealisasi ratio for average
+      const paskaDenom = o.paskaOpen + o.paskaSubmitted;
+      const paskaRealisasi = paskaDenom > 0 
+        ? (considerCategories 
+            ? (o.paskaSubmitted - o.paskaRejected) / paskaDenom 
+            : o.paskaSubmitted / paskaDenom) 
+        : 0;
+      
+      sumRealisasi += paskaRealisasi;
+      countRealisasi++;
     });
 
     const targetPaska = totalPaskaOpen + totalPaskaSubmitted;
-    const paskaPct = targetPaska > 0 ? (totalPaskaSubmitted / targetPaska * 100).toFixed(1) : '0.0';
+    const paskaPct = targetPaska > 0 
+      ? (considerCategories 
+          ? ((totalPaskaSubmitted - totalPaskaRejected) / targetPaska * 100) 
+          : (totalPaskaSubmitted / targetPaska * 100)
+        ).toFixed(1) 
+      : '0.0';
+
     const targetPra = (settings.totalTarget || 0) - targetPaska;
-    const praPct = targetPra > 0 ? (totalPraSubmitted / targetPra * 100).toFixed(1) : '0.0';
+    const praPct = targetPra > 0 
+      ? (considerCategories 
+          ? ((totalPraSubmitted - totalPraRejected) / targetPra * 100) 
+          : (totalPraSubmitted / targetPra * 100)
+        ).toFixed(1) 
+      : '0.0';
+
     const avgRealisasi = countRealisasi > 0 ? (sumRealisasi / countRealisasi * 100).toFixed(1) : '0.0';
 
     const top3 = list.slice(0, 3);
-    const bottom3 = list.filter(o => o.totalSubmitted > 0).slice(-3).reverse();
+    const bottom3 = list.filter(o => o.displayTotal > 0).slice(-3).reverse();
 
-    return { total: list.length, totalPaskaSubmitted, totalPaskaOpen, totalPraSubmitted, paskaPct, praPct, avgRealisasi, top3, bottom3, list };
-  }, [officers, settings.totalTarget]);
+    const displayPaska = considerCategories ? (totalPaskaSubmitted - totalPaskaRejected) : totalPaskaSubmitted;
+    const displayPra = considerCategories ? (totalPraSubmitted - totalPraRejected) : totalPraSubmitted;
+
+    return { 
+      total: list.length, 
+      totalPaskaSubmitted: displayPaska, 
+      totalPaskaOpen, 
+      totalPraSubmitted: displayPra, 
+      paskaPct, 
+      praPct, 
+      avgRealisasi, 
+      top3, 
+      bottom3, 
+      list 
+    };
+  }, [officers, settings.totalTarget, considerCategories]);
 
   // ─── AI Handler ───
   const handleGenerateAI = async () => {
@@ -188,8 +329,16 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
         totalPraSubmitted: formatNumber(officerStats.totalPraSubmitted),
         praPct: officerStats.praPct,
         avgRealisasi: officerStats.avgRealisasi,
-        top3: officerStats.top3.map((o, i) => `${i + 1}. ${o.nama} (Paska: ${o.paskaSubmitted}, Pra: ${o.praSubmitted}, Total: ${o.totalSubmitted})`).join('\n'),
-        bottom3: officerStats.bottom3.map((o, i) => `${i + 1}. ${o.nama} (Paska: ${o.paskaSubmitted}, Pra: ${o.praSubmitted}, Total: ${o.totalSubmitted})`).join('\n'),
+        top3: officerStats.top3.map((o, i) => {
+          const paskaVal = considerCategories ? o.paskaRealisasiVal : o.paskaSubmitted;
+          const praVal = considerCategories ? o.praRealisasiVal : o.praSubmitted;
+          return `${i + 1}. ${o.nama} (Paska: ${formatNumber(paskaVal)}, Pra: ${formatNumber(praVal)}, Total: ${formatNumber(o.displayTotal)})`;
+        }).join('\n'),
+        bottom3: officerStats.bottom3.map((o, i) => {
+          const paskaVal = considerCategories ? o.paskaRealisasiVal : o.paskaSubmitted;
+          const praVal = considerCategories ? o.praRealisasiVal : o.praSubmitted;
+          return `${i + 1}. ${o.nama} (Paska: ${formatNumber(paskaVal)}, Pra: ${formatNumber(praVal)}, Total: ${formatNumber(o.displayTotal)})`;
+        }).join('\n'),
       } : null;
 
       const data = {
@@ -202,6 +351,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
         avgRecent: formatNumber(avgRecent), maxRecent: formatNumber(maxRecent),
         statusLabel: isOnTrack ? 'On Track (Sangat Baik)' : isSlightlyBehind ? 'Perlu Peningkatan' : 'Perhatian Khusus',
         officerData,
+        scenarioLabel: considerCategories ? 'Mempertimbangkan Kategori Kunjungan (Realisasi Bersih)' : 'Tidak Memperhatikan Kategori Kunjungan (Total Submit)'
       };
 
       const summary = await generateExecutiveSummary(settings.geminiApiKey, data);
@@ -225,6 +375,43 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          FILTER TOGGLE: Visit Categories Filter
+         ══════════════════════════════════════════════════════════════════════ */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl shrink-0">
+            <Activity size={18} />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Metode Hitung Pencapaian</h4>
+            <p className="text-[11px] text-slate-400 mt-0.5">Tentukan apakah pencapaian kinerja menyertakan kategori kunjungan</p>
+          </div>
+        </div>
+        <div className="flex bg-slate-100/80 p-1 rounded-xl gap-1 w-full sm:w-auto shrink-0">
+          <button
+            onClick={() => setConsiderCategories(true)}
+            className={`flex-1 sm:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+              considerCategories
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
+                : 'text-slate-600 hover:text-slate-800'
+            }`}
+          >
+            <CheckCircle2 size={14} /> Pertimbangkan Kategori
+          </button>
+          <button
+            onClick={() => setConsiderCategories(false)}
+            className={`flex-1 sm:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+              !considerCategories
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
+                : 'text-slate-600 hover:text-slate-800'
+            }`}
+          >
+            <X size={14} /> Abaikan Kategori
+          </button>
+        </div>
+      </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 1: Hero Progress Ring + Status Banner
@@ -297,7 +484,12 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
             <TrendingUp size={20} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Harian</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Target Harian</p>
+              <button onClick={() => setInfoMetric('target')} className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer" title="Cara perhitungan">
+                <HelpCircle size={12} />
+              </button>
+            </div>
             <h3 className="text-xl md:text-2xl font-black text-slate-800 leading-none">{formatNumber(dailyTarget)}</h3>
             <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
               <span>per Petugas:</span>
@@ -315,7 +507,12 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
             <Activity size={20} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Rata-rata Aktual</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rata-rata Aktual</p>
+              <button onClick={() => setInfoMetric('avg')} className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer" title="Cara perhitungan">
+                <HelpCircle size={12} />
+              </button>
+            </div>
             <h3 className="text-xl md:text-2xl font-black text-slate-800 leading-none">{formatNumber(avgRecent)}</h3>
             <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
               <span>Gap:</span>
@@ -330,21 +527,26 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
           </div>
         </div>
 
-        {/* Capaian Tertinggi */}
+        {/* Capaian Terakhir (Real) */}
         <div className="bg-white rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm flex items-center gap-3 md:gap-4">
           <div className="p-2.5 md:p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
             <Award size={20} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tertinggi (7H)</p>
-            <h3 className="text-xl md:text-2xl font-black text-slate-800 leading-none">{formatNumber(maxRecent)}</h3>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Capaian Terakhir (Real)</p>
+              <button onClick={() => setInfoMetric('latest')} className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer" title="Cara perhitungan">
+                <HelpCircle size={12} />
+              </button>
+            </div>
+            <h3 className="text-xl md:text-2xl font-black text-slate-800 leading-none">{formatNumber(latestRealProgress)}</h3>
             <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
-              <span>Terendah:</span>
-              <span className="font-bold text-blue-600">{formatNumber(minRecent)}</span>
+              <span>Tanggal Data:</span>
+              <span className="font-bold text-blue-600">{latestRealDate}</span>
             </div>
             <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
               <div className="bg-blue-500 h-1 rounded-full transition-all duration-500"
-                style={{ width: `${dailyTarget > 0 ? Math.min((maxRecent / dailyTarget) * 100, 100) : 0}%` }} />
+                style={{ width: `${latestRealPct}%` }} />
             </div>
           </div>
         </div>
@@ -355,7 +557,12 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
             <Calendar size={20} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Sisa Waktu</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sisa Waktu</p>
+              <button onClick={() => setInfoMetric('time')} className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer" title="Cara perhitungan">
+                <HelpCircle size={12} />
+              </button>
+            </div>
             <h3 className="text-xl md:text-2xl font-black text-slate-800 leading-none">{remainingDays} <span className="text-xs font-normal text-slate-400">hari</span></h3>
             <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
               <span>Total Hari Kerja:</span>
@@ -377,6 +584,9 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
           <div>
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <BarChart2 size={18} className="text-blue-600" /> Tren Kinerja Harian
+              <button onClick={() => setInfoMetric('trend')} className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer" title="Cara perhitungan">
+                <HelpCircle size={14} />
+              </button>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Capaian aktual vs target harian yang diperlukan</p>
           </div>
@@ -439,57 +649,28 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
           <Gauge size={18} className="text-indigo-600" /> Simulator Skenario Pencapaian
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Optimis */}
+          {/* Kinerja Saat Ini */}
           {(() => {
-            const s = getScenarioStatus(scenarioOptimistic);
-            return (
-              <div className={`bg-white rounded-2xl p-5 border shadow-sm ${s.bg}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl"><TrendingUp size={16} /></div>
-                    <h4 className="text-sm font-bold text-slate-800">Skenario Optimis</h4>
-                  </div>
-                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${s.bg} ${s.color}`}>{s.prob}</span>
-                </div>
-                <p className="text-[11px] text-slate-500 mb-3">Jika kinerja tertinggi ({formatNumber(maxRecent)}/hari) dipertahankan</p>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Prediksi Total Akhir</span>
-                    <span className="font-black text-slate-900">{formatNumber(scenarioOptimistic)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Selisih vs Target</span>
-                    <span className={`font-bold ${scenarioOptimistic >= settings.totalTarget ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      {scenarioOptimistic >= settings.totalTarget ? '+' : ''}{formatNumber(scenarioOptimistic - settings.totalTarget)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Realistis */}
-          {(() => {
-            const s = getScenarioStatus(scenarioRealistic);
+            const s = getScenarioStatus(scenarioCurrent);
             return (
               <div className={`bg-white rounded-2xl p-5 border shadow-sm ${s.bg}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="p-2 bg-amber-100 text-amber-600 rounded-xl"><Activity size={16} /></div>
-                    <h4 className="text-sm font-bold text-slate-800">Skenario Realistis</h4>
+                    <h4 className="text-sm font-bold text-slate-800">Kinerja Saat Ini</h4>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${s.bg} ${s.color}`}>{s.prob}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mb-3">Jika rata-rata aktual ({formatNumber(avgRecent)}/hari) dipertahankan</p>
+                <p className="text-[11px] text-slate-500 mb-3">Jika rata-rata kecepatan berjalan ({formatNumber(Math.round(avgDailyVelocity))}/hari) dipertahankan</p>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Prediksi Total Akhir</span>
-                    <span className="font-black text-slate-900">{formatNumber(scenarioRealistic)}</span>
+                    <span className="font-black text-slate-900">{formatNumber(scenarioCurrent)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Selisih vs Target</span>
-                    <span className={`font-bold ${scenarioRealistic >= settings.totalTarget ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      {scenarioRealistic >= settings.totalTarget ? '+' : ''}{formatNumber(scenarioRealistic - settings.totalTarget)}
+                    <span className={`font-bold ${scenarioCurrent >= settings.totalTarget ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {scenarioCurrent >= settings.totalTarget ? '+' : ''}{formatNumber(scenarioCurrent - settings.totalTarget)}
                     </span>
                   </div>
                 </div>
@@ -497,7 +678,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
             );
           })()}
 
-          {/* Target */}
+          {/* Target Harian */}
           {(() => {
             const s = getScenarioStatus(scenarioTarget);
             return (
@@ -505,11 +686,11 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="p-2 bg-blue-100 text-blue-600 rounded-xl"><Target size={16} /></div>
-                    <h4 className="text-sm font-bold text-slate-800">Skenario Target</h4>
+                    <h4 className="text-sm font-bold text-slate-800">Target Harian</h4>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${s.bg} ${s.color}`}>{s.prob}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mb-3">Jika target harian ({formatNumber(dailyTarget)}/hari) tercapai setiap hari</p>
+                <p className="text-[11px] text-slate-500 mb-3">Jika target harian berjalan ({formatNumber(dailyTarget)}/hari) dicapai setiap hari</p>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Prediksi Total Akhir</span>
@@ -519,6 +700,35 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                     <span className="text-slate-500">Selisih vs Target</span>
                     <span className={`font-bold ${scenarioTarget >= settings.totalTarget ? 'text-emerald-600' : 'text-rose-600'}`}>
                       {scenarioTarget >= settings.totalTarget ? '+' : ''}{formatNumber(scenarioTarget - settings.totalTarget)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Akselerasi Aman */}
+          {(() => {
+            const s = getScenarioStatus(scenarioAcceleration);
+            return (
+              <div className={`bg-white rounded-2xl p-5 border shadow-sm ${s.bg}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl"><TrendingUp size={16} /></div>
+                    <h4 className="text-sm font-bold text-slate-800">Akselerasi Aman</h4>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${s.bg} ${s.color}`}>{s.prob}</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mb-3">Akselerasi kinerja 15% di atas target harian ({formatNumber(Math.round(accelerationVelocity))}/hari)</p>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Prediksi Total Akhir</span>
+                    <span className="font-black text-slate-900">{formatNumber(scenarioAcceleration)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Selisih vs Target</span>
+                    <span className={`font-bold ${scenarioAcceleration >= settings.totalTarget ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {scenarioAcceleration >= settings.totalTarget ? '+' : ''}{formatNumber(scenarioAcceleration - settings.totalTarget)}
                     </span>
                   </div>
                 </div>
@@ -653,10 +863,10 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-800 truncate">{o.nama}</p>
-                      <p className="text-[10px] text-slate-400">Paska: {formatNumber(o.paskaSubmitted)} · Pra: {formatNumber(o.praSubmitted)}</p>
+                      <p className="text-[10px] text-slate-400">Paska: {formatNumber(considerCategories ? o.paskaRealisasiVal : o.paskaSubmitted)} · Pra: {formatNumber(considerCategories ? o.praRealisasiVal : o.praSubmitted)}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-black text-slate-900">{formatNumber(o.totalSubmitted)}</p>
+                      <p className="text-sm font-black text-slate-900">{formatNumber(o.displayTotal)}</p>
                       <p className="text-[10px] text-slate-400">total</p>
                     </div>
                   </div>
@@ -678,10 +888,10 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-800 truncate">{o.nama}</p>
-                      <p className="text-[10px] text-slate-400">Paska: {formatNumber(o.paskaSubmitted)} · Pra: {formatNumber(o.praSubmitted)}</p>
+                      <p className="text-[10px] text-slate-400">Paska: {formatNumber(considerCategories ? o.paskaRealisasiVal : o.paskaSubmitted)} · Pra: {formatNumber(considerCategories ? o.praRealisasiVal : o.praSubmitted)}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-black text-rose-700">{formatNumber(o.totalSubmitted)}</p>
+                      <p className="text-sm font-black text-rose-700">{formatNumber(o.displayTotal)}</p>
                       <p className="text-[10px] text-slate-400">total</p>
                     </div>
                   </div>
@@ -760,6 +970,182 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                   </ReactMarkdown>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          MODAL: Info Perhitungan Rumus
+         ══════════════════════════════════════════════════════════════════════ */}
+      {infoMetric && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800 animate-slide-up">
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <HelpCircle size={18} className="text-blue-600" /> Detail Cara Perhitungan
+              </h3>
+              <button 
+                onClick={() => setInfoMetric(null)} 
+                className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              {infoMetric === 'target' && (
+                <>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-black text-slate-800 dark:text-slate-200">Target Harian</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Jumlah rata-rata pelanggan yang harus diselesaikan per hari kerja untuk mencapai total target.</p>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-850 rounded-xl p-4 border border-slate-100 dark:border-slate-800 space-y-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rumus Dasar</p>
+                      <code className="text-xs font-bold text-blue-600 dark:text-blue-400 block mt-1 bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-150 dark:border-slate-800">
+                        (Total Target - Pencapaian Kumulatif) / Sisa Hari Kerja
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Kalkulasi Aktual Saat Ini</p>
+                      <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1 mt-1 font-mono">
+                        <p>• Total Target: {formatNumber(settings.totalTarget)}</p>
+                        <p>• Pencapaian Kumulatif: {formatNumber(currentTotal)}</p>
+                        <p>• Sisa Pekerjaan: {formatNumber(remainingWork > 0 ? remainingWork : 0)}</p>
+                        <p>• Sisa Hari Kerja: {remainingDays} hari</p>
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2 pt-2 text-blue-600 dark:text-blue-450 font-bold">
+                          ({formatNumber(settings.totalTarget)} - {formatNumber(currentTotal)}) / {remainingDays} = {formatNumber(dailyTarget)} / hari
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {infoMetric === 'avg' && (
+                <>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-black text-slate-800 dark:text-slate-200">Rata-rata Aktual</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Rata-rata pencapaian realisasi harian yang sebenarnya selama 7 hari kerja terakhir.</p>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-850 rounded-xl p-4 border border-slate-100 dark:border-slate-800 space-y-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rumus Dasar</p>
+                      <code className="text-xs font-bold text-blue-600 dark:text-blue-400 block mt-1 bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-150 dark:border-slate-800">
+                        Total Realisasi 7 Hari Terakhir / Jumlah Hari Aktif
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Kalkulasi Aktual Saat Ini</p>
+                      <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1 mt-1 font-mono">
+                        <p>• Pencapaian Harian (7H): [{recentAchieved.map(v => formatNumber(Math.round(v))).join(', ')}]</p>
+                        <p>• Total Realisasi: {formatNumber(recentAchieved.reduce((a, b) => a + b, 0))}</p>
+                        <p>• Jumlah Hari Aktif: {recentAchieved.length} hari</p>
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2 pt-2 text-blue-600 dark:text-blue-450 font-bold">
+                          {formatNumber(recentAchieved.reduce((a, b) => a + b, 0))} / {recentAchieved.length} = {formatNumber(avgRecent)} / hari
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {infoMetric === 'latest' && (
+                <>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-black text-slate-800 dark:text-slate-200">Capaian Terakhir (Real)</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Angka pencapaian harian terbaru yang diambil langsung dari baris data teratas di spreadsheet.</p>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-850 rounded-xl p-4 border border-slate-100 dark:border-slate-800 space-y-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rumus Dasar</p>
+                      <code className="text-xs font-bold text-blue-600 dark:text-blue-400 block mt-1 bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-150 dark:border-slate-800">
+                        Pencapaian Kumulatif Hari Ini - Pencapaian Kumulatif Kemarin
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Kalkulasi Aktual Saat Ini</p>
+                      <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1 mt-1 font-mono">
+                        <p>• Kumulatif Terakhir (Sheet): {formatNumber(history.length > 0 ? history[0].value : 0)}</p>
+                        <p>• Kumulatif Sebelumnya (Sheet): {formatNumber(history.length > 1 ? history[1].value : 0)}</p>
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2 pt-2 text-blue-600 dark:text-blue-450 font-bold">
+                          {formatNumber(history.length > 0 ? history[0].value : 0)} - {formatNumber(history.length > 1 ? history[1].value : 0)} = {formatNumber(latestRealProgress)} pelanggan
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {infoMetric === 'time' && (
+                <>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-black text-slate-800 dark:text-slate-200">Sisa Waktu</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Jumlah hari kerja aktif yang tersisa untuk menyelesaikan seluruh target proyek.</p>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-855 rounded-xl p-4 border border-slate-100 dark:border-slate-800 space-y-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Metode Perhitungan</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                        Menghitung jumlah hari dari tanggal hari ini hingga tanggal target proyek, dengan mengecualikan hari Sabtu dan Minggu (serta hari libur/libur nasional jika dikonfigurasi).
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Kalkulasi Aktual Saat Ini</p>
+                      <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1 mt-1 font-mono">
+                        <p>• Tanggal Mulai Proyek: {settings.startDate}</p>
+                        <p>• Tanggal Target Selesai: {settings.targetDate}</p>
+                        <p>• Total Hari Kerja Proyek: {totalProjectDays} hari</p>
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2 pt-2 text-blue-600 dark:text-blue-450 font-bold">
+                          Sisa Hari Kerja Aktif: {remainingDays} hari
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {infoMetric === 'trend' && (
+                <>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-black text-slate-800 dark:text-slate-200">Tren Kinerja Harian</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Grafik area yang menampilkan tren pencapaian aktual harian dan target yang harus dicapai.</p>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-850 rounded-xl p-4 border border-slate-100 dark:border-slate-800 space-y-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Metode Perhitungan Data</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                        Setiap titik pada grafik mewakili pencapaian realisasi pada tanggal tertentu. Nilai realisasi harian diperoleh dari:
+                      </p>
+                      <code className="text-[11px] font-bold text-blue-600 dark:text-blue-400 block mt-1 bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-150 dark:border-slate-800">
+                        Pencapaian Hari (t) - Pencapaian Hari (t-1)
+                      </code>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
+                        *Catatan: Nilai disesuaikan secara proporsional sesuai toggle Kategori Kunjungan (Realisasi Bersih vs Total Submit).
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Kalkulasi Batas Target Harian</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                        Garis putus-putus merah pada grafik menunjukkan target harian minimum yang dibutuhkan saat ini yaitu sebesar <strong className="text-rose-600 dark:text-rose-400 font-bold">{formatNumber(dailyTarget)} / hari</strong>.
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50 dark:bg-slate-900/50">
+              <button 
+                onClick={() => setInfoMetric(null)} 
+                className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/10 cursor-pointer"
+              >
+                Tutup
+              </button>
             </div>
           </div>
         </div>
