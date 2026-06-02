@@ -88,9 +88,15 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
     // Convert to list, calculate total submitted (Postpaid + Prepaid) for each officer
     const list = Array.from(map.values()).map((o) => {
       const totalSubmitted = o.paskaSubmitted + o.praSubmitted;
+      
+      // Calculate dynamic paskaRealisasi: Berhasil (colI) / (Open + Submitted)
+      const paskaDenom = o.paskaOpen + o.paskaSubmitted;
+      const paskaRealisasi = paskaDenom > 0 ? o.paskaColI / paskaDenom : 0;
+
       return {
         ...o,
         totalSubmitted,
+        paskaRealisasi,
       };
     });
 
