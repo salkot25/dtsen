@@ -444,19 +444,6 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
               {/* Filter & Sort controls */}
               <div className="flex flex-wrap w-full md:w-auto items-center gap-3">
-                {/* Filter by Service Type */}
-                <select
-                  value={serviceTypeFilter}
-                  onChange={(e) => {
-                    setServiceTypeFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-700 font-semibold cursor-pointer"
-                >
-                  <option value="all">Semua Layanan</option>
-                  <option value="paskabayar">Paskabayar Saja</option>
-                  <option value="prabayar">Prabayar Saja</option>
-                </select>
 
                 {/* Filter by performance */}
                 <select
