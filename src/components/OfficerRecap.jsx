@@ -17,6 +17,7 @@ import { formatNumber } from "../utils/dateUtils";
 export default function OfficerRecap({ officers = [], settings = {} }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [performanceFilter, setPerformanceFilter] = useState("all");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState("all"); // all, paskabayar, prabayar
   const [sortBy, setSortBy] = useState("total_submitted"); // total_submitted, name, paska_submitted, pra_submitted
   const [sortOrder, setSortOrder] = useState("desc"); // asc, desc
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,11 +46,19 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
           paskaRejected: 0,
           paskaRealisasi: 0,
           hasPaska: false,
+          paskaColI: 0,
+          paskaColJ: 0,
+          paskaColK: 0,
+          paskaColL: 0,
 
           // Prepaid (Prabayar) fields
           praSubmitted: 0,
           praRejected: 0,
           hasPra: false,
+          praColI: 0,
+          praColJ: 0,
+          praColK: 0,
+          praColL: 0,
         });
       }
 
@@ -58,6 +67,10 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
         entry.praSubmitted = o.submitted || 0;
         entry.praRejected = o.rejected || 0;
         entry.hasPra = true;
+        entry.praColI = o.colI !== undefined ? o.colI : 0;
+        entry.praColJ = o.colJ !== undefined ? o.colJ : 0;
+        entry.praColK = o.colK !== undefined ? o.colK : 0;
+        entry.praColL = o.colL !== undefined ? o.colL : 0;
       } else {
         // Default to paskabayar
         entry.paskaOpen = o.open || 0;
@@ -65,6 +78,10 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
         entry.paskaRejected = o.rejected || 0;
         entry.paskaRealisasi = o.realisasi || 0;
         entry.hasPaska = true;
+        entry.paskaColI = o.colI !== undefined ? o.colI : 0;
+        entry.paskaColJ = o.colJ !== undefined ? o.colJ : 0;
+        entry.paskaColK = o.colK !== undefined ? o.colK : 0;
+        entry.paskaColL = o.colL !== undefined ? o.colL : 0;
       }
     });
 
@@ -419,6 +436,20 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
               {/* Filter & Sort controls */}
               <div className="flex flex-wrap w-full md:w-auto items-center gap-3">
+                {/* Filter by Service Type */}
+                <select
+                  value={serviceTypeFilter}
+                  onChange={(e) => {
+                    setServiceTypeFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-700 font-semibold cursor-pointer"
+                >
+                  <option value="all">Semua Layanan</option>
+                  <option value="paskabayar">Paskabayar Saja</option>
+                  <option value="prabayar">Prabayar Saja</option>
+                </select>
+
                 {/* Filter by performance */}
                 <select
                   value={performanceFilter}
@@ -584,7 +615,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                   <div
                     className={`overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out ${
                       isExpanded
-                        ? "max-h-[520px] opacity-100 translate-y-0"
+                        ? "max-h-[600px] opacity-100 translate-y-0"
                         : "max-h-0 opacity-0 -translate-y-2"
                     }`}
                     aria-hidden={!isExpanded}
@@ -656,6 +687,41 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                         </div>
                       </div>
 
+                      {/* Additional Columns (I, J, K, L) */}
+                      {(serviceTypeFilter === "paskabayar" || serviceTypeFilter === "prabayar") && (
+                        <div className="rounded-xl bg-emerald-50/50 border border-emerald-100/60 p-3 mt-1 text-[11px]">
+                          <p className="font-bold text-emerald-800 uppercase tracking-wider text-[10px] mb-2">
+                            Kategori Kunjungan
+                          </p>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-slate-600">
+                            <div className="flex justify-between gap-1">
+                              <span className="truncate text-slate-400">1. Berhasil</span>
+                              <span className="font-extrabold text-slate-800">
+                                {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColI : o.praColI)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between gap-1">
+                              <span className="truncate text-slate-400">2. Rmh Kosong</span>
+                              <span className="font-extrabold text-slate-800">
+                                {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColJ : o.praColJ)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between gap-1">
+                              <span className="truncate text-slate-400">3. Menolak</span>
+                              <span className="font-extrabold text-slate-800">
+                                {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColK : o.praColK)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between gap-1">
+                              <span className="truncate text-slate-400">4. Mtr Tdk Ada</span>
+                              <span className="font-extrabold text-slate-800">
+                                {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColL : o.praColL)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {o.hasPaska && (
                         <div className="space-y-1">
                           <div className="flex justify-between text-[11px] text-slate-500 font-medium">
@@ -702,38 +768,88 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     >
                       Identitas Petugas
                     </th>
-                    <th
-                      colSpan="4"
-                      className="py-2.5 px-4 text-center bg-blue-50/50 text-blue-800 border-r border-b border-blue-100 font-extrabold"
-                    >
-                      Paskabayar (Postpaid)
-                    </th>
-                    <th
-                      colSpan="2"
-                      className="py-2.5 px-4 text-center bg-violet-50/50 text-violet-800 border-b border-violet-100 font-extrabold"
-                    >
-                      Prabayar (Prepaid)
-                    </th>
+                    {serviceTypeFilter === "all" && (
+                      <>
+                        <th
+                          colSpan="4"
+                          className="py-2.5 px-4 text-center bg-blue-50/50 text-blue-800 border-r border-b border-blue-100 font-extrabold"
+                        >
+                          Paskabayar (Postpaid)
+                        </th>
+                        <th
+                          colSpan="2"
+                          className="py-2.5 px-4 text-center bg-violet-50/50 text-violet-800 border-b border-violet-100 font-extrabold"
+                        >
+                          Prabayar (Prepaid)
+                        </th>
+                      </>
+                    )}
+                    {serviceTypeFilter === "paskabayar" && (
+                      <>
+                        <th
+                          colSpan="4"
+                          className="py-2.5 px-4 text-center bg-blue-50/50 text-blue-800 border-r border-b border-blue-100 font-extrabold"
+                        >
+                          Kinerja Paskabayar
+                        </th>
+                        <th
+                          colSpan="4"
+                          className="py-2.5 px-4 text-center bg-emerald-50/50 text-emerald-800 border-b border-emerald-100 font-extrabold"
+                        >
+                          Kategori Kunjungan (I - L)
+                        </th>
+                      </>
+                    )}
+                    {serviceTypeFilter === "prabayar" && (
+                      <>
+                        <th
+                          colSpan="2"
+                          className="py-2.5 px-4 text-center bg-violet-50/50 text-violet-800 border-r border-b border-violet-100 font-extrabold"
+                        >
+                          Kinerja Prabayar
+                        </th>
+                        <th
+                          colSpan="4"
+                          className="py-2.5 px-4 text-center bg-emerald-50/50 text-emerald-800 border-b border-emerald-100 font-extrabold"
+                        >
+                          Kategori Kunjungan (I - L)
+                        </th>
+                      </>
+                    )}
                   </tr>
                   <tr className="bg-slate-50/50 border-b border-slate-200 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">
-                      Open
-                    </th>
-                    <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">
-                      Submitted
-                    </th>
-                    <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">
-                      Rejected
-                    </th>
-                    <th className="py-3 px-4 text-center border-r border-slate-200 bg-blue-50/10">
-                      Realisasi %
-                    </th>
-                    <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">
-                      Submitted
-                    </th>
-                    <th className="py-3 px-4 text-center bg-violet-50/10">
-                      Rejected
-                    </th>
+                    {serviceTypeFilter === "all" && (
+                      <>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Open</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Submitted</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Rejected</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-200 bg-blue-50/10">Realisasi %</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">Submitted</th>
+                        <th className="py-3 px-4 text-center bg-violet-50/10">Rejected</th>
+                      </>
+                    )}
+                    {serviceTypeFilter === "paskabayar" && (
+                      <>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Open</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Submitted</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Rejected</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-200 bg-blue-50/10">Realisasi %</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">1. Berhasil</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">2. Rmh Kosong</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">3. Menolak</th>
+                        <th className="py-3 px-4 text-center bg-emerald-50/10">4. Mtr Tdk Ada</th>
+                      </>
+                    )}
+                    {serviceTypeFilter === "prabayar" && (
+                      <>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">Submitted</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-200 bg-violet-50/10">Rejected</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">1. Berhasil</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">2. Rmh Kosong</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">3. Menolak</th>
+                        <th className="py-3 px-4 text-center bg-emerald-50/10">4. Mtr Tdk Ada</th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
@@ -783,65 +899,161 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                             </div>
                           </td>
 
-                          {/* Paskabayar - Open */}
-                          <td className="py-3.5 px-4 text-center font-medium text-slate-600 border-r border-slate-100 bg-blue-50/5">
-                            {o.hasPaska ? formatNumber(o.paskaOpen) : "-"}
-                          </td>
+                          {/* If serviceTypeFilter is all, render both */}
+                          {serviceTypeFilter === "all" && (
+                            <>
+                              {/* Paskabayar - Open */}
+                              <td className="py-3.5 px-4 text-center font-medium text-slate-600 border-r border-slate-100 bg-blue-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaOpen) : "-"}
+                              </td>
 
-                          {/* Paskabayar - Submitted */}
-                          <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-blue-50/5">
-                            {o.hasPaska ? formatNumber(o.paskaSubmitted) : "-"}
-                          </td>
+                              {/* Paskabayar - Submitted */}
+                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-blue-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaSubmitted) : "-"}
+                              </td>
 
-                          {/* Paskabayar - Rejected */}
-                          <td className="py-3.5 px-4 text-center font-medium text-rose-500 border-r border-slate-100 bg-blue-50/5">
-                            {o.hasPaska ? formatNumber(o.paskaRejected) : "-"}
-                          </td>
+                              {/* Paskabayar - Rejected */}
+                              <td className="py-3.5 px-4 text-center font-medium text-rose-500 border-r border-slate-100 bg-blue-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaRejected) : "-"}
+                              </td>
 
-                          {/* Paskabayar - Realisasi % */}
-                          <td className="py-3.5 px-4 border-r border-slate-200 bg-blue-50/5">
-                            {o.hasPaska ? (
-                              <div className="flex flex-col items-center gap-1 w-full min-w-[120px]">
-                                <span
-                                  className={`text-xs font-extrabold ${style.textColor}`}
-                                >
-                                  {paskaPercentage}%
-                                </span>
-                                <div className="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
-                                  <div
-                                    className={`${style.progressBarBg} h-1 rounded-full transition-all duration-500`}
-                                    style={{
-                                      width: `${Math.min(paskaPercentage, 100)}%`,
-                                    }}
-                                  />
-                                </div>
-                                <span
-                                  className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${style.bg}`}
-                                >
-                                  {style.label}
-                                </span>
-                              </div>
-                            ) : (
-                              "-"
-                            )}
-                          </td>
+                              {/* Paskabayar - Realisasi % */}
+                              <td className="py-3.5 px-4 border-r border-slate-200 bg-blue-50/5">
+                                {o.hasPaska ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[120px]">
+                                    <span
+                                      className={`text-xs font-extrabold ${style.textColor}`}
+                                    >
+                                      {paskaPercentage}%
+                                    </span>
+                                    <div className="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                                      <div
+                                        className={`${style.progressBarBg} h-1 rounded-full transition-all duration-500`}
+                                        style={{
+                                          width: `${Math.min(paskaPercentage, 100)}%`,
+                                        }}
+                                      />
+                                    </div>
+                                    <span
+                                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${style.bg}`}
+                                    >
+                                      {style.label}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
 
-                          {/* Prabayar - Submitted */}
-                          <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-violet-50/5">
-                            {o.hasPra ? formatNumber(o.praSubmitted) : "-"}
-                          </td>
+                              {/* Prabayar - Submitted */}
+                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-violet-50/5">
+                                {o.hasPra ? formatNumber(o.praSubmitted) : "-"}
+                              </td>
 
-                          {/* Prabayar - Rejected */}
-                          <td className="py-3.5 px-4 text-center font-medium text-rose-500 bg-violet-50/5">
-                            {o.hasPra ? formatNumber(o.praRejected) : "-"}
-                          </td>
+                              {/* Prabayar - Rejected */}
+                              <td className="py-3.5 px-4 text-center font-medium text-rose-500 bg-violet-50/5">
+                                {o.hasPra ? formatNumber(o.praRejected) : "-"}
+                              </td>
+                            </>
+                          )}
+
+                          {/* If serviceTypeFilter is paskabayar */}
+                          {serviceTypeFilter === "paskabayar" && (
+                            <>
+                              {/* Paskabayar - Open */}
+                              <td className="py-3.5 px-4 text-center font-medium text-slate-600 border-r border-slate-100 bg-blue-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaOpen) : "-"}
+                              </td>
+
+                              {/* Paskabayar - Submitted */}
+                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-blue-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaSubmitted) : "-"}
+                              </td>
+
+                              {/* Paskabayar - Rejected */}
+                              <td className="py-3.5 px-4 text-center font-medium text-rose-500 border-r border-slate-100 bg-blue-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaRejected) : "-"}
+                              </td>
+
+                              {/* Paskabayar - Realisasi % */}
+                              <td className="py-3.5 px-4 border-r border-slate-200 bg-blue-50/5">
+                                {o.hasPaska ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[120px]">
+                                    <span
+                                      className={`text-xs font-extrabold ${style.textColor}`}
+                                    >
+                                      {paskaPercentage}%
+                                    </span>
+                                    <div className="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                                      <div
+                                        className={`${style.progressBarBg} h-1 rounded-full transition-all duration-500`}
+                                        style={{
+                                          width: `${Math.min(paskaPercentage, 100)}%`,
+                                        }}
+                                      />
+                                    </div>
+                                    <span
+                                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${style.bg}`}
+                                    >
+                                      {style.label}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+
+                              {/* Columns I, J, K, L details */}
+                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaColI) : "-"}
+                              </td>
+                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaColJ) : "-"}
+                              </td>
+                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaColK) : "-"}
+                              </td>
+                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 bg-emerald-50/5">
+                                {o.hasPaska ? formatNumber(o.paskaColL) : "-"}
+                              </td>
+                            </>
+                          )}
+
+                          {/* If serviceTypeFilter is prabayar */}
+                          {serviceTypeFilter === "prabayar" && (
+                            <>
+                              {/* Prabayar - Submitted */}
+                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-200 bg-violet-50/5">
+                                {o.hasPra ? formatNumber(o.praSubmitted) : "-"}
+                              </td>
+
+                              {/* Prabayar - Rejected */}
+                              <td className="py-3.5 px-4 text-center font-medium text-rose-500 border-r border-slate-200 bg-violet-50/5">
+                                {o.hasPra ? formatNumber(o.praRejected) : "-"}
+                              </td>
+
+                              {/* Columns I, J, K, L details */}
+                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPra ? formatNumber(o.praColI) : "-"}
+                              </td>
+                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPra ? formatNumber(o.praColJ) : "-"}
+                              </td>
+                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPra ? formatNumber(o.praColK) : "-"}
+                              </td>
+                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 bg-emerald-50/5">
+                                {o.hasPra ? formatNumber(o.praColL) : "-"}
+                              </td>
+                            </>
+                          )}
                         </tr>
                       );
                     })
                   ) : (
                     <tr>
                       <td
-                        colSpan="8"
+                        colSpan={serviceTypeFilter === "all" ? 8 : serviceTypeFilter === "paskabayar" ? 10 : 8}
                         className="py-12 text-center text-slate-400 font-medium"
                       >
                         Tidak ada petugas yang cocok dengan kriteria pencarian

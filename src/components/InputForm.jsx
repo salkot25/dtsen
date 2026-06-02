@@ -116,6 +116,17 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers, 
             realisasiVal = total > 0 ? (submittedVal / total) : 0;
           }
 
+          // Parse columns I, J, K, L safely
+          const colIVal = row['1. Berhasil'] !== undefined ? row['1. Berhasil'] : (row['1. BERHASIL'] !== undefined ? row['1. BERHASIL'] : (row['colI'] || 0));
+          const colJVal = row['2. rumah kosong'] !== undefined ? row['2. rumah kosong'] : (row['2. RUMAH KOSONG'] !== undefined ? row['2. RUMAH KOSONG'] : (row['colJ'] || 0));
+          const colKVal = row['3. menolak'] !== undefined ? row['3. menolak'] : (row['3. MENOLAK'] !== undefined ? row['3. MENOLAK'] : (row['colK'] || 0));
+          const colLVal = row['4. Meter tidak ada'] !== undefined ? row['4. Meter tidak ada'] : (row['4. METER TIDAK ADA'] !== undefined ? row['4. METER TIDAK ADA'] : (row['colL'] || 0));
+
+          const colI = isNaN(Number(colIVal)) ? 0 : Number(colIVal);
+          const colJ = isNaN(Number(colJVal)) ? 0 : Number(colJVal);
+          const colK = isNaN(Number(colKVal)) ? 0 : Number(colKVal);
+          const colL = isNaN(Number(colLVal)) ? 0 : Number(colLVal);
+
           totalSubmittedUploaded += submittedVal;
           totalOpenUploaded += openVal;
           
@@ -129,7 +140,11 @@ export default function InputForm({ onSubmit, lastCumulative, onUploadOfficers, 
             open: openVal,
             submitted: submittedVal,
             rejected: rejectedVal,
-            realisasi: realisasiVal
+            realisasi: realisasiVal,
+            colI,
+            colJ,
+            colK,
+            colL
           };
         });
 

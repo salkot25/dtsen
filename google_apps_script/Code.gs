@@ -62,97 +62,56 @@ function doPost(e) {
         officersSheet = ss.insertSheet('Rekap_Petugas');
       }
       
-      // Ensure we support at least columns up to P (index 15)
-      var numColumns = Math.max(officersSheet.getLastColumn(), 16);
-      
-      var headerRow = [];
-      if (officersSheet.getLastRow() > 0) {
-        headerRow = officersSheet.getRange(1, 1, 1, numColumns).getValues()[0];
-      } else {
-        headerRow = ['no', 'nama', 'email', '', '', '', '', '', '', '', '', 'Total Open', 'Total Submitted', 'Total Rejected', 'type', 'realisasi'];
-        officersSheet.getRange(1, 1, 1, headerRow.length).setValues([headerRow]);
+      // Ambil data lama jika ada (12 kolom)
+      var existingData = [];
+      var lastRow = officersSheet.getLastRow();
+      if (lastRow > 1) {
+        var maxCols = Math.max(officersSheet.getLastColumn(), 12);
+        existingData = officersSheet.getRange(2, 1, lastRow - 1, maxCols).getValues();
       }
       
-      // Read existing rows
-      var existingRows = [];
-      if (officersSheet.getLastRow() > 1) {
-        existingRows = officersSheet.getRange(2, 1, officersSheet.getLastRow() - 1, numColumns).getValues();
-      }
-      
+      // Filter data tipe lain (misal jika kita upload paska, simpan data pra)
       var uploadType = data.type || "paskabayar";
-      
-      // Map existing rows by Nama (index 1) case-insensitively to allow safe merging
-      var rowMap = {};
-      existingRows.forEach(function(row) {
-        var nameKey = row[1] ? row[1].toString().trim().toLowerCase() : '';
-        if (nameKey) {
-          rowMap[nameKey] = row;
+      var filteredData = [];
+      for (var i = 0; i < existingData.length; i++) {
+        var row = existingData[i];
+        // Indeks 7 adalah kolom type
+        if (row[7] !== uploadType) {
+          var newRow = [];
+          for (var c = 0; c < 12; c++) {
+            newRow.push(row[c] !== undefined ? row[c] : "");
+          }
+          filteredData.push(newRow);
         }
-      });
+      }
       
-      // Process new officers uploaded
+      // Tambahkan data baru hasil upload
       for (var i = 0; i < data.officers.length; i++) {
         var o = data.officers[i];
-        var nameKey = o.nama ? o.nama.toString().trim().toLowerCase() : '';
-        if (!nameKey) continue;
-        
-        var row = rowMap[nameKey] || [];
-        // Pad row array to match the total column count
-        while (row.length < numColumns) {
-          row.push('');
-        }
-        
-        row[0] = o.no;
-        row[1] = o.nama;
-        row[2] = o.email || row[2] || '';
-        
-        // Open in Column L (index 11)
-        row[11] = o.open;
-        // Submitted in Column M (index 12)
-        row[12] = o.submitted;
-        // Rejected in Column N (index 13)
-        row[13] = o.rejected;
-        
-        // Type in Column O (index 14)
-        row[14] = uploadType;
-        
-        // Realisasi in Column P (index 15)
-        var total = o.submitted + o.open + o.rejected;
-        row[15] = total > 0 ? (o.submitted / total) : 0;
-        
-        rowMap[nameKey] = row;
+        filteredData.push([
+          o.no,
+          o.nama,
+          o.email,
+          o.open,
+          o.submitted,
+          o.rejected,
+          o.realisasi,
+          uploadType,
+          o.colI !== undefined ? o.colI : "",
+          o.colJ !== undefined ? o.colJ : "",
+          o.colK !== undefined ? o.colK : "",
+          o.colL !== undefined ? o.colL : ""
+        ]);
       }
       
-      // Convert map back to list preserving original rows ordering
-      var allRows = [];
-      var processedKeys = {};
-      existingRows.forEach(function(origRow) {
-        var nameKey = origRow[1] ? origRow[1].toString().trim().toLowerCase() : '';
-        if (nameKey && rowMap[nameKey]) {
-          allRows.push(rowMap[nameKey]);
-          processedKeys[nameKey] = true;
-        }
-      });
-      
-      Object.keys(rowMap).forEach(function(key) {
-        if (!processedKeys[key]) {
-          allRows.push(rowMap[key]);
-        }
-      });
-      
-      // Sort by No (index 0)
-      allRows.sort(function(a, b) {
-        return (parseInt(a[0], 10) || 999) - (parseInt(b[0], 10) || 999);
-      });
-      
-      // Write combined rows back to spreadsheet
-      if (officersSheet.getLastRow() > 1) {
-        officersSheet.getRange(2, 1, officersSheet.getLastRow() - 1, numColumns).clearContent();
+      // Bersihkan sheet dan tulis ulang seluruh data gabungan
+      officersSheet.clear();
+      var rows = [['no', 'nama', 'email', 'open', 'submitted', 'rejected', 'realisasi', 'type', '1. Berhasil', '2. rumah kosong', '3. menolak', '4. Meter tidak ada']];
+      for (var j = 0; j < filteredData.length; j++) {
+        rows.push(filteredData[j]);
       }
       
-      if (allRows.length > 0) {
-        officersSheet.getRange(2, 1, allRows.length, numColumns).setValues(allRows);
-      }
+      officersSheet.getRange(1, 1, rows.length, 12).setValues(rows);
       
       return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
         .setMimeType(ContentService.MimeType.JSON);
@@ -319,22 +278,19 @@ function doGet(e) {
       if (oData.length > 1) {
         officersList = [];
         for (var k = 1; k < oData.length; k++) {
-          var row = oData[k];
-          var openVal = (row.length > 11 && row[11] !== "") ? parseInt(row[11], 10) : (row.length > 3 ? parseInt(row[3], 10) : 0);
-          var submittedVal = (row.length > 12 && row[12] !== "") ? parseInt(row[12], 10) : (row.length > 4 ? parseInt(row[4], 10) : 0);
-          var rejectedVal = (row.length > 13 && row[13] !== "") ? parseInt(row[13], 10) : (row.length > 5 ? parseInt(row[5], 10) : 0);
-          var typeVal = (row.length > 14 && row[14] !== "") ? row[14] : (row.length > 7 ? row[7] : "paskabayar");
-          var realisasiVal = (row.length > 15 && row[15] !== "") ? parseFloat(row[15]) : (row.length > 6 ? parseFloat(row[6]) : 0);
-
           officersList.push({
-            no: parseInt(row[0] || (k).toString(), 10),
-            nama: row[1] || "",
-            email: row[2] || "",
-            open: isNaN(openVal) ? 0 : openVal,
-            submitted: isNaN(submittedVal) ? 0 : submittedVal,
-            rejected: isNaN(rejectedVal) ? 0 : rejectedVal,
-            realisasi: isNaN(realisasiVal) ? 0 : realisasiVal,
-            type: typeVal || "paskabayar"
+            no: parseInt(oData[k][0], 10),
+            nama: oData[k][1],
+            email: oData[k][2],
+            open: parseInt(oData[k][3], 10),
+            submitted: parseInt(oData[k][4], 10),
+            rejected: parseInt(oData[k][5], 10),
+            realisasi: parseFloat(oData[k][6]),
+            type: oData[k][7] || 'paskabayar',
+            colI: oData[k][8] !== undefined ? oData[k][8] : "",
+            colJ: oData[k][9] !== undefined ? oData[k][9] : "",
+            colK: oData[k][10] !== undefined ? oData[k][10] : "",
+            colL: oData[k][11] !== undefined ? oData[k][11] : ""
           });
         }
       }
