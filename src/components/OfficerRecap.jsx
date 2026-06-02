@@ -102,9 +102,9 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       const paskaDenom = o.paskaOpen + o.paskaSubmitted;
       const paskaRealisasi = paskaDenom > 0 ? (o.paskaSubmitted - paskaRejected) / paskaDenom : 0;
 
-      // Calculate dynamic praRealisasi: Berhasil (colI) / (Open + Submitted)
+      // Calculate dynamic praRealisasi: (Submitted - Rejected) / (Open + Submitted)
       const praDenom = o.praOpen + o.praSubmitted;
-      const praRealisasi = praDenom > 0 ? o.praColI / praDenom : 0;
+      const praRealisasi = praDenom > 0 ? (o.praSubmitted - praRejected) / praDenom : 0;
 
       return {
         ...o,
@@ -708,9 +708,11 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               </span>
                             </div>
                             <div className="flex justify-between gap-2 pt-1 border-t border-violet-100">
-                              <span>Total Submit</span>
-                              <span className="font-extrabold text-violet-700">
-                                {formatNumber(o.totalSubmitted)}
+                              <span>Realisasi</span>
+                              <span
+                                className={`font-extrabold ${praStyle.textColor}`}
+                              >
+                                {o.hasPra ? `${praPercentage}%` : "-"}
                               </span>
                             </div>
                           </div>
@@ -772,7 +774,26 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                             <div
                               className={`${style.progressBarBg} h-1.5 rounded-full transition-all duration-500`}
                               style={{
-                                width: `${Math.min(paskaPercentage, 100)}%`,
+                                width: `${Math.min(parseFloat(paskaPercentage), 100)}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {o.hasPra && (
+                        <div className="space-y-1 mt-2">
+                          <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+                            <span>Progres Prabayar</span>
+                            <span className={`font-bold ${praStyle.textColor}`}>
+                              {praPercentage}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div
+                              className={`${praStyle.progressBarBg} h-1.5 rounded-full transition-all duration-500`}
+                              style={{
+                                width: `${Math.min(parseFloat(praPercentage), 100)}%`,
                               }}
                             />
                           </div>
@@ -815,7 +836,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           Paskabayar (Postpaid)
                         </th>
                         <th
-                          colSpan="2"
+                          colSpan="3"
                           className="py-2.5 px-4 text-center bg-violet-50/50 text-violet-800 border-b border-violet-100 font-extrabold"
                         >
                           Prabayar (Prepaid)
@@ -841,7 +862,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     {serviceTypeFilter === "prabayar" && (
                       <>
                         <th
-                          colSpan="2"
+                          colSpan="3"
                           className="py-2.5 px-4 text-center bg-violet-50/50 text-violet-800 border-r border-b border-violet-100 font-extrabold"
                         >
                           Kinerja Prabayar
@@ -863,7 +884,8 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                         <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Rejected</th>
                         <th className="py-3 px-4 text-center border-r border-slate-200 bg-blue-50/10">Realisasi %</th>
                         <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">Submitted</th>
-                        <th className="py-3 px-4 text-center bg-violet-50/10">Rejected</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">Rejected</th>
+                        <th className="py-3 px-4 text-center bg-violet-50/10">Realisasi %</th>
                       </>
                     )}
                     {serviceTypeFilter === "paskabayar" && (
@@ -881,7 +903,8 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     {serviceTypeFilter === "prabayar" && (
                       <>
                         <th className="py-3 px-2 text-center border-r border-slate-100 bg-violet-50/10">Submitted</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-200 bg-violet-50/10">Rejected</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-violet-50/10">Rejected</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-200 bg-violet-50/10">Realisasi</th>
                         <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Berhasil</th>
                         <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Rmh Kosong</th>
                         <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Menolak</th>
@@ -897,6 +920,8 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                       const paskaPercentage = (o.paskaRealisasi * 100).toFixed(
                         1,
                       );
+                      const praStyle = getPerformanceBadge(o.praRealisasi);
+                      const praPercentage = (o.praRealisasi * 100).toFixed(1);
 
                       // Paskabayar percentages for I, J, K, L
                       const paskaDenom = o.paskaOpen + o.paskaSubmitted;
@@ -1003,8 +1028,36 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               </td>
 
                               {/* Prabayar - Rejected */}
-                              <td className="py-3.5 px-4 text-center font-medium text-rose-500 bg-violet-50/5">
+                              <td className="py-3.5 px-4 text-center font-medium text-rose-500 border-r border-slate-100 bg-violet-50/5">
                                 {o.hasPra ? formatNumber(o.praRejected) : "-"}
+                              </td>
+
+                              {/* Prabayar - Realisasi % */}
+                              <td className="py-3.5 px-4 bg-violet-50/5">
+                                {o.hasPra ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[120px]">
+                                    <span
+                                      className={`text-xs font-extrabold ${praStyle.textColor}`}
+                                    >
+                                      {praPercentage}%
+                                    </span>
+                                    <div className="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                                      <div
+                                        className={`${praStyle.progressBarBg} h-1 rounded-full transition-all duration-500`}
+                                        style={{
+                                          width: `${Math.min(parseFloat(praPercentage), 100)}%`,
+                                        }}
+                                      />
+                                    </div>
+                                    <span
+                                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${praStyle.bg}`}
+                                    >
+                                      {praStyle.label}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
                             </>
                           )}
@@ -1124,8 +1177,36 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               </td>
 
                               {/* Prabayar - Rejected */}
-                              <td className="py-3.5 px-2 text-center font-medium text-rose-500 border-r border-slate-200 bg-violet-50/5">
+                              <td className="py-3.5 px-2 text-center font-medium text-rose-500 border-r border-slate-100 bg-violet-50/5">
                                 {o.hasPra ? formatNumber(o.praRejected) : "-"}
+                              </td>
+
+                              {/* Prabayar - Realisasi */}
+                              <td className="py-3.5 px-2 border-r border-slate-200 bg-violet-50/5">
+                                {o.hasPra ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[90px]">
+                                    <span
+                                      className={`text-xs font-extrabold ${praStyle.textColor}`}
+                                    >
+                                      {praPercentage}%
+                                    </span>
+                                    <div className="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                                      <div
+                                        className={`${praStyle.progressBarBg} h-1 rounded-full transition-all duration-500`}
+                                        style={{
+                                          width: `${Math.min(parseFloat(praPercentage), 100)}%`,
+                                        }}
+                                      />
+                                    </div>
+                                    <span
+                                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${praStyle.bg}`}
+                                    >
+                                      {praStyle.label}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
 
                               {/* Columns I, J, K, L details */}
