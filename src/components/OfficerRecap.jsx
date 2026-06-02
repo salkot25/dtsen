@@ -6,8 +6,11 @@ import {
   AlertTriangle,
   CheckCircle2,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   User,
   Mail,
   Sparkles,
@@ -416,9 +419,10 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
           {/* Control Panel: Search, Filter, Sort */}
           <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm space-y-4">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            {/* Row 1: Search & Filter Dropdowns */}
+            <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
               {/* Search bar */}
-              <div className="relative w-full md:w-80">
+              <div className="relative w-full lg:w-80 shrink-0">
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Search size={18} />
                 </span>
@@ -430,88 +434,137 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-inner"
+                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-base md:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-inner"
                 />
               </div>
 
-              {/* Filter & Sort controls */}
-              <div className="flex flex-wrap w-full md:w-auto items-center gap-3">
+              {/* Filter controls */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto justify-end">
                 {/* Filter by Service Type */}
-                <select
-                  value={serviceTypeFilter}
-                  onChange={(e) => {
-                    setServiceTypeFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-700 font-semibold cursor-pointer"
-                >
-                  <option value="all">Semua Layanan</option>
-                  <option value="paskabayar">Paskabayar Saja</option>
-                  <option value="prabayar">Prabayar Saja</option>
-                </select>
+                <div className="relative w-full sm:w-48 shrink-0">
+                  <select
+                    value={serviceTypeFilter}
+                    onChange={(e) => {
+                      setServiceTypeFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full pl-4 pr-10 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-base md:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-700 font-semibold cursor-pointer appearance-none"
+                  >
+                    <option value="all">Semua Layanan</option>
+                    <option value="paskabayar">Paskabayar Saja</option>
+                    <option value="prabayar">Prabayar Saja</option>
+                  </select>
+                  <span className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-450">
+                    <ChevronDown size={16} />
+                  </span>
+                </div>
 
                 {/* Filter by performance */}
-                <select
-                  value={performanceFilter}
-                  onChange={(e) => {
-                    setPerformanceFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-700 font-semibold cursor-pointer"
-                >
-                  <option value="all">Semua Kinerja Paskabayar</option>
-                  <option value="excellent">Sangat Baik (≥ 95%)</option>
-                  <option value="good">Cukup Baik (80% - 94.9%)</option>
-                  <option value="warning">Butuh Bimbingan (&lt; 80%)</option>
-                </select>
-
-                {/* Sort buttons */}
-                <div className="flex items-center gap-1 bg-slate-50/50 border border-slate-200 rounded-xl p-1">
-                  <button
-                    onClick={() => toggleSort("name")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
-                      sortBy === "name"
-                        ? "bg-white text-slate-800 shadow-sm"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
+                <div className="relative w-full sm:w-64 shrink-0">
+                  <select
+                    value={performanceFilter}
+                    onChange={(e) => {
+                      setPerformanceFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full pl-4 pr-10 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-base md:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-700 font-semibold cursor-pointer appearance-none"
                   >
-                    Nama
-                    {sortBy === "name" && <ArrowUpDown size={12} />}
-                  </button>
-                  <button
-                    onClick={() => toggleSort("total_submitted")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
-                      sortBy === "total_submitted"
-                        ? "bg-white text-slate-800 shadow-sm"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Total
-                    {sortBy === "total_submitted" && <ArrowUpDown size={12} />}
-                  </button>
-                  <button
-                    onClick={() => toggleSort("paska_submitted")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
-                      sortBy === "paska_submitted"
-                        ? "bg-white text-slate-800 shadow-sm"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Paskabayar
-                    {sortBy === "paska_submitted" && <ArrowUpDown size={12} />}
-                  </button>
-                  <button
-                    onClick={() => toggleSort("pra_submitted")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
-                      sortBy === "pra_submitted"
-                        ? "bg-white text-slate-800 shadow-sm"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Prabayar
-                    {sortBy === "pra_submitted" && <ArrowUpDown size={12} />}
-                  </button>
+                    <option value="all">Semua Kinerja Paskabayar</option>
+                    <option value="excellent">Sangat Baik (≥ 95%)</option>
+                    <option value="good">Cukup Baik (80% - 94.9%)</option>
+                    <option value="warning">Butuh Bimbingan (&lt; 80%)</option>
+                  </select>
+                  <span className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-455">
+                    <ChevronDown size={16} />
+                  </span>
                 </div>
+              </div>
+            </div>
+
+            {/* Row 2: Sort controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Urutkan Berdasarkan
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5 bg-slate-50/50 border border-slate-200 p-1 rounded-xl w-full sm:w-auto">
+                <button
+                  onClick={() => toggleSort("name")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    sortBy === "name"
+                      ? "bg-white text-blue-600 shadow-sm border border-slate-200/50"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <span>Nama</span>
+                  {sortBy === "name" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUp size={12} className="text-blue-600" />
+                    ) : (
+                      <ArrowDown size={12} className="text-blue-600" />
+                    )
+                  ) : (
+                    <ArrowUpDown size={12} className="text-slate-400 opacity-40" />
+                  )}
+                </button>
+                <button
+                  onClick={() => toggleSort("total_submitted")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    sortBy === "total_submitted"
+                      ? "bg-white text-blue-600 shadow-sm border border-slate-200/50"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <span>Total</span>
+                  {sortBy === "total_submitted" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUp size={12} className="text-blue-600" />
+                    ) : (
+                      <ArrowDown size={12} className="text-blue-600" />
+                    )
+                  ) : (
+                    <ArrowUpDown size={12} className="text-slate-400 opacity-40" />
+                  )}
+                </button>
+                <button
+                  onClick={() => toggleSort("paska_submitted")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    sortBy === "paska_submitted"
+                      ? "bg-white text-blue-600 shadow-sm border border-slate-200/50"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <span>Paskabayar</span>
+                  {sortBy === "paska_submitted" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUp size={12} className="text-blue-600" />
+                    ) : (
+                      <ArrowDown size={12} className="text-blue-600" />
+                    )
+                  ) : (
+                    <ArrowUpDown size={12} className="text-slate-400 opacity-40" />
+                  )}
+                </button>
+                <button
+                  onClick={() => toggleSort("pra_submitted")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    sortBy === "pra_submitted"
+                      ? "bg-white text-blue-600 shadow-sm border border-slate-200/50"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <span>Prabayar</span>
+                  {sortBy === "pra_submitted" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUp size={12} className="text-blue-600" />
+                    ) : (
+                      <ArrowDown size={12} className="text-blue-600" />
+                    )
+                  ) : (
+                    <ArrowUpDown size={12} className="text-slate-400 opacity-40" />
+                  )}
+                </button>
               </div>
             </div>
           </div>
