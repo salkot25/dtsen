@@ -538,6 +538,8 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
             {paginatedOfficers.map((o) => {
               const style = getPerformanceBadge(o.paskaRealisasi);
               const paskaPercentage = (o.paskaRealisasi * 100).toFixed(1);
+              const praStyle = getPerformanceBadge(o.praRealisasi);
+              const praPercentage = (o.praRealisasi * 100).toFixed(1);
               const mobileCardKey = (o.nama || "").trim().toUpperCase();
 
               // Mobile percentages calculation
