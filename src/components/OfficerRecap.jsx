@@ -195,7 +195,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
     }
 
     // Filter by Paskabayar performance category
-    if (performanceFilter !== "all") {
+    if (serviceTypeFilter === "paskabayar" && performanceFilter !== "all") {
       list = list.filter((o) => {
         const pct = (o.paskaRealisasi || 0) * 100;
         if (performanceFilter === "excellent") return pct >= 95;
@@ -468,19 +468,21 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
               <div className="flex flex-wrap w-full md:w-auto items-center gap-3">
 
                 {/* Filter by performance */}
-                <select
-                  value={performanceFilter}
-                  onChange={(e) => {
-                    setPerformanceFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-700 font-semibold cursor-pointer"
-                >
-                  <option value="all">Semua Kinerja Paskabayar</option>
-                  <option value="excellent">Sangat Baik (≥ 95%)</option>
-                  <option value="good">Cukup Baik (80% - 94.9%)</option>
-                  <option value="warning">Butuh Bimbingan (&lt; 80%)</option>
-                </select>
+                {serviceTypeFilter === "paskabayar" && (
+                  <select
+                    value={performanceFilter}
+                    onChange={(e) => {
+                      setPerformanceFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-700 font-semibold cursor-pointer"
+                  >
+                    <option value="all">Semua Kinerja Paskabayar</option>
+                    <option value="excellent">Sangat Baik (≥ 95%)</option>
+                    <option value="good">Cukup Baik (80% - 94.9%)</option>
+                    <option value="warning">Butuh Bimbingan (&lt; 80%)</option>
+                  </select>
+                )}
 
                 {/* Sort buttons */}
                 <div className="flex items-center gap-1 bg-slate-50/50 border border-slate-200 rounded-xl p-1">
