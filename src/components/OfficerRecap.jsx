@@ -750,12 +750,12 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
           {/* Unified Dual-Header Table */}
           <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[900px]">
+              <table className={`w-full text-left border-collapse ${serviceTypeFilter === "all" ? "min-w-[900px]" : "min-w-[800px]"}`}>
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
                     <th
                       rowSpan="2"
-                      className="py-4 px-3 text-center w-16 border-r border-slate-200 text-[11px] leading-tight"
+                      className={`py-4 px-2 text-center border-r border-slate-200 text-[11px] leading-tight ${serviceTypeFilter === "all" ? "w-16" : "w-12"}`}
                     >
                       Peringkat
                       <span className="block text-[9px] font-normal text-slate-400 normal-case mt-0.5">
@@ -764,7 +764,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     </th>
                     <th
                       rowSpan="2"
-                      className="py-4 px-6 border-r border-slate-200 w-64"
+                      className={`py-4 border-r border-slate-200 ${serviceTypeFilter === "all" ? "px-6 w-64" : "px-3 w-48"}`}
                     >
                       Identitas Petugas
                     </th>
@@ -830,24 +830,24 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     )}
                     {serviceTypeFilter === "paskabayar" && (
                       <>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Open</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Submitted</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Rejected</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-200 bg-blue-50/10">Realisasi %</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">1. Berhasil</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">2. Rmh Kosong</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">3. Menolak</th>
-                        <th className="py-3 px-4 text-center bg-emerald-50/10">4. Mtr Tdk Ada</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-blue-50/10">Open</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-blue-50/10">Submitted</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-blue-50/10">Rejected</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-200 bg-blue-50/10">Realisasi</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Berhasil</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Rmh Kosong</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Menolak</th>
+                        <th className="py-3 px-2 text-center bg-emerald-50/10">Mtr Tdk Ada</th>
                       </>
                     )}
                     {serviceTypeFilter === "prabayar" && (
                       <>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">Submitted</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-200 bg-violet-50/10">Rejected</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">1. Berhasil</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">2. Rmh Kosong</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-emerald-50/10">3. Menolak</th>
-                        <th className="py-3 px-4 text-center bg-emerald-50/10">4. Mtr Tdk Ada</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-violet-50/10">Submitted</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-200 bg-violet-50/10">Rejected</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Berhasil</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Rmh Kosong</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Menolak</th>
+                        <th className="py-3 px-2 text-center bg-emerald-50/10">Mtr Tdk Ada</th>
                       </>
                     )}
                   </tr>
@@ -866,7 +866,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           className="group recap-table-row"
                         >
                           {/* Peringkat */}
-                          <td className="py-3.5 px-3 text-center font-bold text-slate-500 border-r border-slate-200">
+                          <td className={`py-3.5 text-center font-bold text-slate-500 border-r border-slate-200 ${serviceTypeFilter === "all" ? "px-3" : "px-2"}`}>
                             {o.no === 1 ? (
                               <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 text-yellow-950 border border-yellow-200/50 shadow-md animate-gold-shine">
                                 1
@@ -885,10 +885,10 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           </td>
 
                           {/* Identitas */}
-                          <td className="py-3.5 px-6 border-r border-slate-200">
+                          <td className={`py-3.5 border-r border-slate-200 ${serviceTypeFilter === "all" ? "px-6" : "px-3"}`}>
                             <div className="flex items-center gap-3">
                               <div className="min-w-0">
-                                <p className="font-bold text-slate-800 leading-snug truncate group-hover:text-blue-700 transition-colors">
+                                <p className={`font-bold text-slate-800 leading-snug truncate group-hover:text-blue-700 transition-colors ${serviceTypeFilter !== "all" ? "text-[13px]" : ""}`}>
                                   {o.nama}
                                 </p>
                                 <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 truncate group-hover:text-slate-500 transition-colors">
@@ -961,24 +961,24 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           {serviceTypeFilter === "paskabayar" && (
                             <>
                               {/* Paskabayar - Open */}
-                              <td className="py-3.5 px-4 text-center font-medium text-slate-600 border-r border-slate-100 bg-blue-50/5">
+                              <td className="py-3.5 px-2 text-center font-medium text-slate-600 border-r border-slate-100 bg-blue-50/5">
                                 {o.hasPaska ? formatNumber(o.paskaOpen) : "-"}
                               </td>
 
                               {/* Paskabayar - Submitted */}
-                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-blue-50/5">
+                              <td className="py-3.5 px-2 text-center font-bold text-slate-700 border-r border-slate-100 bg-blue-50/5">
                                 {o.hasPaska ? formatNumber(o.paskaSubmitted) : "-"}
                               </td>
 
                               {/* Paskabayar - Rejected */}
-                              <td className="py-3.5 px-4 text-center font-medium text-rose-500 border-r border-slate-100 bg-blue-50/5">
+                              <td className="py-3.5 px-2 text-center font-medium text-rose-500 border-r border-slate-100 bg-blue-50/5">
                                 {o.hasPaska ? formatNumber(o.paskaRejected) : "-"}
                               </td>
 
                               {/* Paskabayar - Realisasi % */}
-                              <td className="py-3.5 px-4 border-r border-slate-200 bg-blue-50/5">
+                              <td className="py-3.5 px-2 border-r border-slate-200 bg-blue-50/5">
                                 {o.hasPaska ? (
-                                  <div className="flex flex-col items-center gap-1 w-full min-w-[120px]">
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[90px]">
                                     <span
                                       className={`text-xs font-extrabold ${style.textColor}`}
                                     >
@@ -993,7 +993,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                                       />
                                     </div>
                                     <span
-                                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${style.bg}`}
+                                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${style.bg}`}
                                     >
                                       {style.label}
                                     </span>
@@ -1004,16 +1004,16 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               </td>
 
                               {/* Columns I, J, K, L details */}
-                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-emerald-50/5">
+                              <td className="py-3.5 px-2 text-center font-bold text-slate-700 border-r border-slate-100 bg-emerald-50/5">
                                 {o.hasPaska ? formatNumber(o.paskaColI) : "-"}
                               </td>
-                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
+                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
                                 {o.hasPaska ? formatNumber(o.paskaColJ) : "-"}
                               </td>
-                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
+                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
                                 {o.hasPaska ? formatNumber(o.paskaColK) : "-"}
                               </td>
-                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 bg-emerald-50/5">
+                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 bg-emerald-50/5">
                                 {o.hasPaska ? formatNumber(o.paskaColL) : "-"}
                               </td>
                             </>
@@ -1023,26 +1023,26 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           {serviceTypeFilter === "prabayar" && (
                             <>
                               {/* Prabayar - Submitted */}
-                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-200 bg-violet-50/5">
+                              <td className="py-3.5 px-2 text-center font-bold text-slate-700 border-r border-slate-200 bg-violet-50/5">
                                 {o.hasPra ? formatNumber(o.praSubmitted) : "-"}
                               </td>
 
                               {/* Prabayar - Rejected */}
-                              <td className="py-3.5 px-4 text-center font-medium text-rose-500 border-r border-slate-200 bg-violet-50/5">
+                              <td className="py-3.5 px-2 text-center font-medium text-rose-500 border-r border-slate-200 bg-violet-50/5">
                                 {o.hasPra ? formatNumber(o.praRejected) : "-"}
                               </td>
 
                               {/* Columns I, J, K, L details */}
-                              <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-emerald-50/5">
+                              <td className="py-3.5 px-2 text-center font-bold text-slate-700 border-r border-slate-100 bg-emerald-50/5">
                                 {o.hasPra ? formatNumber(o.praColI) : "-"}
                               </td>
-                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
+                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
                                 {o.hasPra ? formatNumber(o.praColJ) : "-"}
                               </td>
-                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
+                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
                                 {o.hasPra ? formatNumber(o.praColK) : "-"}
                               </td>
-                              <td className="py-3.5 px-4 text-center font-semibold text-slate-600 bg-emerald-50/5">
+                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 bg-emerald-50/5">
                                 {o.hasPra ? formatNumber(o.praColL) : "-"}
                               </td>
                             </>
