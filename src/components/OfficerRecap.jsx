@@ -52,8 +52,10 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
           paskaColL: 0,
 
           // Prepaid (Prabayar) fields
+          praOpen: 0,
           praSubmitted: 0,
           praRejected: 0,
+          praRealisasi: 0,
           hasPra: false,
           praColI: 0,
           praColJ: 0,
@@ -64,6 +66,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
       const entry = map.get(nameKey);
       if (o.type === "prabayar") {
+        entry.praOpen = o.open || 0;
         entry.praSubmitted = o.submitted || 0;
         entry.praRejected = o.rejected || 0;
         entry.hasPra = true;
@@ -93,10 +96,15 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       const paskaDenom = o.paskaOpen + o.paskaSubmitted;
       const paskaRealisasi = paskaDenom > 0 ? o.paskaColI / paskaDenom : 0;
 
+      // Calculate dynamic praRealisasi: Berhasil (colI) / (Open + Submitted)
+      const praDenom = o.praOpen + o.praSubmitted;
+      const praRealisasi = praDenom > 0 ? o.praColI / praDenom : 0;
+
       return {
         ...o,
         totalSubmitted,
         paskaRealisasi,
+        praRealisasi,
       };
     });
 
@@ -699,6 +707,8 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               <span className="truncate text-slate-400">1. Berhasil</span>
                               <span className="font-extrabold text-slate-800">
                                 {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColI : o.praColI)}
+                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${(o.praRealisasi * 100).toFixed(1)}%)`}
+                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${(o.paskaRealisasi * 100).toFixed(1)}%)`}
                               </span>
                             </div>
                             <div className="flex justify-between gap-1">
@@ -1034,8 +1044,19 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               </td>
 
                               {/* Columns I, J, K, L details */}
-                              <td className="py-3.5 px-2 text-center font-bold text-slate-700 border-r border-slate-100 bg-emerald-50/5">
-                                {o.hasPra ? formatNumber(o.praColI) : "-"}
+                              <td className="py-3.5 px-2 text-center border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPra ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[70px]">
+                                    <span className="font-bold text-slate-700">
+                                      {formatNumber(o.praColI)}
+                                    </span>
+                                    <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                                      {(o.praRealisasi * 100).toFixed(1)}%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
                               <td className="py-3.5 px-2 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
                                 {o.hasPra ? formatNumber(o.praColJ) : "-"}
