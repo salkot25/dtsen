@@ -136,6 +136,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
         totalPaskaRejected: 0,
         avgPaskaRealisasi: "0.0",
         totalPraSubmitted: 0,
+        totalPraOpen: 0,
         totalPraRejected: 0,
       };
     }
@@ -148,6 +149,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
     let countPaskaRealisasi = 0;
 
     let totalPraSubmitted = 0;
+    let totalPraOpen = 0;
     let totalPraRejected = 0;
 
     mergedOfficers.forEach((o) => {
@@ -161,6 +163,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       }
 
       totalPraSubmitted += o.praSubmitted;
+      totalPraOpen += o.praOpen;
       totalPraRejected += o.praRejected;
     });
 
@@ -176,6 +179,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       totalPaskaRejected,
       avgPaskaRealisasi,
       totalPraSubmitted,
+      totalPraOpen,
       totalPraRejected,
     };
   }, [mergedOfficers]);
@@ -239,8 +243,11 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       return 0;
     });
 
-    return list;
-  }, [mergedOfficers, searchTerm, performanceFilter, sortBy, sortOrder]);
+    return list.map((o, idx) => ({
+      ...o,
+      no: idx + 1,
+    }));
+  }, [mergedOfficers, searchTerm, performanceFilter, sortBy, sortOrder, serviceTypeFilter]);
 
   // 4. Pagination Logic
   const totalPages = Math.ceil(processedOfficers.length / itemsPerPage) || 1;
