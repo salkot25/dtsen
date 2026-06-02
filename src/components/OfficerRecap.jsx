@@ -92,6 +92,12 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
     const list = Array.from(map.values()).map((o) => {
       const totalSubmitted = o.paskaSubmitted + o.praSubmitted;
       
+      // Calculate dynamic paskaRejected: Rumah Kosong (colJ) + Menolak (colK) + Meter Tidak Ada (colL)
+      const paskaRejected = o.paskaColJ + o.paskaColK + o.paskaColL;
+
+      // Calculate dynamic praRejected: Rumah Kosong (colJ) + Menolak (colK) + Meter Tidak Ada (colL)
+      const praRejected = o.praColJ + o.praColK + o.praColL;
+
       // Calculate dynamic paskaRealisasi: Submitted / (Open + Submitted)
       const paskaDenom = o.paskaOpen + o.paskaSubmitted;
       const paskaRealisasi = paskaDenom > 0 ? o.paskaSubmitted / paskaDenom : 0;
@@ -103,6 +109,8 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       return {
         ...o,
         totalSubmitted,
+        paskaRejected,
+        praRejected,
         paskaRealisasi,
         praRealisasi,
       };
