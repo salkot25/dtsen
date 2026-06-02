@@ -98,9 +98,9 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       // Calculate dynamic praRejected: Rumah Kosong (colJ) + Menolak (colK) + Meter Tidak Ada (colL)
       const praRejected = o.praColJ + o.praColK + o.praColL;
 
-      // Calculate dynamic paskaRealisasi: Submitted / (Open + Submitted)
+      // Calculate dynamic paskaRealisasi: (Submitted - Rejected) / (Open + Submitted)
       const paskaDenom = o.paskaOpen + o.paskaSubmitted;
-      const paskaRealisasi = paskaDenom > 0 ? o.paskaSubmitted / paskaDenom : 0;
+      const paskaRealisasi = paskaDenom > 0 ? (o.paskaSubmitted - paskaRejected) / paskaDenom : 0;
 
       // Calculate dynamic praRealisasi: Berhasil (colI) / (Open + Submitted)
       const praDenom = o.praOpen + o.praSubmitted;
