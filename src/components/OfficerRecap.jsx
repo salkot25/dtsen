@@ -312,26 +312,27 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
   // Paskabayar target = Total Open Paskabayar + Total Submitted Paskabayar
   const targetPaska = stats.totalPaskaOpen + stats.totalPaskaSubmitted;
-  // Paskabayar percentage = (Total Submitted / targetPaska) * 100
+  // Paskabayar percentage = ((Total Submitted - Total Rejected) / targetPaska) * 100
   const paskaPct =
     targetPaska > 0
-      ? ((stats.totalPaskaSubmitted / targetPaska) * 100).toFixed(1)
+      ? (((stats.totalPaskaSubmitted - stats.totalPaskaRejected) / targetPaska) * 100).toFixed(1)
       : "0.0";
 
   // Prabayar target = Total Target - targetPaska
   const targetPra = totalTarget - targetPaska;
-  // Prabayar percentage = (Total Submitted / targetPra) * 100
+  // Prabayar percentage = ((Total Submitted - Total Rejected) / targetPra) * 100
   const praPct =
     targetPra > 0
-      ? ((stats.totalPraSubmitted / targetPra) * 100).toFixed(1)
+      ? (((stats.totalPraSubmitted - stats.totalPraRejected) / targetPra) * 100).toFixed(1)
       : "0.0";
 
-  // Combined progress = Total Combined Submitted / Total Target
-  const totalCombinedSubmitted =
-    stats.totalPaskaSubmitted + stats.totalPraSubmitted;
+  // Combined progress = Total Combined Realisasi / Total Target
+  const totalCombinedRealisasi =
+    (stats.totalPaskaSubmitted - stats.totalPaskaRejected) +
+    (stats.totalPraSubmitted - stats.totalPraRejected);
   const combinedPct =
     totalTarget > 0
-      ? ((totalCombinedSubmitted / totalTarget) * 100).toFixed(1)
+      ? ((totalCombinedRealisasi / totalTarget) * 100).toFixed(1)
       : "0.0";
 
   return (
@@ -404,17 +405,17 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
               </div>
             </div>
 
-            {/* 3. Submitted Paskabayar */}
+            {/* 3. Realisasi Paskabayar */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
               <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
                 <CheckCircle2 size={22} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                  Submitted Paskabayar
+                  Realisasi Paskabayar
                 </p>
                 <h3 className="text-2xl font-black text-slate-800 leading-none">
-                  {formatNumber(stats.totalPaskaSubmitted)}
+                  {formatNumber(stats.totalPaskaSubmitted - stats.totalPaskaRejected)}
                 </h3>
                 <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
                   <span>Rasio Realisasi:</span>
@@ -423,23 +424,23 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                 <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
                   <div
                     className="bg-blue-500 h-1 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(paskaPct, 100)}%` }}
+                    style={{ width: `${Math.min(parseFloat(paskaPct), 100)}%` }}
                   />
                 </div>
               </div>
             </div>
 
-            {/* 4. Submitted Prabayar */}
+            {/* 4. Realisasi Prabayar */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
               <div className="p-3 bg-violet-50 text-violet-600 rounded-xl shrink-0">
                 <Sparkles size={22} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                  Submitted Prabayar
+                  Realisasi Prabayar
                 </p>
                 <h3 className="text-2xl font-black text-violet-800 leading-none">
-                  {formatNumber(stats.totalPraSubmitted)}
+                  {formatNumber(stats.totalPraSubmitted - stats.totalPraRejected)}
                 </h3>
                 <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
                   <span>Rasio Realisasi:</span>
@@ -448,7 +449,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                 <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
                   <div
                     className="bg-violet-500 h-1 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(praPct, 100)}%` }}
+                    style={{ width: `${Math.min(parseFloat(praPct), 100)}%` }}
                   />
                 </div>
               </div>
