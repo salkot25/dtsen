@@ -531,6 +531,19 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
               const style = getPerformanceBadge(o.paskaRealisasi);
               const paskaPercentage = (o.paskaRealisasi * 100).toFixed(1);
               const mobileCardKey = (o.nama || "").trim().toUpperCase();
+
+              // Mobile percentages calculation
+              const paskaDenom = o.paskaOpen + o.paskaSubmitted;
+              const paskaPctI = paskaDenom > 0 ? ((o.paskaColI / paskaDenom) * 100).toFixed(1) : "0.0";
+              const paskaPctJ = paskaDenom > 0 ? ((o.paskaColJ / paskaDenom) * 100).toFixed(1) : "0.0";
+              const paskaPctK = paskaDenom > 0 ? ((o.paskaColK / paskaDenom) * 100).toFixed(1) : "0.0";
+              const paskaPctL = paskaDenom > 0 ? ((o.paskaColL / paskaDenom) * 100).toFixed(1) : "0.0";
+
+              const praDenom = o.praOpen + o.praSubmitted;
+              const praPctI = praDenom > 0 ? ((o.praColI / praDenom) * 100).toFixed(1) : "0.0";
+              const praPctJ = praDenom > 0 ? ((o.praColJ / praDenom) * 100).toFixed(1) : "0.0";
+              const praPctK = praDenom > 0 ? ((o.praColK / praDenom) * 100).toFixed(1) : "0.0";
+              const praPctL = praDenom > 0 ? ((o.praColL / praDenom) * 100).toFixed(1) : "0.0";
               const isExpanded = expandedMobileCard === mobileCardKey;
 
               return (
@@ -707,26 +720,32 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               <span className="truncate text-slate-400">1. Berhasil</span>
                               <span className="font-extrabold text-slate-800">
                                 {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColI : o.praColI)}
-                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${(o.praRealisasi * 100).toFixed(1)}%)`}
-                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${(o.paskaRealisasi * 100).toFixed(1)}%)`}
+                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${praPctI}%)`}
+                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${paskaPctI}%)`}
                               </span>
                             </div>
                             <div className="flex justify-between gap-1">
                               <span className="truncate text-slate-400">2. Rmh Kosong</span>
                               <span className="font-extrabold text-slate-800">
                                 {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColJ : o.praColJ)}
+                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${praPctJ}%)`}
+                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${paskaPctJ}%)`}
                               </span>
                             </div>
                             <div className="flex justify-between gap-1">
                               <span className="truncate text-slate-400">3. Menolak</span>
                               <span className="font-extrabold text-slate-800">
                                 {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColK : o.praColK)}
+                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${praPctK}%)`}
+                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${paskaPctK}%)`}
                               </span>
                             </div>
                             <div className="flex justify-between gap-1">
                               <span className="truncate text-slate-400">4. Mtr Tdk Ada</span>
                               <span className="font-extrabold text-slate-800">
                                 {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColL : o.praColL)}
+                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${praPctL}%)`}
+                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${paskaPctL}%)`}
                               </span>
                             </div>
                           </div>
@@ -870,6 +889,20 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                       const paskaPercentage = (o.paskaRealisasi * 100).toFixed(
                         1,
                       );
+
+                      // Paskabayar percentages for I, J, K, L
+                      const paskaDenom = o.paskaOpen + o.paskaSubmitted;
+                      const paskaPctI = paskaDenom > 0 ? ((o.paskaColI / paskaDenom) * 100).toFixed(1) : "0.0";
+                      const paskaPctJ = paskaDenom > 0 ? ((o.paskaColJ / paskaDenom) * 100).toFixed(1) : "0.0";
+                      const paskaPctK = paskaDenom > 0 ? ((o.paskaColK / paskaDenom) * 100).toFixed(1) : "0.0";
+                      const paskaPctL = paskaDenom > 0 ? ((o.paskaColL / paskaDenom) * 100).toFixed(1) : "0.0";
+
+                      // Prabayar percentages for I, J, K, L
+                      const praDenom = o.praOpen + o.praSubmitted;
+                      const praPctI = praDenom > 0 ? ((o.praColI / praDenom) * 100).toFixed(1) : "0.0";
+                      const praPctJ = praDenom > 0 ? ((o.praColJ / praDenom) * 100).toFixed(1) : "0.0";
+                      const praPctK = praDenom > 0 ? ((o.praColK / praDenom) * 100).toFixed(1) : "0.0";
+                      const praPctL = praDenom > 0 ? ((o.praColL / praDenom) * 100).toFixed(1) : "0.0";
 
                       return (
                         <tr
@@ -1015,17 +1048,61 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               </td>
 
                               {/* Columns I, J, K, L details */}
-                              <td className="py-3.5 px-2 text-center font-bold text-slate-700 border-r border-slate-100 bg-emerald-50/5">
-                                {o.hasPaska ? formatNumber(o.paskaColI) : "-"}
+                              <td className="py-3.5 px-2 text-center border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPaska ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[70px]">
+                                    <span className="font-bold text-slate-700">
+                                      {formatNumber(o.paskaColI)}
+                                    </span>
+                                    <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                                      {paskaPctI}%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
-                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
-                                {o.hasPaska ? formatNumber(o.paskaColJ) : "-"}
+                              <td className="py-3.5 px-2 text-center border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPaska ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[70px]">
+                                    <span className="font-semibold text-slate-600">
+                                      {formatNumber(o.paskaColJ)}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                                      {paskaPctJ}%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
-                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
-                                {o.hasPaska ? formatNumber(o.paskaColK) : "-"}
+                              <td className="py-3.5 px-2 text-center border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPaska ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[70px]">
+                                    <span className="font-semibold text-slate-600">
+                                      {formatNumber(o.paskaColK)}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                                      {paskaPctK}%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
-                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 bg-emerald-50/5">
-                                {o.hasPaska ? formatNumber(o.paskaColL) : "-"}
+                              <td className="py-3.5 px-2 text-center bg-emerald-50/5">
+                                {o.hasPaska ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[70px]">
+                                    <span className="font-semibold text-slate-600">
+                                      {formatNumber(o.paskaColL)}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                                      {paskaPctL}%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
                             </>
                           )}
@@ -1051,21 +1128,54 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                                       {formatNumber(o.praColI)}
                                     </span>
                                     <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100 shrink-0">
-                                      {(o.praRealisasi * 100).toFixed(1)}%
+                                      {praPctI}%
                                     </span>
                                   </div>
                                 ) : (
                                   "-"
                                 )}
                               </td>
-                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
-                                {o.hasPra ? formatNumber(o.praColJ) : "-"}
+                              <td className="py-3.5 px-2 text-center border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPra ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[70px]">
+                                    <span className="font-semibold text-slate-600">
+                                      {formatNumber(o.praColJ)}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                                      {praPctJ}%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
-                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 border-r border-slate-100 bg-emerald-50/5">
-                                {o.hasPra ? formatNumber(o.praColK) : "-"}
+                              <td className="py-3.5 px-2 text-center border-r border-slate-100 bg-emerald-50/5">
+                                {o.hasPra ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[70px]">
+                                    <span className="font-semibold text-slate-600">
+                                      {formatNumber(o.praColK)}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                                      {praPctK}%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
-                              <td className="py-3.5 px-2 text-center font-semibold text-slate-600 bg-emerald-50/5">
-                                {o.hasPra ? formatNumber(o.praColL) : "-"}
+                              <td className="py-3.5 px-2 text-center bg-emerald-50/5">
+                                {o.hasPra ? (
+                                  <div className="flex flex-col items-center gap-1 w-full min-w-[70px]">
+                                    <span className="font-semibold text-slate-600">
+                                      {formatNumber(o.praColL)}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                                      {praPctL}%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
                               </td>
                             </>
                           )}
