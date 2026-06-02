@@ -106,9 +106,17 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       const praDenom = o.praOpen + o.praSubmitted;
       const praRealisasi = praDenom > 0 ? (o.praSubmitted - praRejected) / praDenom : 0;
 
+      // Realisasi values (Submitted - Rejected)
+      const paskaRealisasiVal = o.paskaSubmitted - paskaRejected;
+      const praRealisasiVal = o.praSubmitted - praRejected;
+      const totalRealisasiVal = paskaRealisasiVal + praRealisasiVal;
+
       return {
         ...o,
         totalSubmitted,
+        paskaRealisasiVal,
+        praRealisasiVal,
+        totalRealisasiVal,
         paskaRejected,
         praRejected,
         paskaRealisasi,
@@ -116,8 +124,8 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       };
     });
 
-    // Sort by totalSubmitted descending to calculate absolute global ranking
-    list.sort((a, b) => b.totalSubmitted - a.totalSubmitted);
+    // Sort by totalRealisasiVal descending to calculate absolute global ranking
+    list.sort((a, b) => b.totalRealisasiVal - a.totalRealisasiVal);
 
     // Assign rank (no) based on the absolute global ranking
     return list.map((o, idx) => ({
@@ -227,15 +235,15 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
         valA = a.nama || "";
         valB = b.nama || "";
       } else if (sortBy === "paska_submitted") {
-        valA = a.paskaSubmitted || 0;
-        valB = b.paskaSubmitted || 0;
+        valA = a.paskaRealisasiVal || 0;
+        valB = b.paskaRealisasiVal || 0;
       } else if (sortBy === "pra_submitted") {
-        valA = a.praSubmitted || 0;
-        valB = b.praSubmitted || 0;
+        valA = a.praRealisasiVal || 0;
+        valB = b.praRealisasiVal || 0;
       } else {
-        // Default: sort by totalSubmitted ('total_submitted' or fallback)
-        valA = a.totalSubmitted || 0;
-        valB = b.totalSubmitted || 0;
+        // Default: sort by totalRealisasiVal ('total_submitted' or fallback)
+        valA = a.totalRealisasiVal || 0;
+        valB = b.totalRealisasiVal || 0;
       }
 
       if (valA < valB) return sortOrder === "asc" ? -1 : 1;
@@ -857,7 +865,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     >
                       Peringkat
                       <span className="block text-[9px] font-normal text-slate-400 normal-case mt-0.5">
-                        (Total Submit)
+                        (Realisasi)
                       </span>
                     </th>
                     <th
