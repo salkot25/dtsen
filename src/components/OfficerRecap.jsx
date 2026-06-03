@@ -10,7 +10,8 @@ import {
   ChevronRight,
   User,
   Mail,
-  Sparkles,
+  ReceiptText,
+  Zap,
 } from "lucide-react";
 import { formatNumber } from "../utils/dateUtils";
 
@@ -91,7 +92,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
     // Convert to list, calculate total submitted (Postpaid + Prepaid) for each officer
     const list = Array.from(map.values()).map((o) => {
       const totalSubmitted = o.paskaSubmitted + o.praSubmitted;
-      
+
       // Calculate dynamic paskaRejected: Rumah Kosong (colJ) + Menolak (colK) + Meter Tidak Ada (colL)
       const paskaRejected = o.paskaColJ + o.paskaColK + o.paskaColL;
 
@@ -100,11 +101,13 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
       // Calculate dynamic paskaRealisasi: (Submitted - Rejected) / (Open + Submitted)
       const paskaDenom = o.paskaOpen + o.paskaSubmitted;
-      const paskaRealisasi = paskaDenom > 0 ? (o.paskaSubmitted - paskaRejected) / paskaDenom : 0;
+      const paskaRealisasi =
+        paskaDenom > 0 ? (o.paskaSubmitted - paskaRejected) / paskaDenom : 0;
 
       // Calculate dynamic praRealisasi: (Submitted - Rejected) / (Open + Submitted)
       const praDenom = o.praOpen + o.praSubmitted;
-      const praRealisasi = praDenom > 0 ? (o.praSubmitted - praRejected) / praDenom : 0;
+      const praRealisasi =
+        praDenom > 0 ? (o.praSubmitted - praRejected) / praDenom : 0;
 
       // Realisasi values (Submitted - Rejected)
       const paskaRealisasiVal = o.paskaSubmitted - paskaRejected;
@@ -255,7 +258,14 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       ...o,
       no: idx + 1,
     }));
-  }, [mergedOfficers, searchTerm, performanceFilter, sortBy, sortOrder, serviceTypeFilter]);
+  }, [
+    mergedOfficers,
+    searchTerm,
+    performanceFilter,
+    sortBy,
+    sortOrder,
+    serviceTypeFilter,
+  ]);
 
   // 4. Pagination Logic
   const totalPages = Math.ceil(processedOfficers.length / itemsPerPage) || 1;
@@ -330,7 +340,11 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
   // Paskabayar percentage = ((Total Submitted - Total Rejected) / targetPaska) * 100
   const paskaPct =
     targetPaska > 0
-      ? (((stats.totalPaskaSubmitted - stats.totalPaskaRejected) / targetPaska) * 100).toFixed(1)
+      ? (
+          ((stats.totalPaskaSubmitted - stats.totalPaskaRejected) /
+            targetPaska) *
+          100
+        ).toFixed(1)
       : "0.0";
 
   // Prabayar target = Total Target - targetPaska
@@ -338,12 +352,16 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
   // Prabayar percentage = ((Total Submitted - Total Rejected) / targetPra) * 100
   const praPct =
     targetPra > 0
-      ? (((stats.totalPraSubmitted - stats.totalPraRejected) / targetPra) * 100).toFixed(1)
+      ? (
+          ((stats.totalPraSubmitted - stats.totalPraRejected) / targetPra) *
+          100
+        ).toFixed(1)
       : "0.0";
 
   // Combined progress = Total Combined Realisasi / Total Target
   const totalCombinedRealisasi =
-    (stats.totalPaskaSubmitted - stats.totalPaskaRejected) +
+    stats.totalPaskaSubmitted -
+    stats.totalPaskaRejected +
     (stats.totalPraSubmitted - stats.totalPraRejected);
   const combinedPct =
     totalTarget > 0
@@ -423,14 +441,16 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
             {/* 3. Realisasi Paskabayar */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
               <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
-                <CheckCircle2 size={22} />
+                <ReceiptText size={22} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                   Realisasi Paskabayar
                 </p>
                 <h3 className="text-2xl font-black text-slate-800 leading-none">
-                  {formatNumber(stats.totalPaskaSubmitted - stats.totalPaskaRejected)}
+                  {formatNumber(
+                    stats.totalPaskaSubmitted - stats.totalPaskaRejected,
+                  )}
                 </h3>
                 <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
                   <span>Rasio Realisasi:</span>
@@ -448,14 +468,16 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
             {/* 4. Realisasi Prabayar */}
             <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
               <div className="p-3 bg-violet-50 text-violet-600 rounded-xl shrink-0">
-                <Sparkles size={22} />
+                <Zap size={22} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                   Realisasi Prabayar
                 </p>
                 <h3 className="text-2xl font-black text-violet-800 leading-none">
-                  {formatNumber(stats.totalPraSubmitted - stats.totalPraRejected)}
+                  {formatNumber(
+                    stats.totalPraSubmitted - stats.totalPraRejected,
+                  )}
                 </h3>
                 <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
                   <span>Rasio Realisasi:</span>
@@ -493,7 +515,6 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
               {/* Filter & Sort controls */}
               <div className="flex flex-wrap w-full md:w-auto items-center gap-3">
-
                 {/* Filter by performance */}
                 {serviceTypeFilter === "paskabayar" && (
                   <select
@@ -589,16 +610,40 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
               // Mobile percentages calculation
               const paskaDenom = o.paskaOpen + o.paskaSubmitted;
-              const paskaPctI = paskaDenom > 0 ? ((o.paskaColI / paskaDenom) * 100).toFixed(1) : "0.0";
-              const paskaPctJ = paskaDenom > 0 ? ((o.paskaColJ / paskaDenom) * 100).toFixed(1) : "0.0";
-              const paskaPctK = paskaDenom > 0 ? ((o.paskaColK / paskaDenom) * 100).toFixed(1) : "0.0";
-              const paskaPctL = paskaDenom > 0 ? ((o.paskaColL / paskaDenom) * 100).toFixed(1) : "0.0";
+              const paskaPctI =
+                paskaDenom > 0
+                  ? ((o.paskaColI / paskaDenom) * 100).toFixed(1)
+                  : "0.0";
+              const paskaPctJ =
+                paskaDenom > 0
+                  ? ((o.paskaColJ / paskaDenom) * 100).toFixed(1)
+                  : "0.0";
+              const paskaPctK =
+                paskaDenom > 0
+                  ? ((o.paskaColK / paskaDenom) * 100).toFixed(1)
+                  : "0.0";
+              const paskaPctL =
+                paskaDenom > 0
+                  ? ((o.paskaColL / paskaDenom) * 100).toFixed(1)
+                  : "0.0";
 
               const praDenom = o.praOpen + o.praSubmitted;
-              const praPctI = praDenom > 0 ? ((o.praColI / praDenom) * 100).toFixed(1) : "0.0";
-              const praPctJ = praDenom > 0 ? ((o.praColJ / praDenom) * 100).toFixed(1) : "0.0";
-              const praPctK = praDenom > 0 ? ((o.praColK / praDenom) * 100).toFixed(1) : "0.0";
-              const praPctL = praDenom > 0 ? ((o.praColL / praDenom) * 100).toFixed(1) : "0.0";
+              const praPctI =
+                praDenom > 0
+                  ? ((o.praColI / praDenom) * 100).toFixed(1)
+                  : "0.0";
+              const praPctJ =
+                praDenom > 0
+                  ? ((o.praColJ / praDenom) * 100).toFixed(1)
+                  : "0.0";
+              const praPctK =
+                praDenom > 0
+                  ? ((o.praColK / praDenom) * 100).toFixed(1)
+                  : "0.0";
+              const praPctL =
+                praDenom > 0
+                  ? ((o.praColL / praDenom) * 100).toFixed(1)
+                  : "0.0";
               const isExpanded = expandedMobileCard === mobileCardKey;
 
               return (
@@ -767,42 +812,83 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                       </div>
 
                       {/* Additional Columns (I, J, K, L) */}
-                      {(serviceTypeFilter === "paskabayar" || serviceTypeFilter === "prabayar") && (
+                      {(serviceTypeFilter === "paskabayar" ||
+                        serviceTypeFilter === "prabayar") && (
                         <div className="rounded-xl bg-emerald-50/50 border border-emerald-100/60 p-3 mt-1 text-[11px]">
                           <p className="font-bold text-emerald-800 uppercase tracking-wider text-[10px] mb-2">
                             Kategori Kunjungan
                           </p>
                           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-slate-600">
                             <div className="flex justify-between gap-1">
-                              <span className="truncate text-slate-400">1. Berhasil</span>
+                              <span className="truncate text-slate-400">
+                                1. Berhasil
+                              </span>
                               <span className="font-extrabold text-slate-800">
-                                {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColI : o.praColI)}
-                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${praPctI}%)`}
-                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${paskaPctI}%)`}
+                                {formatNumber(
+                                  serviceTypeFilter === "paskabayar"
+                                    ? o.paskaColI
+                                    : o.praColI,
+                                )}
+                                {serviceTypeFilter === "prabayar" &&
+                                  o.hasPra &&
+                                  ` (${praPctI}%)`}
+                                {serviceTypeFilter === "paskabayar" &&
+                                  o.hasPaska &&
+                                  ` (${paskaPctI}%)`}
                               </span>
                             </div>
                             <div className="flex justify-between gap-1">
-                              <span className="truncate text-slate-400">2. Rmh Kosong</span>
+                              <span className="truncate text-slate-400">
+                                2. Rmh Kosong
+                              </span>
                               <span className="font-extrabold text-slate-800">
-                                {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColJ : o.praColJ)}
-                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${praPctJ}%)`}
-                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${paskaPctJ}%)`}
+                                {formatNumber(
+                                  serviceTypeFilter === "paskabayar"
+                                    ? o.paskaColJ
+                                    : o.praColJ,
+                                )}
+                                {serviceTypeFilter === "prabayar" &&
+                                  o.hasPra &&
+                                  ` (${praPctJ}%)`}
+                                {serviceTypeFilter === "paskabayar" &&
+                                  o.hasPaska &&
+                                  ` (${paskaPctJ}%)`}
                               </span>
                             </div>
                             <div className="flex justify-between gap-1">
-                              <span className="truncate text-slate-400">3. Menolak</span>
+                              <span className="truncate text-slate-400">
+                                3. Menolak
+                              </span>
                               <span className="font-extrabold text-slate-800">
-                                {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColK : o.praColK)}
-                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${praPctK}%)`}
-                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${paskaPctK}%)`}
+                                {formatNumber(
+                                  serviceTypeFilter === "paskabayar"
+                                    ? o.paskaColK
+                                    : o.praColK,
+                                )}
+                                {serviceTypeFilter === "prabayar" &&
+                                  o.hasPra &&
+                                  ` (${praPctK}%)`}
+                                {serviceTypeFilter === "paskabayar" &&
+                                  o.hasPaska &&
+                                  ` (${paskaPctK}%)`}
                               </span>
                             </div>
                             <div className="flex justify-between gap-1">
-                              <span className="truncate text-slate-400">4. Mtr Tdk Ada</span>
+                              <span className="truncate text-slate-400">
+                                4. Mtr Tdk Ada
+                              </span>
                               <span className="font-extrabold text-slate-800">
-                                {formatNumber(serviceTypeFilter === "paskabayar" ? o.paskaColL : o.praColL)}
-                                {serviceTypeFilter === "prabayar" && o.hasPra && ` (${praPctL}%)`}
-                                {serviceTypeFilter === "paskabayar" && o.hasPaska && ` (${paskaPctL}%)`}
+                                {formatNumber(
+                                  serviceTypeFilter === "paskabayar"
+                                    ? o.paskaColL
+                                    : o.praColL,
+                                )}
+                                {serviceTypeFilter === "prabayar" &&
+                                  o.hasPra &&
+                                  ` (${praPctL}%)`}
+                                {serviceTypeFilter === "paskabayar" &&
+                                  o.hasPaska &&
+                                  ` (${paskaPctL}%)`}
                               </span>
                             </div>
                           </div>
@@ -856,7 +942,9 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
           {/* Unified Dual-Header Table */}
           <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className={`w-full text-left border-collapse ${serviceTypeFilter === "all" ? "min-w-[900px]" : "min-w-[800px]"}`}>
+              <table
+                className={`w-full text-left border-collapse ${serviceTypeFilter === "all" ? "min-w-[900px]" : "min-w-[800px]"}`}
+              >
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
                     <th
@@ -926,36 +1014,80 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                   <tr className="bg-slate-50/50 border-b border-slate-200 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     {serviceTypeFilter === "all" && (
                       <>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Open</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Submitted</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">Rejected</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-200 bg-blue-50/10">Realisasi %</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">Submitted</th>
-                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">Rejected</th>
-                        <th className="py-3 px-4 text-center bg-violet-50/10">Realisasi %</th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">
+                          Open
+                        </th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">
+                          Submitted
+                        </th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-blue-50/10">
+                          Rejected
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-200 bg-blue-50/10 w-20 whitespace-nowrap">
+                          Realisasi %
+                        </th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">
+                          Submitted
+                        </th>
+                        <th className="py-3 px-4 text-center border-r border-slate-100 bg-violet-50/10">
+                          Rejected
+                        </th>
+                        <th className="py-3 px-2 text-center bg-violet-50/10 w-20 whitespace-nowrap">
+                          Realisasi %
+                        </th>
                       </>
                     )}
                     {serviceTypeFilter === "paskabayar" && (
                       <>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-blue-50/10">Open</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-blue-50/10">Submitted</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-blue-50/10">Rejected</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-200 bg-blue-50/10">Realisasi</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Berhasil</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Rmh Kosong</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Menolak</th>
-                        <th className="py-3 px-2 text-center bg-emerald-50/10">Mtr Tdk Ada</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-blue-50/10">
+                          Open
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-blue-50/10">
+                          Submitted
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-blue-50/10">
+                          Rejected
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-200 bg-blue-50/10">
+                          Realisasi
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">
+                          Berhasil
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">
+                          Rmh Kosong
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">
+                          Menolak
+                        </th>
+                        <th className="py-3 px-2 text-center bg-emerald-50/10">
+                          Mtr Tdk Ada
+                        </th>
                       </>
                     )}
                     {serviceTypeFilter === "prabayar" && (
                       <>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-violet-50/10">Submitted</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-violet-50/10">Rejected</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-200 bg-violet-50/10">Realisasi</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Berhasil</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Rmh Kosong</th>
-                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">Menolak</th>
-                        <th className="py-3 px-2 text-center bg-emerald-50/10">Mtr Tdk Ada</th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-violet-50/10">
+                          Submitted
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-violet-50/10">
+                          Rejected
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-200 bg-violet-50/10">
+                          Realisasi
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">
+                          Berhasil
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">
+                          Rmh Kosong
+                        </th>
+                        <th className="py-3 px-2 text-center border-r border-slate-100 bg-emerald-50/10">
+                          Menolak
+                        </th>
+                        <th className="py-3 px-2 text-center bg-emerald-50/10">
+                          Mtr Tdk Ada
+                        </th>
                       </>
                     )}
                   </tr>
@@ -972,25 +1104,48 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
                       // Paskabayar percentages for I, J, K, L
                       const paskaDenom = o.paskaOpen + o.paskaSubmitted;
-                      const paskaPctI = paskaDenom > 0 ? ((o.paskaColI / paskaDenom) * 100).toFixed(1) : "0.0";
-                      const paskaPctJ = paskaDenom > 0 ? ((o.paskaColJ / paskaDenom) * 100).toFixed(1) : "0.0";
-                      const paskaPctK = paskaDenom > 0 ? ((o.paskaColK / paskaDenom) * 100).toFixed(1) : "0.0";
-                      const paskaPctL = paskaDenom > 0 ? ((o.paskaColL / paskaDenom) * 100).toFixed(1) : "0.0";
+                      const paskaPctI =
+                        paskaDenom > 0
+                          ? ((o.paskaColI / paskaDenom) * 100).toFixed(1)
+                          : "0.0";
+                      const paskaPctJ =
+                        paskaDenom > 0
+                          ? ((o.paskaColJ / paskaDenom) * 100).toFixed(1)
+                          : "0.0";
+                      const paskaPctK =
+                        paskaDenom > 0
+                          ? ((o.paskaColK / paskaDenom) * 100).toFixed(1)
+                          : "0.0";
+                      const paskaPctL =
+                        paskaDenom > 0
+                          ? ((o.paskaColL / paskaDenom) * 100).toFixed(1)
+                          : "0.0";
 
                       // Prabayar percentages for I, J, K, L
                       const praDenom = o.praOpen + o.praSubmitted;
-                      const praPctI = praDenom > 0 ? ((o.praColI / praDenom) * 100).toFixed(1) : "0.0";
-                      const praPctJ = praDenom > 0 ? ((o.praColJ / praDenom) * 100).toFixed(1) : "0.0";
-                      const praPctK = praDenom > 0 ? ((o.praColK / praDenom) * 100).toFixed(1) : "0.0";
-                      const praPctL = praDenom > 0 ? ((o.praColL / praDenom) * 100).toFixed(1) : "0.0";
+                      const praPctI =
+                        praDenom > 0
+                          ? ((o.praColI / praDenom) * 100).toFixed(1)
+                          : "0.0";
+                      const praPctJ =
+                        praDenom > 0
+                          ? ((o.praColJ / praDenom) * 100).toFixed(1)
+                          : "0.0";
+                      const praPctK =
+                        praDenom > 0
+                          ? ((o.praColK / praDenom) * 100).toFixed(1)
+                          : "0.0";
+                      const praPctL =
+                        praDenom > 0
+                          ? ((o.praColL / praDenom) * 100).toFixed(1)
+                          : "0.0";
 
                       return (
-                        <tr
-                          key={index}
-                          className="group recap-table-row"
-                        >
+                        <tr key={index} className="group recap-table-row">
                           {/* Peringkat */}
-                          <td className={`py-3.5 text-center font-bold text-slate-500 border-r border-slate-200 ${serviceTypeFilter === "all" ? "px-3" : "px-2"}`}>
+                          <td
+                            className={`py-3.5 text-center font-bold text-slate-500 border-r border-slate-200 ${serviceTypeFilter === "all" ? "px-3" : "px-2"}`}
+                          >
                             {o.no === 1 ? (
                               <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 text-yellow-950 border border-yellow-200/50 shadow-md animate-gold-shine">
                                 1
@@ -1009,10 +1164,14 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           </td>
 
                           {/* Identitas */}
-                          <td className={`py-3.5 border-r border-slate-200 ${serviceTypeFilter === "all" ? "px-6" : "px-3"}`}>
+                          <td
+                            className={`py-3.5 border-r border-slate-200 ${serviceTypeFilter === "all" ? "px-6" : "px-3"}`}
+                          >
                             <div className="flex items-center gap-3">
                               <div className="min-w-0">
-                                <p className={`font-bold text-slate-800 leading-snug truncate group-hover:text-blue-700 transition-colors ${serviceTypeFilter !== "all" ? "text-[13px]" : ""}`}>
+                                <p
+                                  className={`font-bold text-slate-800 leading-snug truncate group-hover:text-blue-700 transition-colors ${serviceTypeFilter !== "all" ? "text-[13px]" : ""}`}
+                                >
                                   {o.nama}
                                 </p>
                                 <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 truncate group-hover:text-slate-500 transition-colors">
@@ -1033,20 +1192,24 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
                               {/* Paskabayar - Submitted */}
                               <td className="py-3.5 px-4 text-center font-bold text-slate-700 border-r border-slate-100 bg-blue-50/5">
-                                {o.hasPaska ? formatNumber(o.paskaSubmitted) : "-"}
+                                {o.hasPaska
+                                  ? formatNumber(o.paskaSubmitted)
+                                  : "-"}
                               </td>
 
                               {/* Paskabayar - Rejected */}
                               <td className="py-3.5 px-4 text-center font-medium text-rose-500 border-r border-slate-100 bg-blue-50/5">
-                                {o.hasPaska ? formatNumber(o.paskaRejected) : "-"}
+                                {o.hasPaska
+                                  ? formatNumber(o.paskaRejected)
+                                  : "-"}
                               </td>
 
                               {/* Paskabayar - Realisasi % */}
-                              <td className="py-3.5 px-4 border-r border-slate-200 bg-blue-50/5">
+                              <td className="py-3.5 px-2 border-r border-slate-200 bg-blue-50/5 w-20">
                                 {o.hasPaska ? (
-                                  <div className="flex flex-col items-center gap-1 w-full min-w-[120px]">
+                                  <div className="flex flex-col items-center gap-0.5 w-full min-w-[88px] max-w-[88px] mx-auto">
                                     <span
-                                      className={`text-xs font-extrabold ${style.textColor}`}
+                                      className={`text-[11px] font-extrabold leading-none ${style.textColor}`}
                                     >
                                       {paskaPercentage}%
                                     </span>
@@ -1059,7 +1222,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                                       />
                                     </div>
                                     <span
-                                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${style.bg}`}
+                                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold border shrink-0 ${style.bg}`}
                                     >
                                       {style.label}
                                     </span>
@@ -1080,11 +1243,11 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               </td>
 
                               {/* Prabayar - Realisasi % */}
-                              <td className="py-3.5 px-4 bg-violet-50/5">
+                              <td className="py-3.5 px-2 bg-violet-50/5 w-20">
                                 {o.hasPra ? (
-                                  <div className="flex flex-col items-center gap-1 w-full min-w-[120px]">
+                                  <div className="flex flex-col items-center gap-0.5 w-full min-w-[88px] max-w-[88px] mx-auto">
                                     <span
-                                      className={`text-xs font-extrabold ${praStyle.textColor}`}
+                                      className={`text-[11px] font-extrabold leading-none ${praStyle.textColor}`}
                                     >
                                       {praPercentage}%
                                     </span>
@@ -1097,7 +1260,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                                       />
                                     </div>
                                     <span
-                                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${praStyle.bg}`}
+                                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold border shrink-0 ${praStyle.bg}`}
                                     >
                                       {praStyle.label}
                                     </span>
@@ -1119,20 +1282,24 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
 
                               {/* Paskabayar - Submitted */}
                               <td className="py-3.5 px-2 text-center font-bold text-slate-700 border-r border-slate-100 bg-blue-50/5">
-                                {o.hasPaska ? formatNumber(o.paskaSubmitted) : "-"}
+                                {o.hasPaska
+                                  ? formatNumber(o.paskaSubmitted)
+                                  : "-"}
                               </td>
 
                               {/* Paskabayar - Rejected */}
                               <td className="py-3.5 px-2 text-center font-medium text-rose-500 border-r border-slate-100 bg-blue-50/5">
-                                {o.hasPaska ? formatNumber(o.paskaRejected) : "-"}
+                                {o.hasPaska
+                                  ? formatNumber(o.paskaRejected)
+                                  : "-"}
                               </td>
 
                               {/* Paskabayar - Realisasi % */}
-                              <td className="py-3.5 px-2 border-r border-slate-200 bg-blue-50/5">
+                              <td className="py-3.5 px-2 border-r border-slate-200 bg-blue-50/5 w-20">
                                 {o.hasPaska ? (
-                                  <div className="flex flex-col items-center gap-1 w-full min-w-[90px]">
+                                  <div className="flex flex-col items-center gap-0.5 w-full min-w-[84px] max-w-[84px] mx-auto">
                                     <span
-                                      className={`text-xs font-extrabold ${style.textColor}`}
+                                      className={`text-[11px] font-extrabold leading-none ${style.textColor}`}
                                     >
                                       {paskaPercentage}%
                                     </span>
@@ -1145,7 +1312,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                                       />
                                     </div>
                                     <span
-                                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${style.bg}`}
+                                      className={`text-[8px] px-1 py-0.5 rounded-full font-semibold border shrink-0 ${style.bg}`}
                                     >
                                       {style.label}
                                     </span>
@@ -1229,11 +1396,11 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                               </td>
 
                               {/* Prabayar - Realisasi */}
-                              <td className="py-3.5 px-2 border-r border-slate-200 bg-violet-50/5">
+                              <td className="py-3.5 px-2 border-r border-slate-200 bg-violet-50/5 w-20">
                                 {o.hasPra ? (
-                                  <div className="flex flex-col items-center gap-1 w-full min-w-[90px]">
+                                  <div className="flex flex-col items-center gap-0.5 w-full min-w-[84px] max-w-[84px] mx-auto">
                                     <span
-                                      className={`text-xs font-extrabold ${praStyle.textColor}`}
+                                      className={`text-[11px] font-extrabold leading-none ${praStyle.textColor}`}
                                     >
                                       {praPercentage}%
                                     </span>
@@ -1246,7 +1413,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                                       />
                                     </div>
                                     <span
-                                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold border mt-0.5 shrink-0 ${praStyle.bg}`}
+                                      className={`text-[8px] px-1 py-0.5 rounded-full font-semibold border shrink-0 ${praStyle.bg}`}
                                     >
                                       {praStyle.label}
                                     </span>
@@ -1321,7 +1488,13 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                   ) : (
                     <tr>
                       <td
-                        colSpan={serviceTypeFilter === "all" ? 8 : serviceTypeFilter === "paskabayar" ? 10 : 8}
+                        colSpan={
+                          serviceTypeFilter === "all"
+                            ? 8
+                            : serviceTypeFilter === "paskabayar"
+                              ? 10
+                              : 8
+                        }
                         className="py-12 text-center text-slate-400 font-medium"
                       >
                         Tidak ada petugas yang cocok dengan kriteria pencarian
