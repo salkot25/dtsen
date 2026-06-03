@@ -568,26 +568,26 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
             Apakah pencapaian kinerja menyertakan kategori kunjungan?
           </p>
           <div className="flex bg-slate-100/80 p-1 rounded-xl gap-1 w-auto shrink-0 justify-self-end">
-          <button
-            onClick={() => setConsiderCategories(true)}
-            className={`px-3 sm:px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
-              considerCategories
-                ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
-                : "text-slate-600 hover:text-slate-800"
-            }`}
-          >
-            <CheckCircle2 size={14} /> Ya
-          </button>
-          <button
-            onClick={() => setConsiderCategories(false)}
-            className={`px-3 sm:px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
-              !considerCategories
-                ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
-                : "text-slate-600 hover:text-slate-800"
-            }`}
-          >
-            <X size={14} /> Tidak
-          </button>
+            <button
+              onClick={() => setConsiderCategories(true)}
+              className={`px-3 sm:px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+                considerCategories
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
+                  : "text-slate-600 hover:text-slate-800"
+              }`}
+            >
+              <CheckCircle2 size={14} /> Ya
+            </button>
+            <button
+              onClick={() => setConsiderCategories(false)}
+              className={`px-3 sm:px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+                !considerCategories
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
+                  : "text-slate-600 hover:text-slate-800"
+              }`}
+            >
+              <X size={14} /> Tidak
+            </button>
           </div>
         </div>
       </div>
@@ -766,7 +766,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
           </div>
         </div>
 
-        {/* Capaian Terakhir (Real) */}
+        {/* Capaian Terakhir */}
         <div className="bg-white rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm flex items-center gap-3 md:gap-4">
           <div className="p-2.5 md:p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
             <Award size={20} />
@@ -774,7 +774,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Capaian Terakhir (Real)
+                Capaian Terakhir
               </p>
               <button
                 onClick={() => setInfoMetric("latest")}
@@ -1625,7 +1625,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                 <>
                   <div className="space-y-1">
                     <h4 className="text-sm font-black text-slate-800 dark:text-slate-200">
-                      Capaian Terakhir (Real)
+                      Capaian Terakhir
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       Angka pencapaian harian terbaru yang diambil langsung dari
