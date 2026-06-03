@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Copy, MessageCircle, Check } from 'lucide-react';
-import { formatNumber, calculateDailyTarget, getRemainingWorkingDays } from '../utils/dateUtils';
+import { formatNumber, calculateDailyTarget, getRemainingWorkingDays, parseLocalDate } from '../utils/dateUtils';
 
 const JML_PETUGAS = 60;
 
@@ -26,7 +26,7 @@ export default function WhatsAppGenerator({ history, settings, selectedItem }) {
   const pctKumulatif = targetKumulatif > 0 ? ((currentTotal / targetKumulatif) * 100).toFixed(2) : '0';
 
   // Format tanggal dari selected item atau hari ini
-  const reportDate = selectedItem ? new Date(selectedItem.date) : new Date();
+  const reportDate = selectedItem ? parseLocalDate(selectedItem.date) : new Date();
   const dd = String(reportDate.getDate()).padStart(2, '0');
   const mm = String(reportDate.getMonth() + 1).padStart(2, '0');
   const yyyy = reportDate.getFullYear();

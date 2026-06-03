@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Clock, Loader2, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { fetchAiHistory } from '../services/api';
@@ -32,7 +33,7 @@ const AiHistoryModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fade-in p-4`}>
       <div className="bg-white dark:bg-slate-900 shadow-xl flex flex-col overflow-hidden animate-slide-up transition-all duration-300 w-full max-w-4xl max-h-[92vh] sm:max-h-[90vh] rounded-2xl border border-slate-200 dark:border-slate-800">
         {/* Header */}
@@ -127,7 +128,8 @@ const AiHistoryModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

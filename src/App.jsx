@@ -149,9 +149,15 @@ function App() {
     const previousTotal = history.length > 0 ? history[0].value : 0;
     const dailyAchieved = newValue - previousTotal;
 
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const localDateStr = `${year}-${month}-${day}`;
+
     const newEntry = {
       id: Date.now(),
-      date: new Date().toISOString(),
+      date: localDateStr,
       value: newValue,
       dailyAchieved: dailyAchieved
     };

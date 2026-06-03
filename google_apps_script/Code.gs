@@ -309,9 +309,19 @@ function doGet(e) {
         var row = values[i];
         // Memeriksa agar baris kosong tidak terambil
         if (row[0] && row[1] && row[2]) {
+          var dateVal = row[1];
+          if (typeof dateVal === 'string') {
+            if (dateVal.indexOf('T') !== -1) {
+              dateVal = dateVal.split('T')[0];
+            } else if (dateVal.indexOf(' ') !== -1) {
+              dateVal = dateVal.split(' ')[0];
+            }
+          } else if (Object.prototype.toString.call(dateVal) === '[object Date]') {
+            dateVal = Utilities.formatDate(dateVal, ss.getSpreadsheetTimeZone(), "yyyy-MM-dd");
+          }
           history.push({
             id: row[0],
-            date: row[1],
+            date: dateVal,
             value: row[2],
             dailyAchieved: row[3] || 0
           });

@@ -32,7 +32,7 @@ export async function generateExecutiveSummary(apiKey, data) {
   }
 
   const model = genAI.getGenerativeModel({ model: selectedModelName });
-
+  const hitungLabel = data.considerCategories ? "realisasi bersih" : "total submit";
   const officerSection = data.officerData ? `
 
 --- DATA REKAP KINERJA PETUGAS ---
@@ -41,10 +41,10 @@ export async function generateExecutiveSummary(apiKey, data) {
 - Total Submitted Prabayar: ${data.officerData.totalPraSubmitted} pelanggan (Realisasi: ${data.officerData.praPct}%)
 - Rata-rata Realisasi Paskabayar per Petugas: ${data.officerData.avgRealisasi}%
 
-🏆 Top 3 Performers (berdasarkan total submitted):
+🏆 Top 3 Performers (berdasarkan ${hitungLabel}):
 ${data.officerData.top3 || '(Belum ada data)'}
 
-⚠️ Petugas yang Membutuhkan Perhatian (submitted terendah):
+⚠️ Petugas yang Membutuhkan Perhatian (${hitungLabel} terendah):
 ${data.officerData.bottom3 || '(Belum ada data)'}
 ` : '';
 

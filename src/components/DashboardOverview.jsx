@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine
 } from 'recharts';
-import { formatNumber, getRemainingWorkingDays, calculateDailyTarget, getTotalWorkingDays } from '../utils/dateUtils';
+import { formatNumber, getRemainingWorkingDays, calculateDailyTarget, getTotalWorkingDays, parseLocalDate } from '../utils/dateUtils';
 
 function KPICard({ title, value, subtitle, icon, iconBg, iconColor, children, delay = '0' }) {
   return (
@@ -24,8 +24,8 @@ function KPICard({ title, value, subtitle, icon, iconBg, iconColor, children, de
           {icon}
         </div>
       </div>
+      {subtitle && <p className="text-xs text-slate-500 font-medium leading-relaxed">{subtitle}</p>}
       {children}
-      {subtitle && <p className="text-xs text-slate-500 mt-3">{subtitle}</p>}
     </div>
   );
 }
@@ -44,27 +44,30 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function DashboardOverview({ history, settings, setCurrentTab }) {
   const currentTotal = history.length > 0 ? history[0].value : 0;
-  const percentage = Math.min(((currentTotal / settings.totalTarget) * 100), 100).toFixed(1);
+  const lastRealization = history.length > 0 ? (history[0].dailyAchieved !== undefined ? history[0].dailyAchieved : 0) : 0;
   
   const dailyTarget = calculateDailyTarget(currentTotal, settings);
   const remainingDays = getRemainingWorkingDays(settings);
   
-  const totalProjectDays = getTotalWorkingDays(settings);
-  const idealDaily = Math.ceil(settings.totalTarget / totalProjectDays);
-  
-  const lastRealization = history.length > 0 
-    ? (history.length > 1 ? history[0].value - history[1].value : history[0].value) 
+  // Hitung tren kinerja harian (rata-rata 7 data terakhir)
+  const recentHistory = history.slice(0, 7);
+  const avgRecent = recentHistory.length > 0
+    ? Math.round(recentHistory.reduce((sum, h) => sum + (h.dailyAchieved !== undefined ? h.dailyAchieved : 0), 0) / recentHistory.length)
     : 0;
-    
-  const previousRealization = history.length > 1 
-    ? (history.length > 2 ? history[1].value - history[2].value : history[1].value) 
-    : 0;
-    
-  const isUp = lastRealization >= previousRealization;
-  
+
   const averageDaily = history.length > 1 
     ? Math.round(currentTotal / (history.length - 1))
     : lastRealization;
+
+  const percentage = Math.min(((currentTotal / (settings.totalTarget || 1)) * 100), 100).toFixed(1);
+  const totalProjectDays = getTotalWorkingDays(settings);
+  const idealDaily = Math.ceil(settings.totalTarget / (totalProjectDays || 1));
+  
+  const previousRealization = history.length > 1 
+    ? (history[1].dailyAchieved !== undefined ? history[1].dailyAchieved : (history[1].value - (history[2] ? history[2].value : 0))) 
+    : 0;
+    
+  const isUp = lastRealization >= previousRealization;
     
   const [timeFilter, setTimeFilter] = useState('7d');
   
@@ -77,7 +80,7 @@ export default function DashboardOverview({ history, settings, setCurrentTab }) 
     .map((item, idx, arr) => {
       if (idx === 0) return null; 
       const realisasi = item.dailyAchieved !== undefined ? item.dailyAchieved : (item.value - arr[idx - 1].value);
-      const dateObj = new Date(item.date);
+      const dateObj = parseLocalDate(item.date);
       return {
         name: `${dateObj.getDate()}/${dateObj.getMonth() + 1}`,
         realisasi: realisasi > 0 ? realisasi : 0,

@@ -4,13 +4,14 @@ export function parseLocalDate(dateValue) {
   if (!dateValue) return new Date();
   if (dateValue instanceof Date) return dateValue;
   if (typeof dateValue === 'string') {
-    // If it's a YYYY-MM-DD string, parse as local midnight
+    // Extract YYYY-MM-DD date part from datetime strings to avoid timezone shifts
+    let datePart = dateValue;
     if (dateValue.includes('T')) {
-      // It has timezone info, parse normally but we will construct from it
-      const d = new Date(dateValue);
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      datePart = dateValue.split('T')[0];
+    } else if (dateValue.includes(' ')) {
+      datePart = dateValue.split(' ')[0];
     }
-    const parts = dateValue.split('-');
+    const parts = datePart.split('-');
     if (parts.length === 3) {
       const year = parseInt(parts[0], 10);
       const month = parseInt(parts[1], 10) - 1;

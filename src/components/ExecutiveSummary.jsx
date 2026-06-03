@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import {
   Target,
   TrendingUp,
@@ -32,6 +33,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 import ReactMarkdown from "react-markdown";
 import { generateExecutiveSummary } from "../services/geminiService";
@@ -43,6 +47,7 @@ import {
   calculateDailyTarget,
   getWorkingDaysInMonth,
   getTotalWorkingDays,
+  parseLocalDate,
 } from "../utils/dateUtils";
 
 // ─── SVG Circular Progress Ring ───────────────────────────────────────────────
@@ -176,6 +181,60 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
   const [showAiModal, setShowAiModal] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [timeFilter, setTimeFilter] = useState("7d");
+  const [categoryFilter, setCategoryFilter] = useState("total"); // "total" | "paskabayar" | "prabayar"
+
+  const visitCategoryData = useMemo(() => {
+    let paskaI = 0, paskaJ = 0, paskaK = 0, paskaL = 0;
+    let praI = 0, praJ = 0, praK = 0, praL = 0;
+
+    (officers || []).forEach((o) => {
+      const colIVal = Number(o.colI) || 0;
+      const colJVal = Number(o.colJ) || 0;
+      const colKVal = Number(o.colK) || 0;
+      const colLVal = Number(o.colL) || 0;
+
+      if (o.type === "prabayar") {
+        praI += colIVal;
+        praJ += colJVal;
+        praK += colKVal;
+        praL += colLVal;
+      } else {
+        paskaI += colIVal;
+        paskaJ += colJVal;
+        paskaK += colKVal;
+        paskaL += colLVal;
+      }
+    });
+
+    return {
+      total: [
+        { name: "Berhasil", value: paskaI + praI, color: "#10b981" },
+        { name: "Rumah Kosong", value: paskaJ + praJ, color: "#eab308" },
+        { name: "Pelanggan Menolak", value: paskaK + praK, color: "#ef4444" },
+        { name: "Meter Tidak Ada", value: paskaL + praL, color: "#6366f1" },
+      ],
+      paskabayar: [
+        { name: "Berhasil", value: paskaI, color: "#10b981" },
+        { name: "Rumah Kosong", value: paskaJ, color: "#eab308" },
+        { name: "Pelanggan Menolak", value: paskaK, color: "#ef4444" },
+        { name: "Meter Tidak Ada", value: paskaL, color: "#6366f1" },
+      ],
+      prabayar: [
+        { name: "Berhasil", value: praI, color: "#10b981" },
+        { name: "Rumah Kosong", value: praJ, color: "#eab308" },
+        { name: "Pelanggan Menolak", value: praK, color: "#ef4444" },
+        { name: "Meter Tidak Ada", value: praL, color: "#6366f1" },
+      ],
+    };
+  }, [officers]);
+
+  const activeCategoryData = useMemo(() => {
+    return visitCategoryData ? visitCategoryData[categoryFilter] : [];
+  }, [visitCategoryData, categoryFilter]);
+
+  const totalCategorySum = useMemo(() => {
+    return activeCategoryData.reduce((sum, item) => sum + item.value, 0);
+  }, [activeCategoryData]);
 
   // ─── History Scaling Dinamis ───
   const scaleFactor =
@@ -427,7 +486,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
 
     const top3 = list.slice(0, 3);
     const bottom3 = list
-      .filter((o) => o.displayTotal > 0)
+      .filter((o) => o.totalSubmitted > 0)
       .slice(-3)
       .reverse();
 
@@ -474,7 +533,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                 const praVal = considerCategories
                   ? o.praRealisasiVal
                   : o.praSubmitted;
-                return `${i + 1}. ${o.nama} (Paska: ${formatNumber(paskaVal)}, Pra: ${formatNumber(praVal)}, Total: ${formatNumber(o.displayTotal)})`;
+                return `${i + 1}. ${o.nama} (Paska: ${formatNumber(paskaVal)}, Pra: ${formatNumber(praVal)}, ${considerCategories ? "Realisasi" : "Submitted"}: ${formatNumber(o.displayTotal)})`;
               })
               .join("\n"),
             bottom3: officerStats.bottom3
@@ -485,7 +544,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                 const praVal = considerCategories
                   ? o.praRealisasiVal
                   : o.praSubmitted;
-                return `${i + 1}. ${o.nama} (Paska: ${formatNumber(paskaVal)}, Pra: ${formatNumber(praVal)}, Total: ${formatNumber(o.displayTotal)})`;
+                return `${i + 1}. ${o.nama} (Paska: ${formatNumber(paskaVal)}, Pra: ${formatNumber(praVal)}, ${considerCategories ? "Realisasi" : "Submitted"}: ${formatNumber(o.displayTotal)})`;
               })
               .join("\n"),
           }
@@ -510,6 +569,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
             ? "Perlu Peningkatan"
             : "Perhatian Khusus",
         officerData,
+        considerCategories,
         scenarioLabel: considerCategories
           ? "Pakai Kategori (Realisasi Bersih)"
           : "Tanpa Kategori (Total Submit)",
@@ -841,33 +901,29 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          SECTION 3: Grafik Tren Kinerja Harian
+          SECTION 3: Grafik Kategori Kunjungan
          ══════════════════════════════════════════════════════════════════════ */}
       <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-100 shadow-sm">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
           <div>
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <BarChart2 size={18} className="text-blue-600" /> Tren Kinerja
-              Harian
-              <button
-                onClick={() => setInfoMetric("trend")}
-                className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer"
-                title="Cara perhitungan"
-              >
-                <HelpCircle size={14} />
-              </button>
+              <BarChart2 size={18} className="text-blue-600" /> Kategori Hasil Kunjungan
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Capaian aktual vs target harian yang diperlukan
+              Proporsi hasil kunjungan berdasarkan kategori status
             </p>
           </div>
           <div className="flex bg-slate-100/80 p-1 rounded-lg gap-0.5">
-            {timeFilterOptions.map((opt) => (
+            {[
+              { id: "total", label: "Total" },
+              { id: "paskabayar", label: "Paskabayar" },
+              { id: "prabayar", label: "Prabayar" },
+            ].map((opt) => (
               <button
                 key={opt.id}
-                onClick={() => setTimeFilter(opt.id)}
-                className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
-                  timeFilter === opt.id
+                onClick={() => setCategoryFilter(opt.id)}
+                className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer ${
+                  categoryFilter === opt.id
                     ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200/50"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
@@ -878,87 +934,88 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
           </div>
         </div>
 
-        {chartData.length > 0 ? (
-          <div className="h-64 md:h-72 w-full" style={{ minHeight: 256 }}>
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <AreaChart
-                data={chartData}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="colorKinerja" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="#f1f5f9"
-                />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#94a3b8", fontSize: 11, fontFamily: "Inter" }}
-                  dy={10}
-                  minTickGap={20}
-                />
-                <YAxis
-                  domain={[
-                    0,
-                    (dataMax) => Math.max(dataMax, dailyTarget * 1.15),
-                  ]}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#94a3b8", fontSize: 11, fontFamily: "Inter" }}
-                  tickFormatter={(v) =>
-                    v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v
-                  }
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <ReferenceLine
-                  y={dailyTarget}
-                  stroke="#f43f5e"
-                  strokeDasharray="6 4"
-                  strokeWidth={1.5}
-                  label={{
-                    position: "insideTopRight",
-                    value: `Target: ${formatNumber(dailyTarget)}`,
-                    fill: "#f43f5e",
-                    fontSize: 11,
-                    fontFamily: "Inter",
-                    fontWeight: 600,
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="realisasi"
-                  stroke="#3b82f6"
-                  strokeWidth={2.5}
-                  fillOpacity={1}
-                  fill="url(#colorKinerja)"
-                  dot={{
-                    r: 3,
-                    fill: "#3b82f6",
-                    strokeWidth: 2,
-                    stroke: "#fff",
-                  }}
-                  activeDot={{
-                    r: 5,
-                    fill: "#3b82f6",
-                    strokeWidth: 2,
-                    stroke: "#fff",
-                  }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+        {totalCategorySum > 0 ? (
+          <div className="flex flex-col md:flex-row items-center gap-8 py-2">
+            {/* Donut Chart (Left Column) */}
+            <div className="w-full md:w-1/2 relative flex items-center justify-center h-72 md:h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={activeCategoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={90}
+                    outerRadius={115}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {activeCategoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    position={{ y: 0 }}
+                    wrapperStyle={{ zIndex: 100 }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        const percentage = totalCategorySum > 0 ? ((data.value / totalCategorySum) * 100).toFixed(1) : "0.0";
+                        return (
+                          <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl p-3 shadow-xl z-10">
+                            <p className="text-xs font-bold text-slate-800">{data.name}</p>
+                            <p className="text-sm font-black mt-1" style={{ color: data.color }}>
+                              {formatNumber(data.value)} <span className="text-xs text-slate-400 font-normal">kunjungan ({percentage}%)</span>
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              
+              {/* Central text overlay */}
+              <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Kunjungan</span>
+                <span className="text-2xl font-black text-slate-800 dark:text-slate-200 mt-0.5">
+                  {formatNumber(totalCategorySum)}
+                </span>
+              </div>
+            </div>
+
+            {/* List Details (Right Column) */}
+            <div className="w-full md:w-1/2 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl p-5 border border-slate-100 dark:border-slate-800/80 divide-y divide-slate-100 dark:divide-slate-800/50">
+              {activeCategoryData.map((item, idx) => {
+                const percentage = totalCategorySum > 0 ? ((item.value / totalCategorySum) * 100).toFixed(1) : "0.0";
+                return (
+                  <div key={idx} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-350 truncate">{item.name}</span>
+                      </div>
+                      <div className="w-full bg-slate-200/80 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${percentage}%`, backgroundColor: item.color }} />
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0 min-w-[70px]">
+                      <p className="text-sm font-black text-slate-850 dark:text-slate-200">{formatNumber(item.value)}</p>
+                      <p className="text-[10px] font-bold text-slate-400 mt-0.5">{percentage}%</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-            <BarChart2 size={40} className="mb-3 text-slate-300" />
-            <p className="text-sm">
-              Belum cukup data untuk menampilkan grafik tren.
+          <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+            <BarChart2 size={40} className="mb-3 text-slate-300 animate-pulse" />
+            <p className="text-sm font-semibold text-slate-400">
+              Belum ada data rekap kunjungan petugas.
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              Data akan muncul setelah Anda mengunggah rekap Excel kinerja petugas.
             </p>
           </div>
         )}
@@ -1332,7 +1389,9 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                       <p className="text-sm font-black text-slate-900">
                         {formatNumber(o.displayTotal)}
                       </p>
-                      <p className="text-[10px] text-slate-400">total</p>
+                      <p className="text-[10px] text-slate-400">
+                        {considerCategories ? "realisasi" : "submitted"}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -1379,7 +1438,9 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                       <p className="text-sm font-black text-rose-700">
                         {formatNumber(o.displayTotal)}
                       </p>
-                      <p className="text-[10px] text-slate-400">total</p>
+                      <p className="text-[10px] text-slate-400">
+                        {considerCategories ? "realisasi" : "submitted"}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -1425,7 +1486,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
       </div>
 
       {/* AI Result Modal */}
-      {showAiModal && (
+      {showAiModal && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-up border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between p-5 md:p-6 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-indigo-50 dark:from-indigo-950/50 to-purple-50 dark:to-purple-950/50">
@@ -1497,13 +1558,14 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
           MODAL: Info Perhitungan Rumus
          ══════════════════════════════════════════════════════════════════════ */}
-      {infoMetric && (
+      {infoMetric && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800 animate-slide-up">
             {/* Header */}
@@ -1775,7 +1837,8 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* History Modal */}

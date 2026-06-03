@@ -990,7 +990,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                           colSpan="4"
                           className="py-2.5 px-4 text-center bg-emerald-50/50 text-emerald-800 border-b border-emerald-100 font-extrabold"
                         >
-                          Kategori Kunjungan (I - L)
+                          Kategori Kunjungan
                         </th>
                       </>
                     )}

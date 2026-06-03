@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { formatNumber } from '../utils/dateUtils';
+import { formatNumber, parseLocalDate } from '../utils/dateUtils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 8;
@@ -36,7 +36,7 @@ export default function HistoryTable({ history, selectedId, onSelectItem }) {
             ? item.dailyAchieved 
             : (globalIndex !== history.length - 1 ? item.value - previousCumulative : item.value);
           
-          const dateStr = new Date(item.date).toLocaleDateString('id-ID', {
+          const dateStr = parseLocalDate(item.date).toLocaleDateString('id-ID', {
             day: 'numeric',
             month: 'short',
             year: 'numeric'
