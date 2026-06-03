@@ -1,23 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Loader2, RefreshCw, MessageSquare, Plus, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import { fetchChatHistory, saveChatMessage } from '../services/api';
-import { sendChatMessage } from '../services/geminiService';
-import { getRemainingWorkingDays, calculateDailyTarget } from '../utils/dateUtils';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Send,
+  Bot,
+  User,
+  Loader2,
+  RefreshCw,
+  MessageSquare,
+  Plus,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { fetchChatHistory, saveChatMessage } from "../services/api";
+import { sendChatMessage } from "../services/geminiService";
+import {
+  getRemainingWorkingDays,
+  calculateDailyTarget,
+} from "../utils/dateUtils";
 
 const AiChat = ({ history, settings }) => {
   const [allMessages, setAllMessages] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
-  
-  const [input, setInput] = useState('');
+
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingHistory, setIsFetchingHistory] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
-  
+
   const messagesEndRef = useRef(null);
 
-  const activeMessages = allMessages.filter(m => m.session_id === activeSessionId);
+  const activeMessages = allMessages.filter(
+    (m) => m.session_id === activeSessionId,
+  );
 
   const contextData = getContextData();
 
@@ -26,23 +41,33 @@ const AiChat = ({ history, settings }) => {
     const remainingWork = settings.totalTarget - currentTotal;
     const remainingDays = getRemainingWorkingDays(settings);
     const dailyTarget = calculateDailyTarget(currentTotal, settings);
-    
+
     const recentHistory = history.slice(0, 7);
-    const recentAchieved = recentHistory.map((item, idx, arr) => {
-      if (item.dailyAchieved !== undefined) return item.dailyAchieved;
-      if (idx < arr.length - 1) return item.value - arr[idx + 1].value;
-      return 0; 
-    }).filter(val => val > 0);
-    
-    const avgRecent = recentAchieved.length > 0 
-      ? Math.round(recentAchieved.reduce((a, b) => a + b, 0) / recentAchieved.length) 
-      : 0;
-    const maxRecent = recentAchieved.length > 0 ? Math.max(...recentAchieved) : 0;
+    const recentAchieved = recentHistory
+      .map((item, idx, arr) => {
+        if (item.dailyAchieved !== undefined) return item.dailyAchieved;
+        if (idx < arr.length - 1) return item.value - arr[idx + 1].value;
+        return 0;
+      })
+      .filter((val) => val > 0);
+
+    const avgRecent =
+      recentAchieved.length > 0
+        ? Math.round(
+            recentAchieved.reduce((a, b) => a + b, 0) / recentAchieved.length,
+          )
+        : 0;
+    const maxRecent =
+      recentAchieved.length > 0 ? Math.max(...recentAchieved) : 0;
 
     const isOnTrack = avgRecent >= dailyTarget;
     const isSlightlyBehind = avgRecent > 0 && avgRecent < dailyTarget;
-    const statusLabel = isOnTrack ? "On Track" : isSlightlyBehind ? "Perlu Peningkatan" : "Perhatian Khusus";
-    
+    const statusLabel = isOnTrack
+      ? "On Track"
+      : isSlightlyBehind
+        ? "Perlu Peningkatan"
+        : "Perhatian Khusus";
+
     return {
       currentTotal,
       totalTarget: settings.totalTarget,
@@ -53,7 +78,7 @@ const AiChat = ({ history, settings }) => {
       targetPerOfficer: Math.ceil(dailyTarget / settings.officerCount),
       avgRecent,
       maxRecent,
-      statusLabel
+      statusLabel,
     };
   }
 
@@ -71,8 +96,8 @@ const AiChat = ({ history, settings }) => {
         scrollToBottom();
       }
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const loadChatHistory = async () => {
@@ -80,35 +105,41 @@ const AiChat = ({ history, settings }) => {
     try {
       const data = await fetchChatHistory();
       setAllMessages(data);
-      
+
       // Mengelompokkan berdasarkan session_id untuk mendapatkan daftar sesi unik
       const uniqueSessions = [];
       const sessionMap = new Map();
-      
-      data.forEach(msg => {
+
+      data.forEach((msg) => {
         if (!sessionMap.has(msg.session_id)) {
           // Cari pesan pertama (dari user) di sesi ini sebagai judul
-          const firstUserMsg = data.find(m => m.session_id === msg.session_id && m.role === 'user');
-          const titleMsgText = firstUserMsg ? firstUserMsg.text : (msg.role === 'user' ? msg.text : 'Obrolan AI');
-          
+          const firstUserMsg = data.find(
+            (m) => m.session_id === msg.session_id && m.role === "user",
+          );
+          const titleMsgText = firstUserMsg
+            ? firstUserMsg.text
+            : msg.role === "user"
+              ? msg.text
+              : "Obrolan AI";
+
           let title = titleMsgText.substring(0, 25);
-          if (titleMsgText.length > 25) title += '...';
-          if (msg.session_id === 'Riwayat Lama') title = 'Riwayat Chat Lama';
-          
+          if (titleMsgText.length > 25) title += "...";
+          if (msg.session_id === "Riwayat Lama") title = "Riwayat Chat Lama";
+
           const sessionObj = {
             id: msg.session_id,
             title: title,
-            date: msg.date
+            date: msg.date,
           };
           sessionMap.set(msg.session_id, sessionObj);
           uniqueSessions.push(sessionObj);
         }
       });
-      
+
       // Urutkan sesi terbaru di atas
       uniqueSessions.sort((a, b) => new Date(b.date) - new Date(a.date));
       setSessions(uniqueSessions);
-      
+
       if (uniqueSessions.length > 0 && !activeSessionId) {
         setActiveSessionId(uniqueSessions[0].id);
       }
@@ -122,9 +153,13 @@ const AiChat = ({ history, settings }) => {
   const startNewChat = () => {
     const newSessionId = Date.now().toString();
     setActiveSessionId(newSessionId);
-    setSessions(prev => [
-      { id: newSessionId, title: 'Obrolan Baru', date: new Date().toISOString() },
-      ...prev
+    setSessions((prev) => [
+      {
+        id: newSessionId,
+        title: "Obrolan Baru",
+        date: new Date().toISOString(),
+      },
+      ...prev,
     ]);
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false); // Tutup sidebar di HP saat buat chat baru
@@ -140,40 +175,62 @@ const AiChat = ({ history, settings }) => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    setInput('');
-    
+    setInput("");
+
     let currentSession = activeSessionId;
     if (!currentSession) {
       currentSession = Date.now().toString();
       setActiveSessionId(currentSession);
     }
-    
+
     // Update judul sesi jika ini pesan pertama
     if (activeMessages.length === 0) {
       let title = userMessage.substring(0, 25);
-      if (userMessage.length > 25) title += '...';
-      setSessions(prev => prev.map(s => s.id === currentSession ? { ...s, title } : s));
+      if (userMessage.length > 25) title += "...";
+      setSessions((prev) =>
+        prev.map((s) => (s.id === currentSession ? { ...s, title } : s)),
+      );
     }
-    
-    const newMsgObj = { id: Date.now(), role: 'user', text: userMessage, session_id: currentSession };
-    setAllMessages(prev => [...prev, newMsgObj]);
+
+    const newMsgObj = {
+      id: Date.now(),
+      role: "user",
+      text: userMessage,
+      session_id: currentSession,
+    };
+    setAllMessages((prev) => [...prev, newMsgObj]);
     setIsLoading(true);
 
     // Save to DB asynchronously
-    saveChatMessage('user', userMessage, currentSession);
+    saveChatMessage("user", userMessage, currentSession);
 
     try {
       // Pass the current active messages for context
-      const replyText = await sendChatMessage(settings.geminiApiKey, activeMessages, userMessage, contextData);
-      
-      const aiMsgObj = { id: Date.now(), role: 'model', text: replyText, session_id: currentSession };
-      setAllMessages(prev => [...prev, aiMsgObj]);
-      
+      const replyText = await sendChatMessage(
+        settings.geminiApiKey,
+        activeMessages,
+        userMessage,
+        contextData,
+      );
+
+      const aiMsgObj = {
+        id: Date.now(),
+        role: "model",
+        text: replyText,
+        session_id: currentSession,
+      };
+      setAllMessages((prev) => [...prev, aiMsgObj]);
+
       // Save AI reply to DB
-      saveChatMessage('model', replyText, currentSession);
+      saveChatMessage("model", replyText, currentSession);
     } catch (error) {
-      const errorMsg = { id: Date.now(), role: 'model', text: `**Error:** ${error.message}`, session_id: currentSession };
-      setAllMessages(prev => [...prev, errorMsg]);
+      const errorMsg = {
+        id: Date.now(),
+        role: "model",
+        text: `**Error:** ${error.message}`,
+        session_id: currentSession,
+      };
+      setAllMessages((prev) => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
     }
@@ -181,75 +238,89 @@ const AiChat = ({ history, settings }) => {
 
   return (
     <div className="flex flex-1 h-full w-full min-h-0 bg-white dark:bg-slate-900 md:rounded-2xl md:shadow-sm md:border md:border-slate-200 dark:border-slate-800 overflow-hidden relative">
-      
       {/* Sidebar Overlay (Mobile) */}
       {isSidebarOpen && (
-        <div 
-          className="md:hidden fixed inset-0 bg-slate-900/20 z-10" 
+        <div
+          className="md:hidden fixed inset-0 bg-slate-900/20 z-10"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-      
+
       {/* Sidebar (Sessions List) */}
-      <div className={`absolute md:static top-0 left-0 h-full w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 z-20 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:w-0 md:border-0'}`}>
+      <div
+        className={`absolute md:static top-0 left-0 h-full w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 z-20 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0 md:w-0 md:border-0"}`}
+      >
         <div className="p-4 border-b border-slate-200 dark:border-slate-800">
-          <button 
+          <button
             onClick={startNewChat}
             className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-850 border border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:text-blue-600 text-slate-700 dark:text-slate-300 py-2.5 rounded-xl transition-all shadow-sm font-medium"
           >
             <Plus size={18} /> Chat Baru
           </button>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {sessions.length === 0 && !isFetchingHistory && (
-            <p className="text-center text-xs text-slate-400 mt-4 px-2">Belum ada riwayat obrolan.</p>
+            <p className="text-center text-xs text-slate-400 mt-4 px-2">
+              Belum ada riwayat obrolan.
+            </p>
           )}
-          
-          {sessions.map(session => (
+
+          {sessions.map((session) => (
             <button
               key={session.id}
               onClick={() => {
                 setActiveSessionId(session.id);
                 if (window.innerWidth < 768) setIsSidebarOpen(false);
               }}
-              className={`w-full text-left flex items-start gap-3 p-3 rounded-xl transition-all outline-none ${activeSessionId === session.id ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/10' : 'hover:bg-slate-100 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-400'}`}
+              className={`w-full text-left flex items-start gap-3 p-3 rounded-xl transition-all outline-none ${activeSessionId === session.id ? "bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/10" : "hover:bg-slate-100 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-400"}`}
             >
-              <MessageSquare size={16} className={`mt-0.5 shrink-0 ${activeSessionId === session.id ? 'text-white' : 'text-slate-400 dark:text-slate-500'}`} />
+              <MessageSquare
+                size={16}
+                className={`mt-0.5 shrink-0 ${activeSessionId === session.id ? "text-white" : "text-slate-400 dark:text-slate-500"}`}
+              />
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium truncate ${activeSessionId === session.id ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>{session.title}</p>
+                <p
+                  className={`text-sm font-medium truncate ${activeSessionId === session.id ? "text-white" : "text-slate-700 dark:text-slate-300"}`}
+                >
+                  {session.title}
+                </p>
               </div>
             </button>
           ))}
         </div>
       </div>
-      
+
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full bg-white dark:bg-slate-900 z-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 h-full bg-white dark:bg-slate-900 z-0">
         {/* Header */}
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className={`p-2 -ml-2 rounded-xl transition-all ${
-                isSidebarOpen 
-                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-bold shadow-sm' 
-                  : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800'
+                isSidebarOpen
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-bold shadow-sm"
+                  : "text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800"
               } md:hidden`}
               title="Riwayat Chat"
             >
               <MessageSquare size={20} />
             </button>
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className={`p-2 -ml-2 rounded-xl transition-all ${
-                isSidebarOpen 
-                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-bold shadow-sm' 
-                  : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800'
+                isSidebarOpen
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 font-bold shadow-sm"
+                  : "text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800"
               } hidden md:block`}
               title="Toggle Sidebar"
             >
-              {isSidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
+              {isSidebarOpen ? (
+                <PanelLeftClose size={20} />
+              ) : (
+                <PanelLeftOpen size={20} />
+              )}
             </button>
             <div>
               <h2 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 text-sm md:text-base">
@@ -257,13 +328,16 @@ const AiChat = ({ history, settings }) => {
               </h2>
             </div>
           </div>
-          <button 
+          <button
             onClick={loadChatHistory}
             disabled={isFetchingHistory}
             className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
             title="Muat ulang riwayat"
           >
-            <RefreshCw size={18} className={isFetchingHistory ? "animate-spin" : ""} />
+            <RefreshCw
+              size={18}
+              className={isFetchingHistory ? "animate-spin" : ""}
+            />
           </button>
         </div>
 
@@ -278,20 +352,36 @@ const AiChat = ({ history, settings }) => {
               <div className="w-16 h-16 bg-blue-100/80 rounded-2xl flex items-center justify-center shadow-inner">
                 <Bot size={32} className="text-blue-500 animate-pulse" />
               </div>
-              <p className="text-sm max-w-xs leading-relaxed">Mulai percakapan dengan AI. Riwayat obrolan Anda akan disimpan secara otomatis.</p>
+              <p className="text-sm max-w-xs leading-relaxed">
+                Mulai percakapan dengan AI. Riwayat obrolan Anda akan disimpan
+                secara otomatis.
+              </p>
             </div>
           ) : (
             activeMessages.map((msg, idx) => (
-              <div key={msg.id || idx} className={`flex gap-2 md:gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center ${msg.role === 'user' ? 'bg-indigo-100 text-indigo-600' : 'bg-blue-100 text-blue-600'}`}>
-                  {msg.role === 'user' ? <User size={14} className="md:w-4 md:h-4" /> : <Bot size={14} className="md:w-4 md:h-4" />}
+              <div
+                key={msg.id || idx}
+                className={`flex gap-2 md:gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+              >
+                <div
+                  className={`flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-indigo-100 text-indigo-600" : "bg-blue-100 text-blue-600"}`}
+                >
+                  {msg.role === "user" ? (
+                    <User size={14} className="md:w-4 md:h-4" />
+                  ) : (
+                    <Bot size={14} className="md:w-4 md:h-4" />
+                  )}
                 </div>
-                <div className={`max-w-[88%] md:max-w-[75%] rounded-2xl p-3 md:p-4 ${
-                  msg.role === 'user' 
-                    ? 'bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-tr-none shadow-sm shadow-blue-500/10' 
-                    : 'bg-white border border-slate-200/80 text-slate-700 shadow-sm rounded-tl-none'
-                }`}>
-                  <div className={`prose prose-sm max-w-none ${msg.role === 'user' ? 'prose-invert prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1' : 'prose-blue prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1'}`}>
+                <div
+                  className={`max-w-[88%] md:max-w-[75%] rounded-2xl p-3 md:p-4 ${
+                    msg.role === "user"
+                      ? "bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-tr-none shadow-sm shadow-blue-500/10"
+                      : "bg-white border border-slate-200/80 text-slate-700 shadow-sm rounded-tl-none"
+                  }`}
+                >
+                  <div
+                    className={`prose prose-sm max-w-none ${msg.role === "user" ? "prose-invert prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1" : "prose-blue prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1"}`}
+                  >
                     <ReactMarkdown>{msg.text}</ReactMarkdown>
                   </div>
                 </div>
@@ -305,9 +395,18 @@ const AiChat = ({ history, settings }) => {
               </div>
               <div className="bg-white border border-slate-200/80 shadow-sm rounded-2xl rounded-tl-none p-3 md:p-4 flex items-center gap-1.5">
                 <span className="flex gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  <span
+                    className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"
+                    style={{ animationDelay: "0ms" }}
+                  ></span>
+                  <span
+                    className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"
+                    style={{ animationDelay: "150ms" }}
+                  ></span>
+                  <span
+                    className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"
+                    style={{ animationDelay: "300ms" }}
+                  ></span>
                 </span>
               </div>
             </div>
@@ -327,7 +426,11 @@ const AiChat = ({ history, settings }) => {
                   setTimeout(scrollToBottom, 200);
                 }
               }}
-              placeholder={settings.geminiApiKey ? "Ketik pesan Anda di sini..." : "Masukkan API Key Gemini di Pengaturan"}
+              placeholder={
+                settings.geminiApiKey
+                  ? "Ketik pesan Anda di sini..."
+                  : "Masukkan API Key Gemini di Pengaturan"
+              }
               disabled={isLoading || !settings.geminiApiKey}
               className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-sm disabled:opacity-50 text-slate-800 dark:text-slate-100"
             />

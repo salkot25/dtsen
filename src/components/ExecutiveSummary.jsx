@@ -511,8 +511,8 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
             : "Perhatian Khusus",
         officerData,
         scenarioLabel: considerCategories
-          ? "Mempertimbangkan Kategori Kunjungan (Realisasi Bersih)"
-          : "Tidak Memperhatikan Kategori Kunjungan (Total Submit)",
+          ? "Pakai Kategori (Realisasi Bersih)"
+          : "Tanpa Kategori (Total Submit)",
       };
 
       const summary = await generateExecutiveSummary(
@@ -547,41 +547,48 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
       {/* ══════════════════════════════════════════════════════════════════════
           FILTER TOGGLE: Visit Categories Filter
          ══════════════════════════════════════════════════════════════════════ */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl shrink-0">
-            <Activity size={18} />
-          </div>
-          <div>
-            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Metode Hitung Pencapaian
-            </h4>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Tentukan apakah pencapaian kinerja menyertakan kategori kunjungan
-            </p>
+      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="hidden sm:flex p-2 bg-indigo-50 text-indigo-600 rounded-xl shrink-0">
+              <Activity size={18} />
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                Metode Hitung Pencapaian
+              </h4>
+              <p className="hidden sm:block text-[11px] text-slate-400 mt-0.5">
+                Apakah pencapaian kinerja menyertakan kategori kunjungan?
+              </p>
+            </div>
           </div>
         </div>
-        <div className="flex bg-slate-100/80 p-1 rounded-xl gap-1 w-full sm:w-auto shrink-0">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 w-full sm:w-auto sm:block shrink-0">
+          <p className="text-[11px] text-slate-400 min-w-0 sm:hidden">
+            Apakah pencapaian kinerja menyertakan kategori kunjungan?
+          </p>
+          <div className="flex bg-slate-100/80 p-1 rounded-xl gap-1 w-auto shrink-0 justify-self-end">
           <button
             onClick={() => setConsiderCategories(true)}
-            className={`flex-1 sm:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`px-3 sm:px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
               considerCategories
                 ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
                 : "text-slate-600 hover:text-slate-800"
             }`}
           >
-            <CheckCircle2 size={14} /> Pertimbangkan Kategori
+            <CheckCircle2 size={14} /> Ya
           </button>
           <button
             onClick={() => setConsiderCategories(false)}
-            className={`flex-1 sm:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`px-3 sm:px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
               !considerCategories
                 ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
                 : "text-slate-600 hover:text-slate-800"
             }`}
           >
-            <X size={14} /> Abaikan Kategori
+            <X size={14} /> Tidak
           </button>
+          </div>
         </div>
       </div>
 

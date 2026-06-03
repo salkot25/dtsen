@@ -172,9 +172,9 @@ export default function Layout({
 
       {/* Main Content Area */}
       <div
-        className={`relative ${
+        className={`relative flex-1 min-w-0 ${
           currentTab === "ai_chat"
-            ? "overflow-hidden pb-chat-mobile md:h-screen md:pb-0"
+            ? "overflow-hidden pb-chat-mobile flex flex-col md:h-screen md:pb-0 md:ml-64"
             : "pb-tabs-mobile md:pb-0 overflow-visible md:ml-64"
         }`}
       >
