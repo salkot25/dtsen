@@ -182,10 +182,10 @@ export default function DashboardOverview({ history, settings, setCurrentTab, on
         </div>
       </div>
 
-      {/* Main Content Flow with space-y-6 */}
-      <div className="space-y-6">
+      {/* Main Content Flow */}
+      <div>
         {/* Desktop Header with Manual Refresh Action */}
-        <div className="hidden md:flex justify-between items-center bg-white dark:bg-slate-900 p-4 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+        <div className="hidden md:flex justify-between items-center bg-white dark:bg-slate-900 p-4 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm mb-6">
           <div>
             <h2 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Kinerja Real-time</h2>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Metrik di bawah diperbarui secara otomatis dari basis data.</p>
@@ -208,7 +208,7 @@ export default function DashboardOverview({ history, settings, setCurrentTab, on
         </div>
 
         {/* KPI Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Card 1: Total Capaian */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4 animate-fade-in-up delay-75">
             <div className="p-3 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
