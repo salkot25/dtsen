@@ -156,11 +156,13 @@ export default function DashboardOverview({ history, settings, setCurrentTab, on
     >
       {/* Pull To Refresh Indicator (Mobile) */}
       <div 
-        className="flex items-center justify-center overflow-hidden transition-all duration-200 bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/40 dark:border-slate-800/40 shadow-inner"
+        className="flex items-center justify-center overflow-hidden transition-all duration-200 bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl border-slate-200/40 dark:border-slate-800/40 shadow-inner"
         style={{ 
           height: `${pullDistance}px`, 
           opacity: pullDistance > 0 ? 1 : 0,
           marginBottom: pullDistance > 0 ? '1rem' : '0',
+          borderStyle: pullDistance > 0 ? 'solid' : 'none',
+          borderWidth: pullDistance > 0 ? '1px' : '0px',
           transition: isPullingRef.current ? 'none' : 'all 300ms cubic-bezier(0.25, 0.1, 0.25, 1)'
         }}
       >
