@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, User, Loader2, Zap } from 'lucide-react';
+import { Lock, User, Loader2 } from 'lucide-react';
 import { loginUser } from '../services/api';
 
 export default function Login({ onLogin }) {
@@ -34,9 +34,11 @@ export default function Login({ onLogin }) {
       <div className="max-w-sm w-full relative z-10 animate-fade-in-up">
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-5 shadow-xl shadow-blue-600/30">
-            <Zap className="h-8 w-8 text-white" />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="DTSEN Salkot Logo" 
+            className="inline-block w-20 h-20 rounded-2xl mb-5 shadow-xl shadow-blue-600/30 object-cover" 
+          />
           <h1 className="text-2xl font-bold text-white tracking-tight">Monitoring DTSEN</h1>
           <p className="text-sm text-slate-400 mt-1">ULP Salatiga Kota</p>
         </div>
