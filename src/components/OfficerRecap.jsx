@@ -939,6 +939,54 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
             })}
           </div>
 
+          {/* Mobile Pagination Panel */}
+          {totalPages > 1 && (
+            <div className="md:hidden mt-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 shadow-sm flex flex-col items-center gap-3">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Menampilkan{" "}
+                <span className="font-semibold text-slate-700 dark:text-slate-350">
+                  {Math.min(
+                    processedOfficers.length,
+                    (currentPage - 1) * itemsPerPage + 1,
+                  )}
+                </span>{" "}
+                -{" "}
+                <span className="font-semibold text-slate-700 dark:text-slate-350">
+                  {Math.min(
+                    processedOfficers.length,
+                    currentPage * itemsPerPage,
+                  )}
+                </span>{" "}
+                dari{" "}
+                <span className="font-semibold text-slate-700 dark:text-slate-350">
+                  {processedOfficers.length}
+                </span>{" "}
+                petugas
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-650 dark:text-slate-300 hover:bg-slate-55 dark:hover:bg-slate-750 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  aria-label="Halaman Sebelumnya"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl border border-slate-200/60 dark:border-slate-850 shadow-sm min-w-[64px] text-center">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-650 dark:text-slate-300 hover:bg-slate-55 dark:hover:bg-slate-750 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  aria-label="Halaman Selanjutnya"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Unified Dual-Header Table */}
           <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
