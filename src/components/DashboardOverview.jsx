@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, Target, Clock, Activity, CalendarDays } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { TrendingUp, TrendingDown, Target, Clock, Activity, RefreshCw } from 'lucide-react';
 import {
   AreaChart,
   Area,
@@ -14,17 +14,17 @@ import { formatNumber, getRemainingWorkingDays, calculateDailyTarget, getTotalWo
 
 function KPICard({ title, value, subtitle, icon, iconBg, iconColor, children, delay = '0' }) {
   return (
-    <div className={`kpi-card bg-white rounded-xl p-5 border border-slate-100 enterprise-shadow animate-fade-in-up delay-${delay}`}>
+    <div className={`kpi-card bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-100 dark:border-slate-800 enterprise-shadow animate-fade-in-up delay-${delay}`}>
       <div className="flex justify-between items-start mb-3">
         <div>
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5">{title}</p>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{value}</h3>
+          <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">{title}</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{value}</h3>
         </div>
         <div className={`p-2.5 rounded-xl ${iconBg} ${iconColor}`}>
           {icon}
         </div>
       </div>
-      {subtitle && <p className="text-xs text-slate-500 font-medium leading-relaxed">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{subtitle}</p>}
       {children}
     </div>
   );
@@ -33,16 +33,16 @@ function KPICard({ title, value, subtitle, icon, iconBg, iconColor, children, de
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl p-3 shadow-xl">
-        <p className="text-xs text-slate-500 mb-1">{label}</p>
-        <p className="text-sm font-bold text-slate-900">{formatNumber(payload[0].value)} <span className="text-xs text-slate-400 font-normal">pelanggan</span></p>
+      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-xl">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{label}</p>
+        <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{formatNumber(payload[0].value)} <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">pelanggan</span></p>
       </div>
     );
   }
   return null;
 };
 
-export default function DashboardOverview({ history, settings, setCurrentTab }) {
+export default function DashboardOverview({ history, settings, setCurrentTab, onRefresh }) {
   const currentTotal = history.length > 0 ? history[0].value : 0;
   const lastRealization = history.length > 0 ? (history[0].dailyAchieved !== undefined ? history[0].dailyAchieved : 0) : 0;
   
@@ -94,96 +94,186 @@ export default function DashboardOverview({ history, settings, setCurrentTab }) 
     { id: 'all', label: 'Semua' },
   ];
 
+  // ─── Pull to Refresh State & Handlers ───
+  const startYRef = useRef(0);
+  const isPullingRef = useRef(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [refreshState, setRefreshState] = useState('idle'); // 'idle' | 'pull' | 'ready' | 'loading'
+
+  const handleTouchStart = (e) => {
+    if (window.scrollY > 0 || refreshState === 'loading') return;
+    const touch = e.touches[0];
+    startYRef.current = touch.pageY;
+    isPullingRef.current = true;
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isPullingRef.current || refreshState === 'loading' || window.scrollY > 0) return;
+    const touch = e.touches[0];
+    const distance = touch.pageY - startYRef.current;
+    
+    if (distance > 0) {
+      const resistanceDistance = Math.min(distance * 0.4, 90);
+      setPullDistance(resistanceDistance);
+      setRefreshState(resistanceDistance >= 70 ? 'ready' : 'pull');
+      
+      // Prevent browser default pull-to-refresh gesture
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    if (!isPullingRef.current) return;
+    isPullingRef.current = false;
+    
+    if (refreshState === 'ready') {
+      setRefreshState('loading');
+      setPullDistance(60);
+      try {
+        if (onRefresh) {
+          await onRefresh();
+        }
+      } catch (error) {
+        console.error("Failed to refresh:", error);
+      } finally {
+        setRefreshState('idle');
+        setPullDistance(0);
+      }
+    } else {
+      setRefreshState('idle');
+      setPullDistance(0);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Mobile Quick Action Link */}
-      <div className="md:hidden flex items-center justify-between bg-white dark:bg-slate-900 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-950 border border-blue-100/50 dark:border-slate-800 rounded-xl p-3.5 animate-fade-in">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-blue-500 text-white rounded-lg"><CalendarDays size={14} /></div>
-          <div>
-            <span className="block text-xs font-bold text-slate-800 dark:text-slate-200">Ringkasan Kinerja & Analisis AI</span>
-            <span className="block text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Analisis tren capaian oleh asisten kecerdasan buatan</span>
-          </div>
+    <div 
+      className="space-y-6"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Pull To Refresh Indicator (Mobile) */}
+      <div 
+        className="flex items-center justify-center overflow-hidden transition-all duration-200 bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/40 dark:border-slate-800/40 shadow-inner"
+        style={{ 
+          height: `${pullDistance}px`, 
+          opacity: pullDistance > 0 ? 1 : 0,
+          marginBottom: pullDistance > 0 ? '1rem' : '0',
+          transition: isPullingRef.current ? 'none' : 'all 300ms cubic-bezier(0.25, 0.1, 0.25, 1)'
+        }}
+      >
+        <div className="flex items-center gap-2.5 py-3">
+          <RefreshCw 
+            size={16} 
+            className={`text-blue-600 dark:text-blue-400 transition-all ${refreshState === 'loading' ? 'animate-spin' : ''}`} 
+            style={{ 
+              transform: refreshState !== 'loading' ? `rotate(${pullDistance * 4.5}deg)` : undefined 
+            }} 
+          />
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-400 tracking-wide">
+            {refreshState === 'pull' && 'Tarik untuk memperbarui...'}
+            {refreshState === 'ready' && 'Lepaskan untuk memperbarui...'}
+            {refreshState === 'loading' && 'Memperbarui data...'}
+          </span>
         </div>
-        <button 
-          onClick={() => setCurrentTab && setCurrentTab('executive_summary')}
-          className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-blue-200/50 dark:border-slate-700 shadow-sm active:scale-95 transition-all"
+      </div>
+
+      {/* Desktop Header with Manual Refresh Action */}
+      <div className="hidden md:flex justify-between items-center bg-white dark:bg-slate-900 p-4 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+        <div>
+          <h2 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Kinerja Real-time</h2>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Metrik di bawah diperbarui secara otomatis dari basis data.</p>
+        </div>
+        <button
+          onClick={async () => {
+            setRefreshState('loading');
+            try {
+              if (onRefresh) await onRefresh();
+            } finally {
+              setRefreshState('idle');
+            }
+          }}
+          disabled={refreshState === 'loading'}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl font-bold transition-all shadow-sm text-xs cursor-pointer disabled:opacity-55"
         >
-          Lihat
+          <RefreshCw size={14} className={refreshState === 'loading' ? 'animate-spin' : ''} />
+          {refreshState === 'loading' ? 'Memperbarui...' : 'Perbarui Data'}
         </button>
       </div>
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Capaian */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in-up delay-75">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4 animate-fade-in-up delay-75">
+          <div className="p-3 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
             <Activity size={22} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Pencapaian</p>
-            <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(currentTotal)}</h3>
-            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Total Pencapaian</p>
+            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-200 leading-none">{formatNumber(currentTotal)}</h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-medium">
               <span>Target: {formatNumber(settings.totalTarget)}</span>
-              <span className="font-bold text-blue-600">{percentage}%</span>
+              <span className="font-bold text-blue-600 dark:text-blue-400">{percentage}%</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1 mt-1 overflow-hidden">
               <div className="bg-blue-500 h-1 rounded-full transition-all duration-500" style={{ width: `${percentage}%` }} />
             </div>
           </div>
         </div>
 
-        {/* Card 2: Kinerja Terakhir */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in-up delay-150">
-          <div className={`p-3 rounded-xl shrink-0 ${isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+        {/* Card 2: Capaian Terakhir */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4 animate-fade-in-up delay-150">
+          <div className={`p-3 rounded-xl shrink-0 ${isUp ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-450' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-450'}`}>
             {isUp ? <TrendingUp size={22} /> : <TrendingDown size={22} />}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Capaian Terakhir</p>
-            <h3 className="text-2xl font-black text-slate-800 leading-none">+{formatNumber(lastRealization)}</h3>
-            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Capaian Terakhir</p>
+            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-200 leading-none">+{formatNumber(lastRealization)}</h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-medium">
               <span>Selisih vs kemarin:</span>
-              <span className={`font-bold ${isUp ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <span className={`font-bold ${isUp ? 'text-emerald-600 dark:text-emerald-450' : 'text-rose-600 dark:text-rose-450'}`}>
                 {isUp ? '↑' : '↓'} {formatNumber(Math.abs(lastRealization - previousRealization))}
               </span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1 mt-1 overflow-hidden">
               <div className={`h-1 rounded-full ${isUp ? 'bg-emerald-500' : 'bg-rose-500'}`} style={{ width: `${Math.min((lastRealization / (averageDaily || 1)) * 100, 100)}%` }} />
             </div>
           </div>
         </div>
 
-        {/* Card 3: Rata-rata Harian */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in-up delay-225">
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl shrink-0">
+        {/* Card 3: Rata-rata Aktual */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4 animate-fade-in-up delay-225">
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
             <Target size={22} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Rata-rata Aktual</p>
-            <h3 className="text-2xl font-black text-slate-800 leading-none">{formatNumber(averageDaily)}</h3>
-            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Rata-rata Aktual</p>
+            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-200 leading-none">{formatNumber(averageDaily)}</h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-medium">
               <span>Target Ideal:</span>
-              <span className="font-bold text-amber-600">{formatNumber(idealDaily)}/hari</span>
+              <span className="font-bold text-amber-600 dark:text-amber-400">{formatNumber(idealDaily)}/hari</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1 mt-1 overflow-hidden">
               <div className="bg-amber-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min((averageDaily / (idealDaily || 1)) * 100, 100)}%` }} />
             </div>
           </div>
         </div>
 
         {/* Card 4: Sisa Waktu & Target */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in-up delay-300">
-          <div className="p-3 bg-violet-50 text-violet-600 rounded-xl shrink-0">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4 animate-fade-in-up delay-300">
+          <div className="p-3 bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 rounded-xl shrink-0">
             <Clock size={22} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Sisa Waktu Kerja</p>
-            <h3 className="text-2xl font-black text-slate-800 leading-none">{remainingDays} <span className="text-sm font-normal text-slate-400">hari</span></h3>
-            <div className="flex justify-between items-center text-[10px] text-slate-400 mt-2 font-medium">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Sisa Waktu Kerja</p>
+            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-200 leading-none">{remainingDays} <span className="text-sm font-normal text-slate-400 dark:text-slate-500">hari</span></h3>
+            <div className="flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-medium">
               <span>Target Harian Baru:</span>
-              <span className="font-bold text-violet-600">{formatNumber(dailyTarget)}/hari</span>
+              <span className="font-bold text-violet-600 dark:text-violet-400">{formatNumber(dailyTarget)}/hari</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1 mt-1 overflow-hidden">
               <div className="bg-violet-500 h-1 rounded-full transition-all duration-500" style={{ width: `${Math.min((remainingDays / (totalProjectDays || 1)) * 100, 100)}%` }} />
             </div>
           </div>
@@ -191,21 +281,21 @@ export default function DashboardOverview({ history, settings, setCurrentTab }) 
       </div>
 
       {/* Chart Section */}
-      <div className="bg-white rounded-xl p-6 border border-slate-100 enterprise-shadow animate-fade-in-up delay-300">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-100 dark:border-slate-800 enterprise-shadow animate-fade-in-up delay-300">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Tren Kinerja Pencapaian</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Kinerja Aktual dibandingkan Target Dinamis</p>
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-200">Tren Kinerja Pencapaian</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Kinerja Aktual dibandingkan Target Dinamis</p>
           </div>
-          <div className="flex bg-slate-100/80 p-1 rounded-lg gap-0.5">
+          <div className="flex bg-slate-100/80 dark:bg-slate-800 p-1 rounded-lg gap-0.5">
             {timeFilterOptions.map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => setTimeFilter(opt.id)}
-                className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
+                className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer ${
                   timeFilter === opt.id
-                    ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200/50'
-                    : 'text-slate-500 hover:text-slate-700'
+                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-800'
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
                 {opt.label}
@@ -226,7 +316,7 @@ export default function DashboardOverview({ history, settings, setCurrentTab }) 
                   <stop offset="100%" stopColor="#3b82f6" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.12)" />
               <XAxis 
                 dataKey="name" 
                 axisLine={false} 

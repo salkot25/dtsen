@@ -112,19 +112,28 @@ function App() {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleRefreshData = async () => {
+    try {
+      const data = await fetchHistory();
+      setHistory(data.history);
+      if (data.settings && Object.keys(data.settings).length > 0) {
+        setSettings(data.settings);
+        localStorage.setItem('dtsen_settings', JSON.stringify(data.settings));
+      }
+      if (data.officers && data.officers.length > 0) {
+        setOfficers(data.officers);
+        localStorage.setItem('dtsen_officers', JSON.stringify(data.officers));
+      }
+    } catch (err) {
+      console.error("Failed to refresh data", err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     async function loadData() {
       try {
-        const data = await fetchHistory();
-        setHistory(data.history);
-        if (data.settings && Object.keys(data.settings).length > 0) {
-          setSettings(data.settings);
-          localStorage.setItem('dtsen_settings', JSON.stringify(data.settings));
-        }
-        if (data.officers && data.officers.length > 0) {
-          setOfficers(data.officers);
-          localStorage.setItem('dtsen_officers', JSON.stringify(data.officers));
-        }
+        await handleRefreshData();
       } catch (err) {
         console.error("Failed to load history", err);
       } finally {
@@ -225,7 +234,12 @@ function App() {
     <Layout currentTab={currentTab} setCurrentTab={setCurrentTab} onLogout={handleLogout} theme={theme} setTheme={setTheme}>
       {currentTab === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <DashboardOverview history={history} settings={settings} setCurrentTab={setCurrentTab} />
+          <DashboardOverview 
+            history={history} 
+            settings={settings} 
+            setCurrentTab={setCurrentTab} 
+            onRefresh={handleRefreshData}
+          />
         </div>
       )}
 
