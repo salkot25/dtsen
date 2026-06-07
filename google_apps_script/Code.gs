@@ -51,6 +51,12 @@ function doPost(e) {
       settingsSheet.appendRow(['excludeWeekends', isBothExcluded]);
       settingsSheet.appendRow(['geminiApiKey', data.settings.geminiApiKey || '']);
       
+      // Format column B as plain text to prevent Google Sheets from auto-formatting numbers/dates
+      var numRows = settingsSheet.getLastRow() - 1;
+      if (numRows > 0) {
+        settingsSheet.getRange(2, 2, numRows, 1).setNumberFormat("@");
+      }
+      
       return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
         .setMimeType(ContentService.MimeType.JSON);
     }
@@ -237,14 +243,23 @@ function doGet(e) {
       if (sData.length > 1) {
         settingsObj = {};
         for (var j = 1; j < sData.length; j++) {
+          var keyName = sData[j][0];
           var val = sData[j][1];
           if (Object.prototype.toString.call(val) === '[object Date]') {
-            var year = val.getFullYear();
-            var month = ('0' + (val.getMonth() + 1)).slice(-2);
-            var day = ('0' + val.getDate()).slice(-2);
-            val = year + '-' + month + '-' + day;
+            if (keyName === 'startDate' || keyName === 'targetDate') {
+              var year = val.getFullYear();
+              var month = ('0' + (val.getMonth() + 1)).slice(-2);
+              var day = ('0' + val.getDate()).slice(-2);
+              val = year + '-' + month + '-' + day;
+            } else if (keyName === 'startDayOfMonth' || keyName === 'endDayOfMonth' || keyName === 'totalTarget' || keyName === 'officerCount') {
+              // Convert Date object back to the numeric value based on sheet's epoch (1899-12-30)
+              var epoch = new Date(1899, 11, 30);
+              val = Math.round((val.getTime() - epoch.getTime()) / (24 * 60 * 60 * 1000));
+            } else {
+              val = val.getTime();
+            }
           }
-          settingsObj[sData[j][0]] = val;
+          settingsObj[keyName] = val;
         }
         if (settingsObj.startDayOfMonth) {
           settingsObj.startDayOfMonth = parseInt(settingsObj.startDayOfMonth, 10);
