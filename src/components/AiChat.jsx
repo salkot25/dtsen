@@ -79,6 +79,7 @@ const AiChat = ({ history, settings }) => {
       avgRecent,
       maxRecent,
       statusLabel,
+      geminiModel: settings.geminiModel || 'gemini-1.5-flash',
     };
   }
 

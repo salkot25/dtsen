@@ -22,11 +22,12 @@ Aplikasi web tingkat *enterprise* modern (Responsive Desktop & Mobile) yang dira
    * **Velocity Tracker**: Perhitungan kecepatan pencapaian harian aktual vs target harian dengan indikator selisih (surplus/defisit).
    * **AI Strategic Analysis**: Panel rangkuman strategi berbasis AI menggunakan data tren dan rekap petugas.
 
-3. **👥 Rekap Kinerja Petugas Gabungan (Dual-Header Table):**
-   * Integrasi data **Paskabayar (Postpaid)** dan **Prabayar (Prepaid)** dalam satu tabel terpadu.
+3. **👥 Rekap Kinerja Petugas Gabungan (Tabel Terpadu & Ekspor PDF):**
+   * Integrasi data **Paskabayar (Postpaid)** dan **Prabayar (Prepaid)** dalam satu tabel terintegrasi.
    * **Peringkat Global Stabil**: Peringkat dihitung secara dinamis berdasarkan total gabungan submitted, tetap stabil meskipun data difilter atau diurutkan berdasarkan nama.
    * **Pembeda Medali Beranimasi**: Peringkat 1, 2, dan 3 dihiasi lencana gradasi emas (`gold-shine`), perak (`silver-sway`), dan perunggu (`bronze-pulse`) yang bergerak interaktif.
-   * **Panel Kontrol Canggih**: Dukungan pencarian cepat, filter status kinerja, dan pengurutan multi-kriteria (Nama, Total, Paskabayar, Prabayar).
+   * **Ekspor PDF Enterprise-Grade**: Fitur unduhan laporan tabular lengkap berstandar formal korporat dengan tata letak landscape A4, ringkasan kinerja KPI, branding instansi, penomoran halaman otomatis, dan tanda tangan pengesahan oleh Manager ULP Salatiga Kota.
+   * **Panel Kontrol Canggih**: Dukungan pencarian cepat, filter status kinerja, pengurutan multi-kriteria (Nama, Total, Paskabayar, Prabayar), serta sistem paginasi responsif di mobile.
 
 4. **💬 Asisten AI Interaktif Terintegrasi (Native Mobile Experience):**
    * Diskusi strategi pencapaian target secara langsung dengan AI yang memahami data real-time Anda.
@@ -42,6 +43,11 @@ Aplikasi web tingkat *enterprise* modern (Responsive Desktop & Mobile) yang dira
    * **Offline First**: Menggunakan Service Worker untuk melakukan caching statis dan kebijakan `NetworkFirst` pada API agar aplikasi tetap bekerja dalam kondisi luring (tanpa internet).
    * **Notifikasi Update Instan**: Toast otomatis memberi tahu jika ada pembaruan versi aplikasi terbaru.
    * **Manajemen Notch & Notch Safe**: Mendukung area aman layar insets (`safe-area-inset`) pada iOS/Android modern.
+
+7. **⚙️ Pengaturan Fleksibel & Model AI Dinamis:**
+   * Kustomisasi periode kerja (tanggal mulai & berakhir), target total, jumlah petugas aktif, serta pengecualian hari libur kerja (Sabtu/Minggu).
+   * **Dynamic AI Model Fetching**: Pendeteksian model secara langsung (real-time) melalui API Key Gemini pengguna. Anda dapat secara bebas memilih model seperti `gemini-1.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash-exp`, atau varian model lain yang didukung oleh API Key Anda.
+   * Sinkronisasi data dua arah antara LocalStorage dan database Google Sheets dengan proteksi format Plain Text.
 
 ---
 
@@ -127,11 +133,13 @@ Aplikasi web tingkat *enterprise* modern (Responsive Desktop & Mobile) yang dira
 Untuk membuat sistem menyimpan data secara *Real-Time*, Anda wajib mengaktifkan script di Google Sheets Anda:
 
 1. Buat **Spreadsheet Baru** (misal: "Dataset DTSEN Salkot").
-2. Buat 3 *Sheet/Tab* dengan nama persis sebagai berikut:
-   * **Laporan** (Untuk data log riwayat realisasi)
+2. Buat 6 *Sheet/Tab* dengan nama persis sebagai berikut:
+   * **Laporan** (Untuk data log riwayat realisasi kumulatif harian)
    * **Users** (Untuk verifikasi akun admin)
-   * **Settings** (Untuk sinkronisasi target dan rentang waktu)
-   * **Officers** (Untuk rekapitulasi data kinerja petugas paskabayar dan prabayar)
+   * **Settings** (Untuk sinkronisasi target, rentang waktu, dan model AI)
+   * **Rekap_Petugas** (Untuk rekapitulasi data kinerja petugas Paskabayar dan Prabayar)
+   * **Riwayat_AI** (Untuk riwayat log ringkasan analisis AI yang digenerasi)
+   * **Riwayat_Chat** (Untuk riwayat log obrolan dengan asisten AI)
 3. Klik Menu **Ekstensi > Apps Script**.
 4. Buka file `/google_apps_script/Code.gs` di repository ini, lalu _Copy-Paste_ isinya ke dalam file `Code.gs` milik Apps Script Anda.
 5. Simpan dan **Terapkan (Deploy) > Aplikasi Web (Web App)**.
@@ -155,8 +163,9 @@ Untuk membuat sistem menyimpan data secara *Real-Time*, Anda wajib mengaktifkan 
 * **Tahap 4, Otorisasi Tingkat Lanjut**: Implementasi pengecekan Kredensial Langsung ke Database Sheets, dan peluncuran Filter Waktu (7h, 30h, Semua) untuk area grafik dengan manipulasi tipe `type="monotone"`.
 * **Tahap 5, Integrasi PWA & AI Assistant**: Pembentukan arsitektur aplikasi PWA yang luring-siap, mengaktifkan asisten AI yang dinamis berbasis Gemini Flash, perombakan struktur navigasi sidebar, dan peluncuran **Strategic Performance Intelligence (ExecutiveSummary)** yang dilengkapi simulator skenario pencapaian target.
 * **Tahap 6, Unified Rekap Petugas & Penyempurnaan Detail**: Penggabungan rekap Paskabayar dan Prabayar dengan sistem ranking total gabungan yang stabil, visualisasi medali beranimasi untuk Top 3, layout grid input kustom desktop 30:30:40, perbaikan layout chat mobile, serta pembersihan elemen avatar demi visual minimalis yang elegan.
+* **Tahap 7, Kustomisasi Identitas, Sinkronisasi Data, Ekspor PDF Enterprise & Model AI Dinamis**: Integrasi logo resmi instansi di seluruh layout desktop & mobile, perbaikan bug format desimal/tanggal pada sinkronisasi pengaturan Google Sheets, pengisian opsi paginasi rekap petugas mobile, tata letak responsif ikon PDF bersanding dengan pencarian, peluncuran mesin cetak PDF berstandar korporat (landscape A4, ringkasan KPI, blok tanda tangan pengesahan manager), serta menu pemilihan model Gemini AI secara dinamis yang terhubung langsung ke Google AI Studio API.
 
-*(Proyek di *build* sukses dan dideploy tanpa Error ke GitHub Pages - **Verifikasi Selesai** v1.3)*
+*(Proyek di *build* sukses dan dideploy tanpa Error ke GitHub Pages - **Verifikasi Selesai** v1.4)*
 
 ---
 *© 2026 DTSEN ULP Salatiga Kota. Dikelola oleh Kord/@salkot25.*

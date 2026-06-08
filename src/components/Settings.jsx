@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Settings as SettingsIcon, CalendarDays, Target, Users, Key, Sparkles } from 'lucide-react';
+import { Save, Settings as SettingsIcon, CalendarDays, Target, Users, Key, Sparkles, Loader2 } from 'lucide-react';
 
 const formatDateForInput = (dateValue) => {
   if (!dateValue) return '';
@@ -26,10 +26,17 @@ export default function Settings({ settings, onSave }) {
     officerCount: settings.officerCount !== undefined ? settings.officerCount : 10,
     excludeSaturday: settings.excludeSaturday !== undefined ? settings.excludeSaturday : (settings.excludeWeekends !== undefined ? settings.excludeWeekends : true),
     excludeSunday: settings.excludeSunday !== undefined ? settings.excludeSunday : (settings.excludeWeekends !== undefined ? settings.excludeWeekends : true),
-    geminiApiKey: settings.geminiApiKey || ''
+    geminiApiKey: settings.geminiApiKey || '',
+    geminiModel: settings.geminiModel || 'gemini-1.5-flash'
   });
 
   const [savedMessage, setSavedMessage] = useState('');
+  const [availableModels, setAvailableModels] = useState([
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Default)' },
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (High Intelligence)' },
+    { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Experimental)' }
+  ]);
+  const [isFetchingModels, setIsFetchingModels] = useState(false);
 
   useEffect(() => {
     setFormData({
@@ -41,9 +48,68 @@ export default function Settings({ settings, onSave }) {
       officerCount: settings.officerCount !== undefined ? settings.officerCount : 10,
       excludeSaturday: settings.excludeSaturday !== undefined ? settings.excludeSaturday : (settings.excludeWeekends !== undefined ? settings.excludeWeekends : true),
       excludeSunday: settings.excludeSunday !== undefined ? settings.excludeSunday : (settings.excludeWeekends !== undefined ? settings.excludeWeekends : true),
-      geminiApiKey: settings.geminiApiKey || ''
+      geminiApiKey: settings.geminiApiKey || '',
+      geminiModel: settings.geminiModel || 'gemini-1.5-flash'
     });
   }, [settings]);
+
+  useEffect(() => {
+    let active = true;
+    const apiKey = formData.geminiApiKey;
+    if (!apiKey) {
+      setAvailableModels([
+        { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Default)' },
+        { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (High Intelligence)' },
+        { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Experimental)' }
+      ]);
+      return;
+    }
+
+    const loadModels = async () => {
+      setIsFetchingModels(true);
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        if (!res.ok) throw new Error("Failed to fetch models");
+        const json = await res.json();
+        if (json.models && active) {
+          const supported = json.models
+            .filter(m => m.supportedGenerationMethods?.includes('generateContent') && m.name.startsWith('models/gemini'))
+            .map(m => {
+              const id = m.name.replace('models/', '');
+              let displayName = id;
+              if (id.includes('1.5-flash')) displayName = 'Gemini 1.5 Flash';
+              else if (id.includes('1.5-pro')) displayName = 'Gemini 1.5 Pro';
+              else if (id.includes('2.0-flash')) displayName = 'Gemini 2.0 Flash';
+              else if (id.includes('2.0-pro')) displayName = 'Gemini 2.0 Pro';
+              
+              if (m.displayName) {
+                displayName = `${m.displayName} (${id})`;
+              }
+              return { id, name: displayName };
+            });
+          
+          if (supported.length > 0 && active) {
+            // Pastikan model yang saat ini dipilih tetap ada dalam list jika tidak terdaftar
+            const hasCurrent = supported.some(m => m.id === formData.geminiModel);
+            if (!hasCurrent && formData.geminiModel) {
+              supported.unshift({ id: formData.geminiModel, name: formData.geminiModel });
+            }
+            setAvailableModels(supported);
+          }
+        }
+      } catch (err) {
+        console.warn("Menggunakan fallback daftar model karena gagal mengambil data:", err);
+      } finally {
+        if (active) setIsFetchingModels(false);
+      }
+    };
+
+    loadModels();
+
+    return () => {
+      active = false;
+    };
+  }, [formData.geminiApiKey]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -235,6 +301,27 @@ export default function Settings({ settings, onSave }) {
                   <Sparkles size={18} className="text-indigo-400 dark:text-indigo-300" />
                 </div>
               </div>
+
+              {/* Dropdown Pemilihan Model AI */}
+              <div className="space-y-2 mt-4 pt-1">
+                <label className="block text-sm font-semibold text-indigo-950 dark:text-indigo-200 flex items-center gap-2">
+                  Pilih Model AI
+                  {isFetchingModels && <Loader2 size={14} className="animate-spin text-indigo-500" />}
+                </label>
+                <select
+                  name="geminiModel"
+                  value={formData.geminiModel}
+                  onChange={handleChange}
+                  className="w-full bg-slate-50 dark:bg-slate-850 border border-indigo-200 dark:border-slate-700 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors shadow-sm text-sm text-slate-900 dark:text-slate-100 cursor-pointer outline-none"
+                >
+                  {availableModels.map(model => (
+                    <option key={model.id} value={model.id}>
+                      {model.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <p className="text-sm text-indigo-850 dark:text-slate-400 leading-relaxed">
                 Kunci API ini diperlukan untuk mengaktifkan fitur <strong>Ringkasan Kinerja AI</strong> dan <strong>Asisten AI Chat</strong>. Dapatkan API Key Anda secara gratis di{' '}
                 <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">

@@ -7,28 +7,30 @@ export async function generateExecutiveSummary(apiKey, data) {
 
   const genAI = new GoogleGenerativeAI(apiKey);
   
-  // Mencari model yang tersedia dan didukung secara dinamis
-  let selectedModelName = "gemini-1.5-flash"; // fallback default
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    if (response.ok) {
-      const data = await response.json();
-      const models = data.models || [];
-      const supportedModels = models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'));
-      
-      const flashModel = supportedModels.find(m => m.name.includes('flash') && !m.name.includes('vision'));
-      const proModel = supportedModels.find(m => m.name.includes('pro') && !m.name.includes('vision'));
-      
-      if (flashModel) {
-        selectedModelName = flashModel.name.replace('models/', '');
-      } else if (proModel) {
-        selectedModelName = proModel.name.replace('models/', '');
-      } else if (supportedModels.length > 0) {
-        selectedModelName = supportedModels[0].name.replace('models/', '');
+  let selectedModelName = data.geminiModel || "gemini-1.5-flash";
+  
+  if (!data.geminiModel) {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      if (response.ok) {
+        const resData = await response.json();
+        const models = resData.models || [];
+        const supportedModels = models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'));
+        
+        const flashModel = supportedModels.find(m => m.name.includes('flash') && !m.name.includes('vision'));
+        const proModel = supportedModels.find(m => m.name.includes('pro') && !m.name.includes('vision'));
+        
+        if (flashModel) {
+          selectedModelName = flashModel.name.replace('models/', '');
+        } else if (proModel) {
+          selectedModelName = proModel.name.replace('models/', '');
+        } else if (supportedModels.length > 0) {
+          selectedModelName = supportedModels[0].name.replace('models/', '');
+        }
       }
+    } catch (e) {
+      console.warn("Gagal mengambil daftar model, menggunakan fallback default", e);
     }
-  } catch (e) {
-    console.warn("Gagal mengambil daftar model, menggunakan fallback default", e);
   }
 
   const model = genAI.getGenerativeModel({ model: selectedModelName });
@@ -108,17 +110,19 @@ export async function sendChatMessage(apiKey, history, message, contextData) {
 
   const genAI = new GoogleGenerativeAI(apiKey);
   
-  let selectedModelName = "gemini-1.5-flash";
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    if (response.ok) {
-      const data = await response.json();
-      const models = data.models || [];
-      const flashModel = models.find(m => m.supportedGenerationMethods?.includes('generateContent') && m.name.includes('flash') && !m.name.includes('vision'));
-      if (flashModel) selectedModelName = flashModel.name.replace('models/', '');
+  let selectedModelName = contextData?.geminiModel || "gemini-1.5-flash";
+  if (!contextData?.geminiModel) {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      if (response.ok) {
+        const resData = await response.json();
+        const models = resData.models || [];
+        const flashModel = models.find(m => m.supportedGenerationMethods?.includes('generateContent') && m.name.includes('flash') && !m.name.includes('vision'));
+        if (flashModel) selectedModelName = flashModel.name.replace('models/', '');
+      }
+    } catch (e) {
+      console.warn("Fallback to default model", e);
     }
-  } catch (e) {
-    console.warn("Fallback to default model", e);
   }
 
   const model = genAI.getGenerativeModel({ model: selectedModelName });

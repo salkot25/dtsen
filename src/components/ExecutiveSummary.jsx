@@ -573,6 +573,7 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
         scenarioLabel: considerCategories
           ? "Pakai Kategori (Realisasi Bersih)"
           : "Tanpa Kategori (Total Submit)",
+        geminiModel: settings.geminiModel || 'gemini-1.5-flash',
       };
 
       const summary = await generateExecutiveSummary(
@@ -618,14 +619,16 @@ const ExecutiveSummary = ({ history, settings, officers = [] }) => {
                 Metode Hitung Pencapaian
               </h4>
               <p className="hidden sm:block text-[11px] text-slate-400 mt-0.5">
-                Apakah pencapaian kinerja menyertakan kategori kunjungan?
+                Apakah pencapaian kinerja hanya menghitung kunjungan{" "}
+                <strong>Berhasil</strong>?
               </p>
             </div>
           </div>
         </div>
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 w-full sm:w-auto sm:block shrink-0">
           <p className="text-[11px] text-slate-400 min-w-0 sm:hidden">
-            Apakah pencapaian kinerja menyertakan kategori kunjungan?
+            Apakah pencapaian kinerja hanya menghitung kunjungan{" "}
+            <strong>Berhasil</strong>?
           </p>
           <div className="flex bg-slate-100/80 p-1 rounded-xl gap-1 w-auto shrink-0 justify-self-end">
             <button

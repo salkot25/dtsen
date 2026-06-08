@@ -61,7 +61,7 @@ function App() {
 
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('dtsen_settings');
-    return saved ? JSON.parse(saved) : {
+    const defaultSettings = {
       startDate: '2026-01-01',
       targetDate: '2026-08-31',
       startDayOfMonth: 2,
@@ -70,8 +70,18 @@ function App() {
       officerCount: 10,
       excludeSaturday: true,
       excludeSunday: true,
-      geminiApiKey: ''
+      geminiApiKey: '',
+      geminiModel: 'gemini-1.5-flash'
     };
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return { ...defaultSettings, ...parsed };
+      } catch (e) {
+        return defaultSettings;
+      }
+    }
+    return defaultSettings;
   });
 
   const [officers, setOfficers] = useState(() => {
@@ -117,8 +127,11 @@ function App() {
       const data = await fetchHistory();
       setHistory(data.history);
       if (data.settings && Object.keys(data.settings).length > 0) {
-        setSettings(data.settings);
-        localStorage.setItem('dtsen_settings', JSON.stringify(data.settings));
+        setSettings(prev => {
+          const merged = { ...prev, ...data.settings };
+          localStorage.setItem('dtsen_settings', JSON.stringify(merged));
+          return merged;
+        });
       }
       if (data.officers && data.officers.length > 0) {
         setOfficers(data.officers);

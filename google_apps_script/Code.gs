@@ -50,6 +50,7 @@ function doPost(e) {
       var isBothExcluded = (data.settings.excludeSaturday && data.settings.excludeSunday);
       settingsSheet.appendRow(['excludeWeekends', isBothExcluded]);
       settingsSheet.appendRow(['geminiApiKey', data.settings.geminiApiKey || '']);
+      settingsSheet.appendRow(['geminiModel', data.settings.geminiModel || 'gemini-1.5-flash']);
       
       // Format column B as plain text to prevent Google Sheets from auto-formatting numbers/dates
       var numRows = settingsSheet.getLastRow() - 1;
