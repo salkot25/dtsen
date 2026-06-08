@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { formatNumber } from "../utils/dateUtils";
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 export default function OfficerRecap({ officers = [], settings = {} }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -515,7 +515,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       columnStyles.colL = { halign: "center" };
     }
 
-    doc.autoTable({
+    autoTable(doc, {
       columns: columns,
       body: rows,
       startY: 47,
