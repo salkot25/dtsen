@@ -880,10 +880,11 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                 <button
                   type="button"
                   onClick={exportToPDF}
-                  className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer border-0 shrink-0 select-none"
+                  title="Ekspor PDF"
+                  className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center cursor-pointer border-0 shrink-0 select-none"
+                  aria-label="Ekspor PDF"
                 >
-                  <Download size={16} />
-                  <span>Ekspor PDF</span>
+                  <Download size={18} />
                 </button>
               </div>
             </div>
