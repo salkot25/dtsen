@@ -12,8 +12,11 @@ import {
   Mail,
   ReceiptText,
   Zap,
+  Download,
 } from "lucide-react";
 import { formatNumber } from "../utils/dateUtils";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 export default function OfficerRecap({ officers = [], settings = {} }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -302,6 +305,290 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
   const toggleMobileCard = (mobileCardKey) => {
     setExpandedMobileCard((prev) =>
       prev === mobileCardKey ? null : mobileCardKey,
+    );
+  };
+
+  const exportToPDF = async () => {
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // Load logo
+    try {
+      const img = new Image();
+      img.src = "/logo.png";
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+      doc.addImage(img, "PNG", 14, 10, 12, 12);
+    } catch (e) {
+      console.warn("Failed to load logo image for PDF:", e);
+    }
+
+    // Add title (shifted slightly because of logo)
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(0, 75, 128); // Brand blue #004b80
+    doc.text("LAPORAN REKAPITULASI KINERJA PETUGAS FIELD MONITORING", 28, 15);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Aplikasi Monitoring DTSEN - ULP Salatiga Kota", 28, 20);
+
+    // Date printed
+    const today = new Intl.DateTimeFormat("id-ID", {
+      dateStyle: "long",
+      timeStyle: "short",
+    }).format(new Date());
+    doc.text(`Tanggal Cetak: ${today}`, 283, 20, { align: "right" });
+
+    // Line separator
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.4);
+    doc.line(14, 24, 283, 24);
+
+    // Summary info block
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(50, 50, 50);
+    doc.text("RINGKASAN METRIK KINERJA GABUNGAN:", 14, 31);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text(`- Total Petugas Lapangan: ${stats.total} orang`, 14, 36);
+    doc.text(`- Total Target Periode: ${formatNumber(totalTarget)} pelanggan`, 14, 41);
+
+    doc.text(`- Realisasi Paskabayar: ${formatNumber(stats.totalPaskaSubmitted - stats.totalPaskaRejected)} (${paskaPct}%)`, 95, 36);
+    doc.text(`- Realisasi Prabayar: ${formatNumber(stats.totalPraSubmitted - stats.totalPraRejected)} (${praPct}%)`, 95, 41);
+
+    doc.setFont("helvetica", "bold");
+    doc.text(`- Pencapaian Kumulatif Gabungan: ${formatNumber(totalCombinedRealisasi)} (${combinedPct}%)`, 185, 36);
+    doc.setFont("helvetica", "normal");
+    doc.text(`- Status Target Berjalan: ${combinedPct >= 100 ? "TERPENUHI" : "ON PROGRESS"}`, 185, 41);
+
+    // Define columns & rows based on active serviceTypeFilter
+    let columns = [];
+    let rows = [];
+
+    if (serviceTypeFilter === "paskabayar") {
+      columns = [
+        { header: "No", dataKey: "no" },
+        { header: "Nama Petugas", dataKey: "nama" },
+        { header: "Email", dataKey: "email" },
+        { header: "Paska Open", dataKey: "paskaOpen" },
+        { header: "Paska Sub", dataKey: "paskaSub" },
+        { header: "Paska Rej", dataKey: "paskaRej" },
+        { header: "Realisasi %", dataKey: "paskaReal" },
+        { header: "1. Berhasil", dataKey: "colI" },
+        { header: "2. Rmh Kosong", dataKey: "colJ" },
+        { header: "3. Menolak", dataKey: "colK" },
+        { header: "4. Mtr Tdk Ada", dataKey: "colL" }
+      ];
+
+      rows = processedOfficers.map((o) => {
+        const paskaPercentage = o.hasPaska ? `${(o.paskaRealisasi * 100).toFixed(1)}%` : "-";
+        const denom = o.paskaOpen + o.paskaSubmitted;
+        const pctI = denom > 0 ? `${((o.paskaColI / denom) * 100).toFixed(1)}%` : "0.0%";
+        const pctJ = denom > 0 ? `${((o.paskaColJ / denom) * 100).toFixed(1)}%` : "0.0%";
+        const pctK = denom > 0 ? `${((o.paskaColK / denom) * 100).toFixed(1)}%` : "0.0%";
+        const pctL = denom > 0 ? `${((o.paskaColL / denom) * 100).toFixed(1)}%` : "0.0%";
+
+        return {
+          no: o.no,
+          nama: o.nama || "-",
+          email: o.email || "-",
+          paskaOpen: o.hasPaska ? formatNumber(o.paskaOpen) : "-",
+          paskaSub: o.hasPaska ? formatNumber(o.paskaSubmitted) : "-",
+          paskaRej: o.hasPaska ? formatNumber(o.paskaRejected) : "-",
+          paskaReal: paskaPercentage,
+          colI: o.hasPaska ? `${formatNumber(o.paskaColI)} (${pctI})` : "-",
+          colJ: o.hasPaska ? `${formatNumber(o.paskaColJ)} (${pctJ})` : "-",
+          colK: o.hasPaska ? `${formatNumber(o.paskaColK)} (${pctK})` : "-",
+          colL: o.hasPaska ? `${formatNumber(o.paskaColL)} (${pctL})` : "-"
+        };
+      });
+    } else if (serviceTypeFilter === "prabayar") {
+      columns = [
+        { header: "No", dataKey: "no" },
+        { header: "Nama Petugas", dataKey: "nama" },
+        { header: "Email", dataKey: "email" },
+        { header: "Pra Open", dataKey: "praOpen" },
+        { header: "Pra Sub", dataKey: "praSub" },
+        { header: "Pra Rej", dataKey: "praRej" },
+        { header: "Realisasi %", dataKey: "praReal" },
+        { header: "1. Berhasil", dataKey: "colI" },
+        { header: "2. Rmh Kosong", dataKey: "colJ" },
+        { header: "3. Menolak", dataKey: "colK" },
+        { header: "4. Mtr Tdk Ada", dataKey: "colL" }
+      ];
+
+      rows = processedOfficers.map((o) => {
+        const praPercentage = o.hasPra ? `${(o.praRealisasi * 100).toFixed(1)}%` : "-";
+        const denom = o.praOpen + o.praSubmitted;
+        const pctI = denom > 0 ? `${((o.praColI / denom) * 100).toFixed(1)}%` : "0.0%";
+        const pctJ = denom > 0 ? `${((o.praColJ / denom) * 100).toFixed(1)}%` : "0.0%";
+        const pctK = denom > 0 ? `${((o.praColK / denom) * 100).toFixed(1)}%` : "0.0%";
+        const pctL = denom > 0 ? `${((o.praColL / denom) * 100).toFixed(1)}%` : "0.0%";
+
+        return {
+          no: o.no,
+          nama: o.nama || "-",
+          email: o.email || "-",
+          praOpen: o.hasPra ? formatNumber(o.praOpen) : "-",
+          praSub: o.hasPra ? formatNumber(o.praSubmitted) : "-",
+          praRej: o.hasPra ? formatNumber(o.praRejected) : "-",
+          praReal: praPercentage,
+          colI: o.hasPra ? `${formatNumber(o.praColI)} (${pctI})` : "-",
+          colJ: o.hasPra ? `${formatNumber(o.praColJ)} (${pctJ})` : "-",
+          colK: o.hasPra ? `${formatNumber(o.praColK)} (${pctK})` : "-",
+          colL: o.hasPra ? `${formatNumber(o.praColL)} (${pctL})` : "-"
+        };
+      });
+    } else {
+      // serviceTypeFilter === "all"
+      columns = [
+        { header: "No", dataKey: "no" },
+        { header: "Nama Petugas", dataKey: "nama" },
+        { header: "Email", dataKey: "email" },
+        { header: "Paska Open", dataKey: "paskaOpen" },
+        { header: "Paska Sub", dataKey: "paskaSub" },
+        { header: "Paska Rej", dataKey: "paskaRej" },
+        { header: "Paska Real %", dataKey: "paskaReal" },
+        { header: "Pra Sub", dataKey: "praSub" },
+        { header: "Pra Rej", dataKey: "praRej" },
+        { header: "Pra Real %", dataKey: "praReal" },
+        { header: "Total Realisasi", dataKey: "totalReal" }
+      ];
+
+      rows = processedOfficers.map((o) => {
+        const paskaPercentage = o.hasPaska ? `${(o.paskaRealisasi * 100).toFixed(1)}%` : "-";
+        const praPercentage = o.hasPra ? `${(o.praRealisasi * 100).toFixed(1)}%` : "-";
+
+        return {
+          no: o.no,
+          nama: o.nama || "-",
+          email: o.email || "-",
+          paskaOpen: o.hasPaska ? formatNumber(o.paskaOpen) : "-",
+          paskaSub: o.hasPaska ? formatNumber(o.paskaSubmitted) : "-",
+          paskaRej: o.hasPaska ? formatNumber(o.paskaRejected) : "-",
+          paskaReal: paskaPercentage,
+          praSub: o.hasPra ? formatNumber(o.praSubmitted) : "-",
+          praRej: o.hasPra ? formatNumber(o.praRejected) : "-",
+          praReal: praPercentage,
+          totalReal: formatNumber(o.totalRealisasiVal)
+        };
+      });
+    }
+
+    // Set styles configuration
+    let columnStyles = {
+      no: { halign: "center", width: 10 },
+      nama: { fontStyle: "bold", width: 35 },
+      email: { width: 40 }
+    };
+
+    if (serviceTypeFilter === "all") {
+      columnStyles.paskaOpen = { halign: "center" };
+      columnStyles.paskaSub = { halign: "center" };
+      columnStyles.paskaRej = { halign: "center" };
+      columnStyles.paskaReal = { halign: "center", fontStyle: "bold" };
+      columnStyles.praSub = { halign: "center" };
+      columnStyles.praRej = { halign: "center" };
+      columnStyles.praReal = { halign: "center", fontStyle: "bold" };
+      columnStyles.totalReal = { halign: "center", fontStyle: "bold" };
+    } else {
+      columnStyles.paskaOpen = { halign: "center" };
+      columnStyles.paskaSub = { halign: "center" };
+      columnStyles.paskaRej = { halign: "center" };
+      columnStyles.paskaReal = { halign: "center", fontStyle: "bold" };
+      columnStyles.praOpen = { halign: "center" };
+      columnStyles.praSub = { halign: "center" };
+      columnStyles.praRej = { halign: "center" };
+      columnStyles.praReal = { halign: "center", fontStyle: "bold" };
+      columnStyles.colI = { halign: "center" };
+      columnStyles.colJ = { halign: "center" };
+      columnStyles.colK = { halign: "center" };
+      columnStyles.colL = { halign: "center" };
+    }
+
+    doc.autoTable({
+      columns: columns,
+      body: rows,
+      startY: 47,
+      theme: "striped",
+      headStyles: {
+        fillColor: [0, 75, 128], // PLN Brand Blue
+        textColor: [255, 255, 255],
+        fontSize: 8.5,
+        fontStyle: "bold",
+        halign: "center",
+        valign: "middle",
+      },
+      bodyStyles: {
+        fontSize: 8,
+        valign: "middle",
+      },
+      columnStyles: columnStyles,
+      styles: {
+        cellPadding: 1.8,
+        lineColor: [225, 225, 225],
+        lineWidth: 0.1,
+      },
+      margin: { top: 15, left: 14, right: 14, bottom: 35 },
+      didDrawPage: function (data) {
+        // Footer text
+        doc.setFontSize(7.5);
+        doc.setTextColor(140, 140, 140);
+        doc.text(
+          `Halaman ${data.pageNumber} dari ${doc.internal.getNumberOfPages()}`,
+          14,
+          doc.internal.pageSize.height - 10
+        );
+        doc.text(
+          "Laporan Rekap Kinerja DTSEN ULP Salatiga - CONFIDENTIAL",
+          283,
+          doc.internal.pageSize.height - 10,
+          { align: "right" }
+        );
+      },
+    });
+
+    // Add signature block at the end of the table
+    const finalY = doc.lastAutoTable.finalY + 12;
+    const pageHeight = doc.internal.pageSize.height;
+
+    // Check if we need a new page for signature block
+    if (finalY + 30 > pageHeight - 15) {
+      doc.addPage();
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(50, 50, 50);
+
+      // Signature labels on the new page
+      doc.text("Mengetahui,", 220, 20);
+      doc.text("Manager ULP Salatiga Kota", 220, 25);
+      doc.line(220, 42, 270, 42); // Line for signature
+      doc.setFont("helvetica", "bold");
+      doc.text("Ferry Tri Wibowo", 220, 47);
+    } else {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(50, 50, 50);
+
+      // Signature labels on the current page
+      doc.text("Mengetahui,", 220, finalY);
+      doc.text("Manager ULP Salatiga Kota", 220, finalY + 5);
+      doc.line(220, finalY + 22, 270, finalY + 22); // Line for signature
+      doc.setFont("helvetica", "bold");
+      doc.text("Ferry Tri Wibowo", 220, finalY + 27);
+    }
+
+    doc.save(
+      `Rekap_Kinerja_Petugas_${new Date().toISOString().slice(0, 10)}.pdf`
     );
   };
 
@@ -595,6 +882,15 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     {sortBy === "pra_submitted" && <ArrowUpDown size={12} />}
                   </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={exportToPDF}
+                  className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer border-0 shrink-0 select-none"
+                >
+                  <Download size={16} />
+                  <span>Ekspor PDF</span>
+                </button>
               </div>
             </div>
           </div>
