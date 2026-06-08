@@ -332,7 +332,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(0, 75, 128); // Brand blue #004b80
-    doc.text("LAPORAN REKAPITULASI KINERJA PETUGAS FIELD MONITORING", 28, 15);
+    doc.text("LAPORAN REKAPITULASI KINERJA DTSEN PETUGAS", 28, 15);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
@@ -548,12 +548,6 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
           14,
           doc.internal.pageSize.height - 10
         );
-        doc.text(
-          "Laporan Rekap Kinerja DTSEN ULP Salatiga - CONFIDENTIAL",
-          283,
-          doc.internal.pageSize.height - 10,
-          { align: "right" }
-        );
       },
     });
 
@@ -573,7 +567,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       doc.text("Manager ULP Salatiga Kota", 220, 25);
       doc.line(220, 42, 270, 42); // Line for signature
       doc.setFont("helvetica", "bold");
-      doc.text("Ferry Tri Wibowo", 220, 47);
+      doc.text("Arif Setyawan", 220, 47);
     } else {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.5);
@@ -584,7 +578,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
       doc.text("Manager ULP Salatiga Kota", 220, finalY + 5);
       doc.line(220, finalY + 22, 270, finalY + 22); // Line for signature
       doc.setFont("helvetica", "bold");
-      doc.text("Ferry Tri Wibowo", 220, finalY + 27);
+      doc.text("Arif Setyawan", 220, finalY + 27);
     }
 
     doc.save(
