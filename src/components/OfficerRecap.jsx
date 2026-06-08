@@ -777,21 +777,33 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
           {/* Control Panel: Search, Filter, Sort */}
           <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm space-y-4">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              {/* Search bar */}
-              <div className="relative w-full md:w-80">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Search size={18} />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Cari nama biller..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-inner"
-                />
+              {/* Search bar & Export PDF (side-by-side on mobile) */}
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="relative flex-1 md:w-80">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Search size={18} />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Cari nama biller..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="block w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-inner"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={exportToPDF}
+                  title="Ekspor PDF"
+                  className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center cursor-pointer border-0 shrink-0 select-none"
+                  aria-label="Ekspor PDF"
+                >
+                  <Download size={18} />
+                </button>
               </div>
 
               {/* Filter & Sort controls */}
@@ -876,16 +888,6 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                     {sortBy === "pra_submitted" && <ArrowUpDown size={12} />}
                   </button>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={exportToPDF}
-                  title="Ekspor PDF"
-                  className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center cursor-pointer border-0 shrink-0 select-none"
-                  aria-label="Ekspor PDF"
-                >
-                  <Download size={18} />
-                </button>
               </div>
             </div>
           </div>
