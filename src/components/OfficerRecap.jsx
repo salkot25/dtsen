@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Search,
   Users,
@@ -13,10 +13,13 @@ import {
   ReceiptText,
   Zap,
   Download,
+  FileText,
+  FileSpreadsheet,
 } from "lucide-react";
 import { formatNumber } from "../utils/dateUtils";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 export default function OfficerRecap({ officers = [], settings = {} }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +29,7 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
   const [sortOrder, setSortOrder] = useState("desc"); // asc, desc
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedMobileCard, setExpandedMobileCard] = useState(null);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
   const itemsPerPage = 10;
 
   // 1. Group & Merge Postpaid (Paskabayar) and Prepaid (Prabayar) by Officer Name
@@ -586,6 +590,178 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
     );
   };
 
+  const exportToExcel = () => {
+    const makeNumCell = (val, fmt = '#,##0') => {
+      if (val === null || val === undefined || val === "-") return { v: "-", t: 's' };
+      const num = Number(val);
+      if (isNaN(num)) return { v: val, t: 's' };
+      return { v: num, t: 'n', z: fmt };
+    };
+
+    const makePctCell = (val) => {
+      if (val === null || val === undefined || val === "-") return { v: "-", t: 's' };
+      const num = Number(val);
+      if (isNaN(num)) return { v: val, t: 's' };
+      return { v: num, t: 'n', z: '0.0%' };
+    };
+
+    const makeTextCell = (val) => {
+      return { v: val !== undefined && val !== null ? String(val) : "-", t: 's' };
+    };
+
+    // Prepare headers & rows based on active serviceTypeFilter
+    let headers = [];
+    let rows = [];
+
+    if (serviceTypeFilter === "paskabayar") {
+      headers = [
+        "Peringkat",
+        "Nama Petugas",
+        "Email",
+        "Paska Open",
+        "Paska Submitted",
+        "Paska Rejected",
+        "Realisasi Bersih",
+        "Realisasi %",
+        "1. Berhasil (Count)",
+        "2. Rumah Kosong (Count)",
+        "3. Menolak (Count)",
+        "4. Meter Tdk Ada (Count)"
+      ];
+
+      rows = processedOfficers.map((o) => {
+        return [
+          makeNumCell(o.no),
+          makeTextCell(o.nama),
+          makeTextCell(o.email),
+          o.hasPaska ? makeNumCell(o.paskaOpen) : makeTextCell("-"),
+          o.hasPaska ? makeNumCell(o.paskaSubmitted) : makeTextCell("-"),
+          o.hasPaska ? makeNumCell(o.paskaRejected) : makeTextCell("-"),
+          o.hasPaska ? makeNumCell(o.paskaRealisasiVal) : makeTextCell("-"),
+          o.hasPaska ? makePctCell(o.paskaRealisasi) : makeTextCell("-"),
+          o.hasPaska ? makeNumCell(o.paskaColI) : makeTextCell("-"),
+          o.hasPaska ? makeNumCell(o.paskaColJ) : makeTextCell("-"),
+          o.hasPaska ? makeNumCell(o.paskaColK) : makeTextCell("-"),
+          o.hasPaska ? makeNumCell(o.paskaColL) : makeTextCell("-")
+        ];
+      });
+    } else if (serviceTypeFilter === "prabayar") {
+      headers = [
+        "Peringkat",
+        "Nama Petugas",
+        "Email",
+        "Pra Open",
+        "Pra Submitted",
+        "Pra Rejected",
+        "Realisasi Bersih",
+        "Realisasi %",
+        "1. Berhasil (Count)",
+        "2. Rumah Kosong (Count)",
+        "3. Menolak (Count)",
+        "4. Meter Tdk Ada (Count)"
+      ];
+
+      rows = processedOfficers.map((o) => {
+        return [
+          makeNumCell(o.no),
+          makeTextCell(o.nama),
+          makeTextCell(o.email),
+          o.hasPra ? makeNumCell(o.praOpen) : makeTextCell("-"),
+          o.hasPra ? makeNumCell(o.praSubmitted) : makeTextCell("-"),
+          o.hasPra ? makeNumCell(o.praRejected) : makeTextCell("-"),
+          o.hasPra ? makeNumCell(o.praRealisasiVal) : makeTextCell("-"),
+          o.hasPra ? makePctCell(o.praRealisasi) : makeTextCell("-"),
+          o.hasPra ? makeNumCell(o.praColI) : makeTextCell("-"),
+          o.hasPra ? makeNumCell(o.praColJ) : makeTextCell("-"),
+          o.hasPra ? makeNumCell(o.praColK) : makeTextCell("-"),
+          o.hasPra ? makeNumCell(o.praColL) : makeTextCell("-")
+        ];
+      });
+    } else {
+      // serviceTypeFilter === "all"
+      headers = [
+        "Peringkat",
+        "Nama Petugas",
+        "Email",
+        "Paska Open",
+        "Paska Submitted",
+        "Paska Rejected",
+        "Paska Realisasi %",
+        "Pra Sub",
+        "Pra Rej",
+        "Pra Realisasi %",
+        "Total Realisasi Bersih"
+      ];
+
+      rows = processedOfficers.map((o) => {
+        return [
+          makeNumCell(o.no),
+          makeTextCell(o.nama),
+          makeTextCell(o.email),
+          o.hasPaska ? makeNumCell(o.paskaOpen) : makeTextCell("-"),
+          o.hasPaska ? makeNumCell(o.paskaSubmitted) : makeTextCell("-"),
+          o.hasPaska ? makeNumCell(o.paskaRejected) : makeTextCell("-"),
+          o.hasPaska ? makePctCell(o.paskaRealisasi) : makeTextCell("-"),
+          o.hasPra ? makeNumCell(o.praSubmitted) : makeTextCell("-"),
+          o.hasPra ? makeNumCell(o.praRejected) : makeTextCell("-"),
+          o.hasPra ? makePctCell(o.praRealisasi) : makeTextCell("-"),
+          makeNumCell(o.totalRealisasiVal)
+        ];
+      });
+    }
+
+    // Dynamic Summary metadata for professional enterprise formatting
+    const summaryData = [
+      [makeTextCell("LAPORAN REKAPITULASI KINERJA DTSEN PETUGAS")],
+      [makeTextCell("Aplikasi Monitoring DTSEN - ULP Salatiga Kota")],
+      [makeTextCell(`Tanggal Cetak: ${new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeStyle: "short" }).format(new Date())}`)],
+      [],
+      [makeTextCell("RINGKASAN METRIK KINERJA GABUNGAN:")],
+      [makeTextCell("Total Petugas Lapangan"), makeNumCell(stats.total, '#,##0" orang"')],
+      [makeTextCell("Total Target Periode"), makeNumCell(totalTarget)],
+      [makeTextCell("Realisasi Paskabayar"), makeNumCell(stats.totalPaskaSubmitted - stats.totalPaskaRejected), makePctCell(parseFloat(paskaPct) / 100)],
+      [makeTextCell("Realisasi Prabayar"), makeNumCell(stats.totalPraSubmitted - stats.totalPraRejected), makePctCell(parseFloat(praPct) / 100)],
+      [makeTextCell("Pencapaian Kumulatif Gabungan"), makeNumCell(totalCombinedRealisasi), makePctCell(parseFloat(combinedPct) / 100)],
+      [makeTextCell("Status Target Berjalan"), makeTextCell(parseFloat(combinedPct) >= 100 ? "TERPENUHI" : "ON PROGRESS")],
+      [],
+      headers.map(h => makeTextCell(h)),
+      ...rows
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(summaryData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Rekap Kinerja Petugas");
+
+    // Enable gridlines view options in spreadsheet
+    ws['!views'] = [{ showGridLines: true }];
+
+    // Merges layout for top headers (rows 1-3)
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } }
+    ];
+
+    // Dynamic column width layout formatting
+    const wscols = [
+      { wch: 12 }, // rank
+      { wch: 28 }, // name
+      { wch: 32 }, // email
+      { wch: 15 }, // paska open
+      { wch: 15 }, // paska sub
+      { wch: 15 }, // paska rej
+      { wch: 18 }, // realisasi bersih
+      { wch: 15 }, // realisasi pct
+      { wch: 18 }, // col I
+      { wch: 18 }, // col J
+      { wch: 18 }, // col K
+      { wch: 18 }  // col L
+    ];
+    ws["!cols"] = wscols;
+
+    XLSX.writeFile(wb, `Rekap_Kinerja_Petugas_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
   // Helper for performance category styling (Postpaid)
   const getPerformanceBadge = (realisasi) => {
     const pct = realisasi * 100;
@@ -795,15 +971,49 @@ export default function OfficerRecap({ officers = [], settings = {} }) {
                   />
                 </div>
 
-                <button
-                  type="button"
-                  onClick={exportToPDF}
-                  title="Ekspor PDF"
-                  className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center cursor-pointer border-0 shrink-0 select-none"
-                  aria-label="Ekspor PDF"
-                >
-                  <Download size={18} />
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowExportDropdown(!showExportDropdown)}
+                    title="Ekspor Laporan"
+                    className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center cursor-pointer border-0 shrink-0 select-none"
+                    aria-label="Ekspor Laporan"
+                  >
+                    <Download size={18} />
+                  </button>
+
+                  {showExportDropdown && (
+                    <>
+                      {/* Click outside overlay handler */}
+                      <div
+                        className="fixed inset-0 z-30 bg-transparent"
+                        onClick={() => setShowExportDropdown(false)}
+                      />
+                      <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1.5 z-40 animate-in fade-in slide-in-from-top-2 duration-150">
+                        <button
+                          onClick={() => {
+                            exportToPDF();
+                            setShowExportDropdown(false);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 flex items-center gap-2.5 transition-colors border-0 bg-transparent cursor-pointer"
+                        >
+                          <FileText size={16} className="text-red-500 shrink-0" />
+                          <span>Ekspor ke PDF (.pdf)</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            exportToExcel();
+                            setShowExportDropdown(false);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 flex items-center gap-2.5 transition-colors border-0 bg-transparent cursor-pointer"
+                        >
+                          <FileSpreadsheet size={16} className="text-emerald-500 shrink-0" />
+                          <span>Ekspor ke Excel (.xlsx)</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Filter & Sort controls */}

@@ -22,11 +22,11 @@ Aplikasi web tingkat *enterprise* modern (Responsive Desktop & Mobile) yang dira
    * **Velocity Tracker**: Perhitungan kecepatan pencapaian harian aktual vs target harian dengan indikator selisih (surplus/defisit).
    * **AI Strategic Analysis**: Panel rangkuman strategi berbasis AI menggunakan data tren dan rekap petugas.
 
-3. **👥 Rekap Kinerja Petugas Gabungan (Tabel Terpadu & Ekspor PDF):**
+3. **👥 Rekap Kinerja Petugas Gabungan (Tabel Terpadu & Ekspor Dual-Format):**
    * Integrasi data **Paskabayar (Postpaid)** dan **Prabayar (Prepaid)** dalam satu tabel terintegrasi.
    * **Peringkat Global Stabil**: Peringkat dihitung secara dinamis berdasarkan total gabungan submitted, tetap stabil meskipun data difilter atau diurutkan berdasarkan nama.
    * **Pembeda Medali Beranimasi**: Peringkat 1, 2, dan 3 dihiasi lencana gradasi emas (`gold-shine`), perak (`silver-sway`), dan perunggu (`bronze-pulse`) yang bergerak interaktif.
-   * **Ekspor PDF Enterprise-Grade**: Fitur unduhan laporan tabular lengkap berstandar formal korporat dengan tata letak landscape A4, ringkasan kinerja KPI, branding instansi, penomoran halaman otomatis, dan tanda tangan pengesahan oleh Manager ULP Salatiga Kota.
+   * **Ekspor Laporan Dual-Format (PDF & Excel)**: Pilihan unduhan laporan lengkap dalam format PDF formal korporat (tata letak landscape A4, ringkasan kinerja KPI, branding instansi, penomoran halaman otomatis, dan tanda tangan pengesahan Manager) atau format Excel Spreadsheet (.xlsx) siap olah dengan format metadata dan lebar kolom otomatis.
    * **Panel Kontrol Canggih**: Dukungan pencarian cepat, filter status kinerja, pengurutan multi-kriteria (Nama, Total, Paskabayar, Prabayar), serta sistem paginasi responsif di mobile.
 
 4. **💬 Asisten AI Interaktif Terintegrasi (Native Mobile Experience):**
